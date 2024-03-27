@@ -1,0 +1,105 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Gill Sans", sans-serif;
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: url(./images/background-login.webp);
+    background-size: cover;
+    background-position: center; /* Centrer l'image */
+
+    flex-direction: column; /* Organise les éléments en colonne */
+}
+
+.allContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column; /* Organise les éléments en colonne */
+  padding: 60px; /* Ajoute un espace intérieur pour le contenu */
+}
+
+
+.loginTittle{
+    font-size: 280%;
+    color: #404c52;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Ombre portée douce */
+}
+
+.input-login{
+    /*text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Ombre portée douce */
+    font-size: 180%;
+    color: #374146;
+}
+
+.input-password{
+    /*text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Ombre portée douce */
+    font-size: 180%;
+    margin-left: 20px;
+    color: #374146;
+}
+form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Styles de base */
+input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+  }
+  
+  /* Style au survol */
+  input:hover {
+    border-color: #57a4d8;
+  }
+  
+  /* Style au focus */
+  input:focus {
+    border-color: #a1d2e6;
+    box-shadow: 0 0 10px rgba(0, 128, 0, 0.5);
+  }
+
+/*Button css //////////////////////////////////////////////////////////////////*/
+.container-button-flex{
+    display: flex;
+    flex-direction: column;
+}
+
+.button-submit {
+    margin-top: 150px;
+    padding: 10px 20px;
+    background-color: #457ba0;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .button-submit:hover {
+    background-color: #4CAF50;
+  }
+/*/////////////////////////////////////////////////////////////////////////*/
+
+.register-path {
+    color: #374146;
+    text-decoration: none; /* Suppression du soulignement par défaut */
+    font-weight: bold; /* Mise en gras */
+    transition: transform 0.2s ease; /* Transition pour une animation fluide */
+  }
+  
+  .register-path:hover {
+    transform: scale(1.1); /* Grossissement au survol */
+    text-decoration: underline; /* Soulignement au survol */
+  }
+  
