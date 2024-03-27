@@ -10,7 +10,7 @@ body{
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-image: url(./images/background-login.webp);
+    background-image: url(./images/background-register.avif);
     background-size: cover;
     background-position: center; /* Centrer l'image */
 
@@ -27,7 +27,7 @@ body{
 
 
 .loginTittle{
-    font-size: 280%;
+    font-size: 300%;
     color: #404c52;
     /*text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Ombre portée douce */
 }
