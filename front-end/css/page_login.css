@@ -10,7 +10,7 @@ body{
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-image: url(./images/background-register.avif);
+    background-image: url(./images/background-login.webp);
     background-size: cover;
     background-position: center; /* Centrer l'image */
 
