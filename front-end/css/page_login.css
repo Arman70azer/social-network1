@@ -29,7 +29,7 @@ body{
 .loginTittle{
     font-size: 280%;
     color: #404c52;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Ombre portée douce */
+    /*text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Ombre portée douce */
 }
 
 .input-login{
