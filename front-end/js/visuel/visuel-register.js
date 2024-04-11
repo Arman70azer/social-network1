@@ -23,6 +23,7 @@ function validFormVerification() {
   const form = document.getElementById('formRegister');
   const passwordInput = document.getElementById('password');
   const firstName = document.getElementById("input-first-name");
+  const buttonRemoveImage=document.getElementById("remove-image")
 
   // Fonction de validation d'e-mail
   function validateEmail(email) {
@@ -54,6 +55,7 @@ function validFormVerification() {
       }
   }
 
+  buttonRemoveImage.addEventListener('click', removeImage)
   buttonForm.addEventListener('click', handleSubmit);
 }
 
@@ -64,4 +66,9 @@ function ErrorNotifFor5secondes(id){
   setTimeout(()=>{
     error.style.display="none";
   }, 5000)
+}
+
+function removeImage(){
+  const image = document.getElementById("imageName");
+  image.textContent='';
 }
