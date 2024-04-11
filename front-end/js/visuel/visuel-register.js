@@ -57,7 +57,7 @@ function validFormVerification() {
   buttonForm.addEventListener('click', handleSubmit);
 }
 
-//Affiche une error jusqu'alors caché pour avertir l'user d'une donnée mal renseigné
+//Affiche une error jusqu'alors caché pour avertir l'user d'une donnée mal renseigné en renseigné l'id de celui-ci
 function ErrorNotifFor5secondes(id){
   const error = document.getElementById(id)
   error.style.display = 'inline';
