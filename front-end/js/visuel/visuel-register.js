@@ -20,10 +20,8 @@ function effectvisuelAvatarForm(){
 function validFormVerification() {
   const buttonForm = document.getElementById('button-submit');
   const emailInput = document.getElementById('email');
-  const emailError = document.getElementById('emailError');
   const form = document.getElementById('formRegister');
   const passwordInput = document.getElementById('password');
-  const passwordError = document.getElementById("passwordError");
   const firstName = document.getElementById("input-first-name");
 
   // Fonction de validation d'e-mail
@@ -46,13 +44,13 @@ function validFormVerification() {
 
       // Vérifier si l'e-mail est valide
       if (!validateEmail(emailInput.value)) {
-        ErrorNotifFor5secondes(emailError)
+        ErrorNotifFor5secondes("emailError");
       }else if(validatePassword(passwordInput.value)<8){
-        ErrorNotifFor5secondes(passwordError)
+        ErrorNotifFor5secondes("passwordError");
       }else if(!firstName.value){
-        ErrorNotifFor5secondes()
+        ErrorNotifFor5secondes("firstnameError");
       } else {
-          form.submit();
+        form.submit();
       }
   }
 
@@ -60,9 +58,10 @@ function validFormVerification() {
 }
 
 //Affiche une error jusqu'alors caché pour avertir l'user d'une donnée mal renseigné
-function ErrorNotifFor5secondes(htmlElement){
-  htmlElement.style.display = 'inline';
+function ErrorNotifFor5secondes(id){
+  const error = document.getElementById(id)
+  error.style.display = 'inline';
   setTimeout(()=>{
-    htmlElement.style.display="none";
+    error.style.display="none";
   }, 5000)
 }
