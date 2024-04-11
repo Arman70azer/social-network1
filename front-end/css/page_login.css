@@ -103,3 +103,6 @@ input {
     text-decoration: underline; /* Soulignement au survol */
   }
   
+  span{
+    margin-top: 20px;
+  }

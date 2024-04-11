@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page Login SocialNetwork</title>
     <link rel="stylesheet" href="../css/page_login.css">
+    <script src="../js/visuel/visuel-login.js"></script>
 </head>
 
 <!---
@@ -21,8 +22,11 @@ AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
 <body>
     <div class="allContent">
         <div class="loginTittle">Connect here :</div>
+
+        <span id="usernameError" style="color: red; display: none;">Vous n'avez pas renseignez votre username!</span>
+        <span id="passwordError" style="color: red; display: none;">Vous n'avez pas renseignez votre password!</span>
         
-        <form action="">
+        <form action="" id="formLogin">
             <div class="input-login">
                 Login: <input type="text" id="username" placeholder="username or mail">
             </div>
@@ -30,7 +34,7 @@ AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
                 Password: <input type="password" id="password">
             </div>
             <div class="container-button-flex">
-                <button type="submit" class="button-submit">Validate</button>
+                <button type="submit" class="button-submit" id="button-submit">Validate</button>
             </div>
         </form>
         <a href="../htmls/page_register.html" class="register-path">New user? Create an account here</a>
