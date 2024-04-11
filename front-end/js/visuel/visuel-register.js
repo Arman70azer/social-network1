@@ -22,8 +22,10 @@ function validFormVerification() {
   const emailInput = document.getElementById('email');
   const form = document.getElementById('formRegister');
   const passwordInput = document.getElementById('password');
-  const firstName = document.getElementById("input-first-name");
-  const buttonRemoveImage=document.getElementById("remove-image")
+  const firstName = document.getElementById("firstname");
+  const buttonRemoveImage=document.getElementById("remove-image");
+  const lastName = document.getElementById("lastname");
+  const birthday = document.getElementById("birthday");
 
   // Fonction de validation d'e-mail
   function validateEmail(email) {
@@ -50,6 +52,10 @@ function validFormVerification() {
         ErrorNotifFor5secondes("passwordError");
       }else if(!firstName.value){
         ErrorNotifFor5secondes("firstnameError");
+      }else if (!lastName.value){
+        ErrorNotifFor5secondes("lastnameError");
+      }else if (!birthday.value){
+        ErrorNotifFor5secondes("birthdayError")
       } else {
         form.submit();
       }
