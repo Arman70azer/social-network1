@@ -22,11 +22,22 @@ function validFormVerification() {
   const emailInput = document.getElementById('email');
   const emailError = document.getElementById('emailError');
   const form = document.getElementById('formRegister');
+  const passwordInput = document.getElementById('password');
+  const passwordError = document.getElementById("passwordError");
+  const firstName = document.getElementById("input-first-name");
 
   // Fonction de validation d'e-mail
   function validateEmail(email) {
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return regex.test(email);
+  }
+
+  // Fonction de validation du mot de pass en fonction du nombre de caractère
+  function validatePassword(password) {
+    const regex = /./g; // Recherche de chaque caractère individuellement
+    const count = (password.match(regex) || []).length;
+    console.log(count)
+    return count
   }
 
   // Fonction de gestion de la soumission du formulaire
@@ -36,6 +47,10 @@ function validFormVerification() {
       // Vérifier si l'e-mail est valide
       if (!validateEmail(emailInput.value)) {
         ErrorNotifFor5secondes(emailError)
+      }else if(validatePassword(passwordInput.value)<8){
+        ErrorNotifFor5secondes(passwordError)
+      }else if(!firstName.value){
+        ErrorNotifFor5secondes()
       } else {
           form.submit();
       }
