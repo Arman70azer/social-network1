@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Page Register SocialNetwork</title>
-    <link rel="stylesheet" href="../css/page_register.css">
+    <link rel="stylesheet" href="../css/page_register.css" />
     <script src="https://use.fontawesome.com/3a2eaf6206.js"></script>
     <script src="../js/visuel/visuel-register.js"></script>
-</head>
-<!---
+  </head>
+  <!---
 INFORMATION BACK-END ET JS : 
 
 LES "ID" POUR LE FORMULAIRE SONT :
@@ -33,55 +33,73 @@ DOSSIER : "visuel-register.js" contient les animations de la page uniquement
 
 AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
 -->
-<body>
+  <body>
     <div class="allContent">
-        <a href="../htmls/page_login.html" class="login-path">Already a user? Come to loggin here</a>
-        <p class="title-register">Register here :</p>
-        <form action="../htmls/page_login.html" id="formRegister" enctype="multipart/form-data" method="post">
-            <div class="input-email">
-                Email: <input type="email" id="email" required>
-                <span id="emailError" style="color: red; display: none;">L'adresse e-mail n'est pas valide.</span>
-            </div>
-            <div class="input-password">
-                Password: <input type="password" id="password" required>
-                <span id="passwordError" style="color: red; display: none;">Il faut au minimum 8 charactères.</span>
-            </div>
-            <div class="input-first-name">
-                First Name: <input type="text" id="firstname" required>
-                <span id="firstnameError" style="color: red; display: none;">Ce champ est obligatoire!</span>
-            </div>
-            <div class="input-last-name">
-                Last Name: <input type="text" id="lastname" required>
-                <span id="lastnameError" style="color: red; display: none;">Ce champ est obligatoire!</span>
-            </div>
-            <div class="input-birthday">
-                Date of birth: <input type="date" id="birthday" required>
-                <span id="birthdayError" style="color: red; display: none;">Ce champ est obligatoire!</span>
-            </div>
-            <div class="input-nickname">
-                Nickname (optionel): <input type="text" id="nickname">
-            </div>
-            <div class="input-aboutme">
-                About me (optionel): 
-                <textarea id="aboutme" placeholder="Tell me more about you!">
-                </textarea>
-            </div>
-            <div class="input-file">Avatar (optionel):
-                <div class="input-file-image">
-                    <label class="label-image" for="avatar">
-                        Select Image <br/>
-                        <i class="fa fa-2x fa-camera"></i>
-                        <input id="avatar" type="file"/>
-                        <br/>
-                        <span id="imageName"></span>
-                        <button id="remove-image">
-                            X
-                        </button>
-                    </label>
-                </div>
-            </div>
-            <button id="button-submit" class="button-submit" type="submit">register</button>
-        </form>
+      <a href="../htmls/page_login.html" class="login-path"
+        >Already a user? Come to loggin here</a
+      >
+      <p class="title-register">Register here :</p>
+      <form
+        action="../htmls/page_login.html"
+        id="formRegister"
+        enctype="multipart/form-data"
+        method="post"
+      >
+        <div class="input-email">
+          Email: <input type="email" id="email" required />
+          <span id="emailError" style="color: red; display: none"
+            >L'adresse e-mail n'est pas valide.</span
+          >
+        </div>
+        <div class="input-password">
+          Password: <input type="password" id="password" required />
+          <span id="passwordError" style="color: red; display: none"
+            >Il faut au minimum 8 charactères.</span
+          >
+        </div>
+        <div class="input-first-name">
+          First Name: <input type="text" id="firstname" required />
+          <span id="firstnameError" style="color: red; display: none"
+            >Ce champ est obligatoire!</span
+          >
+        </div>
+        <div class="input-last-name">
+          Last Name: <input type="text" id="lastname" required />
+          <span id="lastnameError" style="color: red; display: none"
+            >Ce champ est obligatoire!</span
+          >
+        </div>
+        <div class="input-birthday">
+          Date of birth: <input type="date" id="birthday" required />*
+          <span id="dateofbirthError" style="color: red; display: none"
+            >Ce champ est obligatoire!</span
+          >
+        </div>
+        <div class="input-nickname">
+          Nickname (optionel): <input type="text" id="nickname" />
+        </div>
+        <div class="input-aboutme">
+          About me (optionel):
+          <textarea id="aboutme" placeholder="Tell me more about you!">
+          </textarea>
+        </div>
+        <div class="input-file">
+          Avatar (optionel):
+          <div class="input-file-image">
+            <label class="label-image" for="avatar">
+              Select Image <br />
+              <i class="fa fa-2x fa-camera"></i>
+              <input id="avatar" type="file" />
+              <br />
+              <span id="imageName"></span>
+              <button id="remove-image">X</button>
+            </label>
+          </div>
+        </div>
+        <button id="button-submit" class="button-submit" type="submit">
+          register
+        </button>
+      </form>
     </div>
-</body>
+  </body>
 </html>
