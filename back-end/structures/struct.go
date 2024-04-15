@@ -23,3 +23,15 @@ type Picture struct {
 	Header    *multipart.FileHeader
 	FileExist string
 }
+
+type User struct {
+	Nickname    string
+	FirstName   string
+	Birthday    string
+	LastName    string
+	Gender      string
+	ID          int
+	Email       string
+	MessageUser string
+	Connected   bool
+}

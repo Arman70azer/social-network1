@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
+	data "back-end/db"
 	handlers "back-end/middleware/handlers"
 )
 
 func main() {
+	data.Createdb()
 	// Démarrer le serveur sur le port 8080 dans une goroutine pour pouvoir démarrer d'autres func après http.ListenAndServe
 	go func() {
 		http.HandleFunc("/register", handlers.HandlerRegister)

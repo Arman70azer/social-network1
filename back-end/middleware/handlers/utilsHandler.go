@@ -46,14 +46,12 @@ func RecoverAllFormValues(r *http.Request) structures.AllFormValues {
 		allFormValues.AboutME = r.FormValue("aboutme")
 		file, header, err := r.FormFile("avatar")
 		if err != nil {
-			allFormValues.ImageFile.FileExist = "Erreur lors du téléchargement du fichier :" + err.Error()
+			allFormValues.ImageFile.FileExist = err.Error() + "-----> le fichier n'a pas été donnée"
 		} else {
 			defer file.Close()
 			allFormValues.ImageFile.File = file
 			allFormValues.ImageFile.Header = header
 		}
-
-		fmt.Println(allFormValues)
 
 	case "login":
 		emailOrUsername := r.FormValue("username")
