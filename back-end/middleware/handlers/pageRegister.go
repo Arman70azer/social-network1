@@ -10,13 +10,15 @@ func HandlerRegister(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 		fmt.Println("Le formulaire a été soumis avec succès")
-		email := r.FormValue("email")
-		fmt.Println("Voici l'adresse e-mail fournie : ", email)
+		form := r.FormValue("form")
+		fmt.Println(form)
 	}
 
 	var data structures.Data
 
 	data.Requete = "ds"
 
+	data1 := RecoverAllFormValues(r)
+	fmt.Println(data1.ImageFile.Header.Filename)
 	ExecuteHtmlWithData(w, "register", data)
 }
