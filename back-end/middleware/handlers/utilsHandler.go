@@ -45,12 +45,16 @@ func RecoverAllFormValues(r *http.Request) structures.AllFormValues {
 		allFormValues.AboutME = r.FormValue("aboutme")
 		file, header, err := r.FormFile("avatar")
 		if err != nil {
-			fmt.Println("Erreur lors de la récupération du fichier:", err)
-			break
+			allFormValues.ImageFile.FileExist = "Il n'y a pas d'image car: " + err.Error()
+		} else {
+			if file == nil {
+				allFormValues.ImageFile.FileExist = "Il n'y a pas d'image dans la requête."
+			} else {
+				defer file.Close()
+				allFormValues.ImageFile.File = file
+				allFormValues.ImageFile.Header = header
+			}
 		}
-		defer file.Close()
-		allFormValues.ImageFile.Image = file
-		allFormValues.ImageFile.Header = header
 	case "login":
 		emailOrUsername := r.FormValue("username")
 		if emailRegex.MatchString(emailOrUsername) {

@@ -19,6 +19,7 @@ type AllFormValues struct {
 }
 
 type Picture struct {
-	Image  multipart.File
-	Header *multipart.FileHeader
+	File      multipart.File
+	Header    *multipart.FileHeader
+	FileExist string
 }

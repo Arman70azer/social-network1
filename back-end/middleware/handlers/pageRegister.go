@@ -9,16 +9,24 @@ import (
 func HandlerRegister(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
-		fmt.Println("Le formulaire a été soumis avec succès")
-		form := r.FormValue("form")
-		fmt.Println(form)
+		allFormValues := RecoverAllFormValues(r)
+		fmt.Println(allFormValues)
+		if requiredRegisterValuesIsPresent(allFormValues) {
+			fmt.Println(allFormValues.Email)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		}
 	}
 
 	var data structures.Data
 
 	data.Requete = "ds"
-
-	data1 := RecoverAllFormValues(r)
-	fmt.Println(data1.ImageFile.Header.Filename)
 	ExecuteHtmlWithData(w, "register", data)
+}
+
+func requiredRegisterValuesIsPresent(allFormValues structures.AllFormValues) bool {
+	if allFormValues.Email != "" && allFormValues.Firstname != "" && allFormValues.Lastname != "" && allFormValues.Birthday != "" && allFormValues.Password != "" {
+		return true
+	} else {
+		return false
+	}
 }
