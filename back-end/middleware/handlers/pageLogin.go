@@ -5,8 +5,8 @@ import (
 	"html/template"
 	"net/http"
 )
-func handlerRegister(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("../social-network/front-end/htmls/page_register.html")
+func HandlerLogin(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("../social-network/front-end/htmls/page_login.html")
 	if err != nil {
 		fmt.Println("Error loading template:", err)
 		http.Error(w, "Erreur lors du chargement du modèle", http.StatusInternalServerError)
