@@ -1,23 +1,15 @@
 package handlers
 
 import (
-	"fmt"
-	"html/template"
+	"back-end/structures"
 	"net/http"
 )
 
 func HandlerRegister(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("gg")
-	tmpl, err := template.ParseFiles("../front-end/htmls/page_register.html")
-	if err != nil {
-		fmt.Println("Error loading template:", err)
-		http.Error(w, "Erreur lors du chargement du modèle", http.StatusInternalServerError)
-		return
-	}
-	err = tmpl.Execute(w, "sd")
-	if err != nil {
-		fmt.Println("Error executing template:", err)
-		http.Error(w, "Erreur lors de l'exécution du modèle", http.StatusInternalServerError)
-		return
-	}
+
+	var data structures.Data
+
+	data.Requete = "ds"
+
+	ExecuteHtmlWithData(w, "register", data)
 }
