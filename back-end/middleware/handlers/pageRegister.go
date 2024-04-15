@@ -6,14 +6,15 @@ import (
 	"net/http"
 )
 
-func handlerRegister(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("../social-network/front-end/htmls/page_register.html")
+func HandlerRegister(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("gg")
+	tmpl, err := template.ParseFiles("../front-end/htmls/page_register.html")
 	if err != nil {
 		fmt.Println("Error loading template:", err)
 		http.Error(w, "Erreur lors du chargement du modèle", http.StatusInternalServerError)
 		return
 	}
-	err = tmpl.Execute(w, r)
+	err = tmpl.Execute(w, "sd")
 	if err != nil {
 		fmt.Println("Error executing template:", err)
 		http.Error(w, "Erreur lors de l'exécution du modèle", http.StatusInternalServerError)
