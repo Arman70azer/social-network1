@@ -17,6 +17,8 @@ LES "ID" POUR LE FORMULAIRE SONT :
 
 2) username : pour le nom de l'user mais peut-être aussi un mail.
 
+3) form : le type de formulaire (input cacher dans le form).
+
 AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
 -->
 <body>
@@ -27,6 +29,7 @@ AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
         <span id="passwordError" style="color: red; display: none;">Vous n'avez pas renseignez votre password!</span>
         
         <form action="" id="formLogin">
+            <input type="hidden" name="form" value="login">
             <div class="input-login">
                 Login: <input type="text" id="username" placeholder="username or mail">
             </div>
@@ -37,7 +40,7 @@ AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
                 <button type="submit" class="button-submit" id="button-submit">Validate</button>
             </div>
         </form>
-        <a href="../htmls/page_register.html" class="register-path">New user? Create an account here</a>
+        <a href="/register" class="register-path">New user? Create an account here</a>
     </div>
 </body>
 </html>

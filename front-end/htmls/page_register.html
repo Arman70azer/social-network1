@@ -35,9 +35,10 @@ AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
 -->
 <body>
     <div class="allContent">
-        <a href="../htmls/page_login.html" class="login-path">Already a user? Come to loggin here</a>
+        <a href="/login" class="login-path">Already a user? Come to loggin here</a>
         <p class="title-register">Register here :</p>
-        <form action="../htmls/page_login.html" id="formRegister" enctype="multipart/form-data" method="post">
+        <form id="formRegister" enctype="multipart/form-data" method="post">
+            <input type="hidden" name="form" value="register">
             <div class="input-email">
                 Email: <input type="email" id="email" required>
                 <span id="emailError" style="color: red; display: none;">L'adresse e-mail n'est pas valide.</span>
@@ -71,7 +72,7 @@ AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
                     <label class="label-image" for="avatar">
                         Select Image <br/>
                         <i class="fa fa-2x fa-camera"></i>
-                        <input id="avatar" type="file"/>
+                        <input id="avatar" type="file" name="avatar"/>
                         <br/>
                         <span id="imageName"></span>
                         <button id="remove-image">
