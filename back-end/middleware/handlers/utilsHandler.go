@@ -45,7 +45,7 @@ func RecoverAllFormValues(r *http.Request) structures.AllFormValues {
 		allFormValues.AboutME = r.FormValue("aboutme")
 		file, header, err := r.FormFile("avatar")
 		if err != nil {
-			allFormValues.ImageFile.FileExist = "Il n'y a pas d'image car: " + err.Error()
+			allFormValues.ImageFile.FileExist = "Il n'y a pas d'image"
 		} else {
 			if file == nil {
 				allFormValues.ImageFile.FileExist = "Il n'y a pas d'image dans la requête."
