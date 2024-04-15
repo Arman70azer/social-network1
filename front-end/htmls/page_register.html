@@ -37,30 +37,30 @@ AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
     <div class="allContent">
         <a href="/login" class="login-path">Already a user? Come to loggin here</a>
         <p class="title-register">Register here :</p>
-        <form id="formRegister" enctype="multipart/form-data" method="post">
+        <form action="/register" id="formRegister" enctype="multipart/form-data" method="post">
             <input type="hidden" name="form" value="register">
             <div class="input-email">
-                Email: <input type="email" id="email" required>
+                Email: <input type="email" id="email" name="email" required>
                 <span id="emailError" style="color: red; display: none;">L'adresse e-mail n'est pas valide.</span>
             </div>
             <div class="input-password">
-                Password: <input type="password" id="password" required>
+                Password: <input type="password" id="password"  name="password" required>
                 <span id="passwordError" style="color: red; display: none;">Il faut au minimum 8 charactères.</span>
             </div>
             <div class="input-first-name">
-                First Name: <input type="text" id="firstname" required>
+                First Name: <input type="text" id="firstname"  name="firstname"  required>
                 <span id="firstnameError" style="color: red; display: none;">Ce champ est obligatoire!</span>
             </div>
             <div class="input-last-name">
-                Last Name: <input type="text" id="lastname" required>
+                Last Name: <input type="text" id="lastname"  name="lastname"  required>
                 <span id="lastnameError" style="color: red; display: none;">Ce champ est obligatoire!</span>
             </div>
             <div class="input-birthday">
-                Date of birth: <input type="date" id="birthday" required>
+                Date of birth: <input type="date" id="birthday" name="birthday" required>
                 <span id="birthdayError" style="color: red; display: none;">Ce champ est obligatoire!</span>
             </div>
             <div class="input-nickname">
-                Nickname (optionel): <input type="text" id="nickname">
+                Nickname (optionel): <input type="text" id="nickname"  name="nickname" >
             </div>
             <div class="input-aboutme">
                 About me (optionel): 

@@ -25,6 +25,7 @@ func ExecuteHtmlWithData(w http.ResponseWriter, page string, data structures.Dat
 	}
 }
 
+// Va chercher toutes les values dans le formulaire en fonctions du type de form
 func RecoverAllFormValues(r *http.Request) structures.AllFormValues {
 	var allFormValues structures.AllFormValues
 
@@ -45,7 +46,7 @@ func RecoverAllFormValues(r *http.Request) structures.AllFormValues {
 		allFormValues.AboutME = r.FormValue("aboutme")
 		file, header, err := r.FormFile("avatar")
 		if err != nil {
-			fmt.Println("Erreur lors du téléchargement du fichier :", err)
+			allFormValues.ImageFile.FileExist = "Erreur lors du téléchargement du fichier :" + err.Error()
 		} else {
 			defer file.Close()
 			allFormValues.ImageFile.File = file

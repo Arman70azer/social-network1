@@ -28,13 +28,13 @@ AUSSI PENSER A CHANGER L'URL DE L'"href" !!!!!!
         <span id="usernameError" style="color: red; display: none;">Vous n'avez pas renseignez votre username!</span>
         <span id="passwordError" style="color: red; display: none;">Vous n'avez pas renseignez votre password!</span>
         
-        <form action="" id="formLogin">
+        <form id="formLogin" method="post">
             <input type="hidden" name="form" value="login">
             <div class="input-login">
-                Login: <input type="text" id="username" placeholder="username or mail">
+                Login: <input type="text" id="username" placeholder="username or mail" name="username" required>
             </div>
             <div class="input-password">
-                Password: <input type="password" id="password">
+                Password: <input type="password" id="password" name="password" required>
             </div>
             <div class="container-button-flex">
                 <button type="submit" class="button-submit" id="button-submit">Validate</button>
