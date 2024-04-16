@@ -6,18 +6,27 @@ const HomePage = () => {
       style={{
         display: "flex",
         flexDirection: "column",
-        minHeight: "100vh",
         justifyContent: "center",
         alignItems: "center",
+        minHeight: "100vh",
         backgroundColor: "#f0f2f5",
-        padding: "20px",
       }}
     >
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <h1 style={{ color: "#1877f2" }}>Welcome to Social Network</h1>
-        <p style={{ color: "#606770" }}>Page login</p>
+        <head style={{ color: "#1877f2", fontSize: "36px" }}>
+          Welcome to Social Network
+        </head>
+        <p style={{ color: "#606770", fontSize: "24px" }}>Page login</p>
       </div>
-      <div style={{ textAlign: "left", maxWidth: "300px", margin: "0 auto" }}>
+      <div
+        className="carte"
+        style={{
+          backgroundColor: "#ffffff",
+          width: "300px",
+          padding: "20px",
+          boxShadow: "0px 0px 10px 0px rgba(0, 0, 0, 0.5)",
+        }}
+      >
         <form>
           <div style={{ marginBottom: "10px" }}>
             <label htmlFor="email">Email:</label>
