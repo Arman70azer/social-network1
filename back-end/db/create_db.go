@@ -3,9 +3,11 @@ package db
 import (
 	"database/sql"
 	"log"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
-func Createdb() {
+func Create_db() {
 	database, err := sql.Open("sqlite3", "db/social-network.db")
 	if err != nil {
 		log.Fatal("Error opening database:", err)
@@ -19,7 +21,7 @@ func Createdb() {
 
 	createTables := []string{
 		`CREATE TABLE IF NOT EXISTS Users (
-            ID INTEGER PRIMARY KEY
+            ID INTEGER PRIMARY KEY,
 			Nickname TEXT,
 			Email TEXT,
 			Password TEXT,

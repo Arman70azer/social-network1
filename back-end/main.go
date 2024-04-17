@@ -1,11 +1,13 @@
 package main
 
 import (
+	db "back-end/db"
 	"fmt"
 	"net/http"
 )
 
 func main() {
+	db.Create_db()
 	fmt.Println("Server is running at http://localhost:8000")
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Hello, World!")
