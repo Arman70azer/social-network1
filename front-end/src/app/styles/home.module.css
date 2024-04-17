@@ -1,0 +1,74 @@
+.dashboardTopPage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 15%; /* Ajustez la hauteur selon vos besoins */
+    background-color: rgb(23, 24, 29);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 999; /* Assurez-vous que le tableau de bord s'affiche au-dessus du contenu de la page */
+}
+
+.buttonLogout{ 
+    font-size: 110%;
+    transition: 0.3s;
+    position: absolute;
+    right: 20px;
+}
+
+.buttonLogout:hover{
+    font-size: 150%;
+}
+
+.titleHome {
+    font-size: 170%;
+    position: absolute;
+    padding: 20px 20px; /* Ajoute un remplissage de 10px en haut et en bas, et de 20px à gauche et à droite */
+    color: rgb(23, 24, 29);
+    background: linear-gradient(to right, aqua 0%, aquamarine 50%, aqua 100%);
+    background-size: 200% auto; /* Double la largeur du dégradé pour pouvoir le déplacer */
+    background-position: left bottom; /* Démarre le dégradé à gauche */
+    transition: background-position 0.5s ease-in-out; /* Transition pour le dégradé */
+    border-radius: 5px;
+}
+
+.titleHome:hover {
+    background-position: right bottom; /* Déplace le dégradé à droite */
+}
+
+.buttonProfil{
+    right: 150px;
+    font-size: 115%;
+    transition: 0.3s;
+    position: absolute;
+}
+
+.buttonProfil:hover{
+    font-size: 150%;
+}
+
+.buttonConversations{
+    transition: 0.3s;
+    font-size: 110%;
+    left: 300px;
+    position: absolute;
+}
+
+.buttonConversations:hover {
+    font-size: 150%;
+}
+
+.buttonNotif{
+    position: absolute;
+    transition: 0.3s;
+    font-size: 110%;
+    left:500px
+}
+
+.buttonNotif:hover {
+    font-size: 150%;
+}
