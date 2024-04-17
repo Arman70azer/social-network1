@@ -1,4 +1,4 @@
-package middleware
+package dbFunc
 
 import (
 	"database/sql"
