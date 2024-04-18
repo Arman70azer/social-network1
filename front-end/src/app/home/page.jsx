@@ -1,4 +1,5 @@
 import DashboardTop from "../components/dashboard";
+import DashboardBottom from "../components/dashboard2"
 import fetchPosts from "../lib/fetPosts";
 import styles from '../styles/home.module.css'
 
@@ -28,6 +29,7 @@ export default async function Page(){
                     </div>
                 ))}
             </div>
+            <DashboardBottom/>
         </div>
     );
 }
