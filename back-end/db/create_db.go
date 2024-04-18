@@ -21,7 +21,7 @@ func Create_db() {
 
 	createTables := []string{
 		`CREATE TABLE IF NOT EXISTS Users (
-            ID INTEGER PRIMARY KEY,
+			ID INTEGER PRIMARY KEY,
 			Nickname TEXT,
 			Email TEXT,
 			Password TEXT,
@@ -32,12 +32,27 @@ func Create_db() {
 			ImageName TEXT,
 			AboutMe TEXT,
 			UUID TEXT
-        );`,
-		`CREATE TABLE IF NOT EXISTS Category (
-            ID INTEGER PRIMARY KEY, 
-            Name VARCHAR(150)
-        );`,
+		);`,
+		`CREATE TABLE IF NOT EXISTS Posts (
+			ID INTEGER PRIMARY KEY,
+			Titre TEXT,
+			Content TEXT,
+			Author TEXT,
+			Date TEXT,
+			Image TEXT
+		);`,
+		`CREATE TABLE IF NOT EXISTS Hashtags (
+			ID INTEGER PRIMARY KEY,
+			Tag TEXT
+		);`,
+		`CREATE TABLE IF NOT EXISTS PostHashtags (
+			PostID INTEGER,
+			HashtagID INTEGER,
+			FOREIGN KEY (PostID) REFERENCES Posts(ID),
+			FOREIGN KEY (HashtagID) REFERENCES Hashtags(ID)
+		);`,
 	}
+	
 
 	for _, createTableQuery := range createTables {
 		_, err := tx.Exec(createTableQuery)
