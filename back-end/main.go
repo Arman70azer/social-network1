@@ -2,6 +2,7 @@ package main
 
 import (
 	db "back-end/db"
+	handlers "back-end/middleware/handlers"
 	"fmt"
 	"net/http"
 )
@@ -9,9 +10,7 @@ import (
 func main() {
 	db.Create_db()
 	fmt.Println("Server is running at http://localhost:8000")
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Hello, World!")
-	})
+	http.HandleFunc("/api/home", handlers.HandlerHome)
 
 	err := http.ListenAndServe(":8000", nil)
 	if err != nil {

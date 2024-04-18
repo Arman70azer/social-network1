@@ -37,9 +37,10 @@ func Create_db() {
 			ID INTEGER PRIMARY KEY,
 			Titre TEXT,
 			Content TEXT,
-			Author TEXT,
+			Author INTEGER,
 			Date TEXT,
-			Image TEXT
+			Image TEXT,
+			FOREIGN KEY (Author) REFERENCES Users(ID)
 		);`,
 		`CREATE TABLE IF NOT EXISTS Hashtags (
 			ID INTEGER PRIMARY KEY,
@@ -52,7 +53,6 @@ func Create_db() {
 			FOREIGN KEY (HashtagID) REFERENCES Hashtags(ID)
 		);`,
 	}
-	
 
 	for _, createTableQuery := range createTables {
 		_, err := tx.Exec(createTableQuery)

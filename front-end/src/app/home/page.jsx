@@ -1,7 +1,21 @@
 import DashboardTop from "../components/dashboard"
 
-export default function Page() {
+//Renvoie un array de tout les posts
+async function fetchPosts() {
+    const response = await fetch((`http://localhost:8000/api/home`),{
+        method: 'GET'
+    });
+    return response.json();
+}
+
+export default async function Page(){
+    const posts = await fetchPosts()
+
+    console.log(posts)
     return (
-    <DashboardTop/>
+        <div>
+            <div >post: {posts[0].Titre}</div>
+        </div>
+
     )
 }
