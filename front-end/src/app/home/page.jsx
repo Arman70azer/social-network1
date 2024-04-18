@@ -1,21 +1,33 @@
-import DashboardTop from "../components/dashboard"
-
-//Renvoie un array de tout les posts
-async function fetchPosts() {
-    const response = await fetch((`http://localhost:8000/api/home`),{
-        method: 'GET'
-    });
-    return response.json();
-}
+import DashboardTop from "../components/dashboard";
+import fetchPosts from "../lib/fetPosts";
+import styles from '../styles/home.module.css'
 
 export default async function Page(){
-    const posts = await fetchPosts()
+    const posts = await fetchPosts();
 
-    console.log(posts)
+    console.log(posts);
+    //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>
-            <div >post: {posts[0].Titre}</div>
+            <DashboardTop/>
+            <div className={styles.Content}>     
+                {posts.map((post, index) => (
+                    <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
+                        <div className={styles.authorPost}>
+                            --- {post.Author} publish ---
+                        </div>
+                        <div className={styles.titlePost}>
+                            {post.Titre}:
+                        </div>
+                        <div className={styles.contentPost}>
+                            {post.Content}
+                        </div>
+                        <div className={styles.datePost}>
+                            {post.Date}
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
-
-    )
+    );
 }

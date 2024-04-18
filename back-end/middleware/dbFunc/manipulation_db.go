@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-// Ouvre la db et vous permet par la suite de la manipuler
+// Ouvre la db et permet par la suite de la manipuler
 func Open_db() *sql.DB {
 	db, err := sql.Open("sqlite3", "db/social-network.db")
 	if err != nil {
@@ -25,7 +25,7 @@ func Open_db() *sql.DB {
 	return db
 }
 
-// SelectAllsSameValues_db sélectionne les valeurs similaires dans la colonne choisie dans la base de données (db).
+// SelectAllsSameValues_db sélectionne les valeurs similaires dans la colonne choisie dans la db.
 func SelectAllsSameValuesUsers_db(db *sql.DB, column, value string) []string {
 	var result []string
 	query := "SELECT " + column + " FROM Users WHERE " + column + " = ?"

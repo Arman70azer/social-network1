@@ -3,7 +3,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 15%; /* Ajustez la hauteur selon vos besoins */
+    height: 150px; /* Ajustez la hauteur selon vos besoins */
     background-color: rgb(23, 24, 29);
     color: white;
     display: flex;
@@ -71,4 +71,55 @@
 
 .buttonNotif:hover {
     font-size: 150%;
+}
+
+.Content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 180px;
+    margin-bottom: 100px;
+    overflow-y: auto;
+    flex-direction: column;
+}
+
+.windowPost {
+    border: 2px solid rgb(23, 24, 29);
+    border-radius: 5px;
+    padding: 10px;
+    min-width: 600px;
+    margin-bottom: 20px;
+    flex-direction: column;
+    background: linear-gradient(to right, aqua 0%, aquamarine 50%, aqua 100%);
+    background-size: 200% auto; /* Double la largeur du dégradé pour pouvoir le déplacer */
+    background-position: left bottom; /* Démarre le dégradé à gauche */
+    transition: background-position 0.5s ease-in-out; /* Transition pour le dégradé */
+    border-radius: 5px;
+}
+
+.windowPost:hover {
+    background-position: right bottom; /* Déplace le dégradé à droite */
+}
+
+.datePost{
+    margin-top: 20px;
+    margin-left: 500px;
+}
+
+.titlePost{
+    margin-top: 20px;
+}
+
+.authorPost{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.contentPost{
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
 }

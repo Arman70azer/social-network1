@@ -4,7 +4,7 @@ import styles from '../styles/home.module.css'; // Utilisez des guillemets simpl
 function DashboardTop () {
     return (
         <div className={styles.dashboardTopPage}>
-            <div className={styles.titleHome}>Social-Network</div>
+            <button className={styles.titleHome}>Social-Network</button>
             <button className={styles.buttonConversations}>Conversations</button>
             <button className={styles.buttonNotif}>Notifications</button>
             <button className={styles.buttonProfil}>Profil</button>
