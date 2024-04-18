@@ -179,8 +179,8 @@
     align-items: center;
 }
 .avatarPost {
-    width: 50px; /* Remplacez 50px par la largeur souhaitée */
-    height: 50px; /* Remplacez 50px par la hauteur souhaitée */
+    width: 70px; /* Remplacez 50px par la largeur souhaitée */
+    height: 70px; /* Remplacez 50px par la hauteur souhaitée */
     border-radius: 50px;
 }
 
