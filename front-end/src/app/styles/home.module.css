@@ -84,21 +84,21 @@
 }
 
 .windowPost {
-    border: 2px solid rgb(23, 24, 29);
     border-radius: 5px;
     padding: 10px;
     min-width: 600px;
     margin-bottom: 20px;
     flex-direction: column;
-    background: linear-gradient(to right, aqua 0%, aquamarine 50%, aqua 100%);
+    background: linear-gradient(to right, rgb(21, 26, 34) 0%, rgba(7, 214, 255, 0.997) 90%);
     background-size: 200% auto; /* Double la largeur du dégradé pour pouvoir le déplacer */
     background-position: left bottom; /* Démarre le dégradé à gauche */
-    transition: background-position 0.5s ease-in-out; /* Transition pour le dégradé */
+    transition: 0.2s; /* Transition pour le dégradé */
     border-radius: 5px;
+    color: aliceblue;
 }
 
 .windowPost:hover {
-    background-position: right bottom; /* Déplace le dégradé à droite */
+    font-size: 110%;
 }
 
 .datePost{

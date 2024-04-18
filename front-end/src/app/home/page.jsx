@@ -14,6 +14,9 @@ export default async function Page(){
             <div className={styles.Content}>     
                 {posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
+                        <div className={styles.avatarProfil}>
+                            
+                        </div>
                         <div className={styles.authorPost}>
                             --- {post.Author} publish ---
                         </div>
