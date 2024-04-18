@@ -89,7 +89,7 @@
     min-width: 600px;
     margin-bottom: 20px;
     flex-direction: column;
-    background: linear-gradient(to right, rgb(21, 26, 34) 0%, rgba(7, 214, 255, 0.997) 90%);
+    background:  rgb(23, 24, 29);
     background-size: 200% auto; /* Double la largeur du dégradé pour pouvoir le déplacer */
     background-position: left bottom; /* Démarre le dégradé à gauche */
     transition: 0.2s; /* Transition pour le dégradé */
@@ -108,12 +108,15 @@
 
 .titlePost{
     margin-top: 20px;
+    margin-left: 20px;
+    font-size: 120%;
 }
 
 .authorPost{
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 140%;
 }
 
 .contentPost{
@@ -158,4 +161,27 @@
 
 .buttonPostPrivates:hover{
     font-size: 130%;
+}
+
+.avatarProfil{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.avatarPost {
+    width: 50px; /* Remplacez 50px par la largeur souhaitée */
+    height: 50px; /* Remplacez 50px par la hauteur souhaitée */
+    border-radius: 50px;
+}
+
+.imagePost{
+    max-width: 200px; /* Remplacez 50px par la largeur souhaitée */
+    max-height: 200px; /* Remplacez 50px par la hauteur souhaitée */
+}
+
+.imagePostContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
 }

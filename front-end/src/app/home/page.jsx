@@ -15,13 +15,16 @@ export default async function Page(){
                 {posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
                         <div className={styles.avatarProfil}>
-                            
+                            <img className={styles.avatarPost} src={`/images/${post.Author.ImageName}`}/>
                         </div>
                         <div className={styles.authorPost}>
-                            --- {post.Author} publish ---
+                            --- {post.Author.Nickname} ---
                         </div>
                         <div className={styles.titlePost}>
                             {post.Titre}:
+                        </div>
+                        <div className={styles.imagePostContainer}>
+                            <img className={styles.imagePost} src={`/images/${post.Image}`}/>
                         </div>
                         <div className={styles.contentPost}>
                             {post.Content}

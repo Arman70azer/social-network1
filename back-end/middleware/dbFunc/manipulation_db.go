@@ -51,28 +51,30 @@ func SelectAllsSameValuesUsers_db(db *sql.DB, column, value string) []string {
 }
 
 // Sélèctionne tout les posts de la db et return dans la structure Posts
-func SelectAllPosts_db(db *sql.DB) []structures.Posts {
-	var result []structures.Posts
+func SelectAllPosts_db(db *sql.DB) []structures.Post {
+    var result []structures.Post
 
-	//p. représente les collones de Posts tandis u. sont les collones de Users
-	query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS Author, p.Date, p.Image FROM Posts p JOIN Users u ON p.Author = u.ID"
+    // p. représente les colonnes de Posts tandis que u. représente les colonnes de Users
+    query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS AuthorNickname, p.Date, p.Image, u.ImageName AS AuthorImageName FROM Posts p JOIN Users u ON p.Author = u.ID"
 
-	rows, err := db.Query(query)
-	if err != nil {
-		return result
-	}
-	defer rows.Close()
+    rows, err := db.Query(query)
+    if err != nil {
+        log.Println("Erreur lors de la requête:", err)
+        return result
+    }
+    defer rows.Close()
 
-	for rows.Next() {
-		var post structures.Posts
-		if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author, &post.Date, &post.Image); err != nil {
-			return result
-		}
-		result = append(result, post)
-	}
-	if err := rows.Err(); err != nil {
-		return result
-	}
+    for rows.Next() {
+        var post structures.Post
+        if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author.Nickname, &post.Date, &post.Image, &post.Author.ImageName); err != nil {
+            log.Println("Erreur lors du scan des lignes:", err)
+            continue // Continuer à la prochaine ligne en cas d'erreur de scan
+        }
+        result = append(result, post)
+    }
+    if err := rows.Err(); err != nil {
+        log.Println("Erreur lors du parcours des lignes:", err)
+    }
 
-	return result
+    return result
 }
