@@ -117,6 +117,16 @@
     justify-content: center;
     align-items: center;
     font-size: 140%;
+    background: linear-gradient(to right, aqua 0%, aquamarine 50%, aqua 100%);
+    background-size: 200% auto; /* Double la largeur du dégradé pour pouvoir le déplacer */
+    background-position: left bottom; /* Démarre le dégradé à gauche */
+    transition: background-position 0.5s ease-in-out; /* Transition pour le dégradé */
+    border-radius: 5px;
+    color: black;
+}
+
+.authorPost:hover {
+    background-position: right bottom; /* Déplace le dégradé à droite */
 }
 
 .contentPost{
