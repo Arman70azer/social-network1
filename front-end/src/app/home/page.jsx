@@ -11,6 +11,9 @@ export default async function Page(){
     return (
         <div>
             <DashboardTop/>
+            <div className={styles.centerElementChilds}>
+                <button className={styles.actualiserPosts}>Actualiser</button>
+            </div>
             <div className={styles.Content}>     
                 {posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
@@ -39,6 +42,9 @@ export default async function Page(){
                             </div>
                             <div className={styles.buttonDislike}>
                                 <button className={styles.marginLeft}>Dislike</button>
+                            </div>
+                            <div className={styles.commentaires}>
+                                <button>See commentaries</button>
                             </div>
                             <div className={styles.datePost}>
                                 {post.Date}
