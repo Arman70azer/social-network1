@@ -22,3 +22,9 @@ type User struct {
 	AboutMe   string
 	UUID      string
 }
+
+type Chat struct {
+	Messages    []string `json:"messages"`
+	Sender      string   `json:"sender"`
+	MembersChat []string `json:"memberschat"`
+}

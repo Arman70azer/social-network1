@@ -1,11 +1,46 @@
+"use client"
 import DashboardTop from "../components/dashboard";
 import DashboardBottom from "../components/dashboard2"
+//import WebSocket from "../components/home_webSocket"
 import fetchPosts from "../lib/fetPosts";
 import styles from '../styles/home.module.css'
+import { useEffect, useState } from 'react';
 
-export default async function Page(){
-    const posts = await fetchPosts();
+export default function Page(){
+    const [posts, setPosts] = useState([]);
 
+    useEffect(() => {
+        const fetchData = async () => {
+            // Récupérer les données des posts
+            const postsData = await fetchPosts();
+            setPosts(postsData);
+            console.log("ggg")
+        };
+
+        const WebSocket1 = () =>{
+                // Ouvrir une connexion WebSocket
+            const ws = new WebSocket('ws://localhost:8000/websocket');
+
+            // Gérer les messages reçus du serveur WebSocket
+            ws.onmessage = (event) => {
+                console.log("Message reçu du serveur WebSocket:", event.data);
+            };
+
+            // Envoyer un message au serveur WebSocket
+            ws.onopen = () => {
+                console.log("Connexion établie avec le serveur WebSocket");
+                ws.send("hello");
+            };
+
+            // Fermer la connexion WebSocket lorsque le composant est démonté
+            return () => {
+                ws.close();
+            };
+        };
+        // Appeler la fonction qui effectue à la fois le fetch et la gestion du WebSocket
+        WebSocket1()
+        fetchData();
+    }, []);
     console.log(posts);
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
@@ -14,7 +49,9 @@ export default async function Page(){
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts}>Actualiser</button>
             </div>
-            <div className={styles.Content}>     
+            <div className={styles.Content}>
+            <div>
+        </div>
                 {posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
                         <div className={styles.alineProfilPost}>
