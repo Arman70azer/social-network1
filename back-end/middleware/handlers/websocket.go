@@ -16,27 +16,60 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// Define a map to store connected clients
+var clients = make(map[*websocket.Conn]bool)
+
+var lastMessage string // Variable globale pour stocker le dernier message reçu
+
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Nouvelle connexion WebSocket depuis l'adresse IP: %s\n", r.RemoteAddr)
-	// Upgrade de la connexion HTTP vers WebSocket
+	log.Printf("New WebSocket connection from IP address: %s\n", r.RemoteAddr)
+	// Upgrade the HTTP connection to WebSocket
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error upgrading connection to WebSocket:", err)
 		return
 	}
 	defer conn.Close()
 
-	// Boucle de lecture des messages du client
+	// Add the client to the map of connected clients
+	clients[conn] = true
+
+	// Read messages from the client
 	for {
-		// Lecture du message du client
+		// Read the message from the client
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			log.Println(err)
-			return
+			log.Println("Error reading message from client:", err)
+			break
 		}
 
-		// Affichage du message reçu
-		log.Printf("Message reçu: %s", message)
+		log.Println(len(clients))
 
+		// Compare the new message with the last received message
+		if lastMessage != string(message) {
+			lastMessage = string(message)
+
+			broadcastMessage("bien")
+			// Display the received message
+			log.Printf("Received message: %s\n", lastMessage)
+			log.Println(lastMessage)
+		}
+	}
+
+	// Remove the client from the map of connected clients when the connection is closed
+	delete(clients, conn)
+}
+
+// Define a function to broadcast a message to all connected clients
+func broadcastMessage(message string) {
+	// Iterate over all connected clients
+	for client := range clients {
+		// Send the message to each client
+		err := client.WriteMessage(websocket.TextMessage, []byte(message))
+		if err != nil {
+			log.Println("Error sending message to client:", err)
+			// If there is an error sending the message to a client,
+			// you may choose to handle it according to your application logic
+		}
 	}
 }

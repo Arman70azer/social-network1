@@ -1,7 +1,7 @@
 "use client"
 import DashboardTop from "../components/dashboard";
 import DashboardBottom from "../components/dashboard2"
-//import WebSocket from "../components/home_webSocket"
+import WebSocket from "../components/home_webSocket"
 import fetchPosts from "../lib/fetPosts";
 import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
@@ -17,28 +17,8 @@ export default function Page(){
             console.log("ggg")
         };
 
-        const WebSocket1 = () =>{
-                // Ouvrir une connexion WebSocket
-            const ws = new WebSocket('ws://localhost:8000/websocket');
-
-            // Gérer les messages reçus du serveur WebSocket
-            ws.onmessage = (event) => {
-                console.log("Message reçu du serveur WebSocket:", event.data);
-            };
-
-            // Envoyer un message au serveur WebSocket
-            ws.onopen = () => {
-                console.log("Connexion établie avec le serveur WebSocket");
-                ws.send("hello");
-            };
-
-            // Fermer la connexion WebSocket lorsque le composant est démonté
-            return () => {
-                ws.close();
-            };
-        };
         // Appeler la fonction qui effectue à la fois le fetch et la gestion du WebSocket
-        WebSocket1()
+        WebSocket("home", "Martin", "look", "Salut")
         fetchData();
     }, []);
     console.log(posts);
