@@ -1,7 +1,7 @@
 "use client"
 import DashboardTop from "../components/dashboard";
 import DashboardBottom from "../components/dashboard2"
-import WebSocket from "../components/home_webSocket"
+import giveMessageWebsocket from "../lib/websocket"
 import fetchPosts from "../lib/fetPosts";
 import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
@@ -14,11 +14,10 @@ export default function Page(){
             // Récupérer les données des posts
             const postsData = await fetchPosts();
             setPosts(postsData);
-            console.log("ggg")
         };
 
         // Appeler la fonction qui effectue à la fois le fetch et la gestion du WebSocket
-        WebSocket("home", "Martin", "look", "Salut")
+        giveMessageWebsocket("home", "Martin", "eee", "Salut")
         fetchData();
     }, []);
     console.log(posts);

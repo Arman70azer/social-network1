@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 
@@ -18,6 +19,7 @@ var upgrader = websocket.Upgrader{
 
 // Define a map to store connected clients
 var clients = make(map[*websocket.Conn]bool)
+var clientsName []string
 
 var lastMessage string // Variable globale pour stocker le dernier message reçu
 
@@ -31,9 +33,6 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	// Add the client to the map of connected clients
-	clients[conn] = true
-
 	// Read messages from the client
 	for {
 		// Read the message from the client
@@ -43,17 +42,37 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		log.Println(len(clients))
-
 		// Compare the new message with the last received message
 		if lastMessage != string(message) {
+			// Ajouter le client à la carte des clients connectés si ce n'est pas déjà fait
+			if _, ok := clients[conn]; !ok {
+				clients[conn] = true
+
+				// Récupérer le nom du client depuis le message JSON
+				var messageJSON map[string]interface{}
+				err := json.Unmarshal([]byte(message), &messageJSON)
+				if err != nil {
+					log.Println("Error parsing JSON:", err)
+				}
+				user, ok := messageJSON["user"].(string)
+				if !ok {
+					log.Println("Error getting user name from message:", err)
+				} else {
+					clientsName = append(clientsName, user)
+				}
+			}
+
 			lastMessage = string(message)
 
-			broadcastMessage("bien")
-			// Display the received message
+			// Envoyer un message à tous les clients
+			broadcastMessageToAllClients("bien")
+
+			// Afficher le message reçu
 			log.Printf("Received message: %s\n", lastMessage)
-			log.Println(lastMessage)
+			log.Println(clientsName)
+			log.Println("Number of clients:", len(clients))
 		}
+
 	}
 
 	// Remove the client from the map of connected clients when the connection is closed
@@ -61,7 +80,7 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 }
 
 // Define a function to broadcast a message to all connected clients
-func broadcastMessage(message string) {
+func broadcastMessageToAllClients(message string) {
 	// Iterate over all connected clients
 	for client := range clients {
 		// Send the message to each client

@@ -1,4 +1,5 @@
-export default function WebSocketComponent(origin, user, type, message) {
+//Envoie un message websocket en JSON à la page "websocket"
+export default function WebSocketGiveMessage(origin, user, type, message) {
   // Ouvrir une connexion WebSocket
   const ws = new WebSocket('ws://localhost:8000/websocket');
 
