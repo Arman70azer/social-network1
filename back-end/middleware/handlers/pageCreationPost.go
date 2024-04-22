@@ -10,6 +10,8 @@ type Post struct {
 	Title    string `json:"title"`
 	Content  string `json:"content"`
 	TypePost string `json:"typePost"`
+	Image    string `json:"file"`
+
 	// Ajoutez d'autres champs selon vos besoins
 }
 
@@ -33,7 +35,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Titre:", post.Title)
 		fmt.Println("Contenu:", post.Content)
 		fmt.Println("Type de publication:", post.TypePost)
-		// Traitez les données du post ici
+		fmt.Println("fileName:", post.Image)
 
 		// Répondre avec un message de succès
 		w.WriteHeader(http.StatusOK)

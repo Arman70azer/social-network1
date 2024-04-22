@@ -7,7 +7,8 @@ export default function Page(){
     const [formData, setFormData] = useState({
         title: '',
         content: '',
-        typePost: 'Public'
+        typePost: 'Public',
+        file:'nothing'
     });
 
     const handleSubmit = async (event) => {
@@ -39,6 +40,13 @@ export default function Page(){
         });
     };
 
+    const handleFile = (event) => {
+        const filename = event.target.files[0].name; // Obtenir le nom du fichier
+        setFormData({
+            ...formData,
+            file: filename // Assigner le nom du fichier à la clé "file" dans formData
+        });
+    };
     return (
         <div>
             <DashboardTop/>
@@ -46,7 +54,7 @@ export default function Page(){
                 <form className={styles.menuNewPost} encType="multipart/form-data" onSubmit={handleSubmit}>
                     Write New Post :
                     <input className={styles.inputTitle} name="title" type="text" placeholder="Title" value={formData.title} onChange={handleChange}/>
-                    <input type="file" className={styles.file} name="file"/>
+                    <input type="file" className={styles.file} name="file" onChange={handleFile}/>
                     <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>
                     <label className={styles.select} htmlFor="typePost">Type de publication :</label>
                     <select name="typePost" id="typePost" value={formData.typePost} onChange={handleChange}>

@@ -7,6 +7,7 @@ type Post struct {
 	Author  User
 	Date    string
 	Image   string
+	Type    string
 }
 
 type User struct {

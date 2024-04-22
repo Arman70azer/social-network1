@@ -40,6 +40,7 @@ func Create_db() {
 			Author INTEGER,
 			Date TEXT,
 			Image TEXT,
+			Type TEXT,
 			FOREIGN KEY (Author) REFERENCES Users(ID)
 		);`,
 		`CREATE TABLE IF NOT EXISTS Hashtags (
