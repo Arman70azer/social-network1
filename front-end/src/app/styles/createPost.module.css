@@ -1,0 +1,50 @@
+.menuNewPost{
+    width: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgb(23, 24, 29); /* Bordure de 2 pixels solide de couleur whitesmoke */
+    flex-direction: column;
+}
+
+.center{
+    margin-top: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 5%;
+}
+
+.inputTitle{
+    margin-top: 20px;
+    width: 90%;
+    border: 2px solid rgb(23, 24, 29);
+    border-radius: 4px;
+}
+
+.textarea{
+    margin-top: 40px;
+    width: 85%;
+    border: 2px solid rgb(23, 24, 29);
+}
+
+.hashtags{
+    margin-top: 20px;
+    max-height: 50px;
+    border: 2px solid rgb(23, 24, 29);
+    margin-right: 100px;
+}
+
+.select{
+    margin-top: 40px;
+}
+
+.file{
+    margin-top: 30px;
+}
+
+.buttonForm{
+    margin-top: 50px;
+    margin-bottom: 20px;
+    border: 2px solid rgb(23, 24, 29);
+}

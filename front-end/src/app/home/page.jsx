@@ -16,7 +16,7 @@ export default function Page(){
             setPosts(postsData);
         };
 
-        // Appeler la fonction qui effectue à la fois le fetch et la gestion du WebSocket
+        // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         giveMessageWebsocket("home", "Martin", "eee", "Salut")
         fetchData();
     }, []);

@@ -11,6 +11,7 @@ func main() {
 	db.Create_db()
 	fmt.Println("Server is running at http://localhost:8000")
 	http.HandleFunc("/api/home", handlers.HandlerHome)
+	http.HandleFunc("/createPost", handlers.CreationPost)
 	http.HandleFunc("/websocket", handlers.HandleWebSocket)
 
 	err := http.ListenAndServe(":8000", nil)

@@ -233,3 +233,24 @@
 .commentaires{
     margin-left: 70px;
 }
+
+.buttonCreatePost{
+    position: absolute;
+    margin-left: 20px;
+    margin-bottom: 70%;
+    border: 2px solid rgb(77, 134, 124); /* Bordure de 2 pixels solide de couleur whitesmoke */
+    padding: 20px;
+    color: rgb(0, 0, 0);
+    border-radius: 8px;
+    background: linear-gradient(to right, aqua 0%, aquamarine 50%, aqua 100%);
+    background-size: 200% auto; /* Double la largeur du dégradé pour pouvoir le déplacer */
+    background-position: left bottom; /* Démarre le dégradé à gauche */
+    transition: background-position 0.5s ease-in-out; /* Transition pour le dégradé */
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.buttonCreatePost:hover{
+    background-position: right bottom; /* Déplace le dégradé à droite */
+    font-size: 102%;
+}

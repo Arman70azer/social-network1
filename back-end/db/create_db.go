@@ -60,6 +60,14 @@ func Create_db() {
 			FOREIGN KEY (Author) REFERENCES Users(ID),
 			FOREIGN KEY (Post) REFERENCES Posts(ID)
 		);`,
+		`CREATE TABLE IF NOT EXISTS LikesDislikes (
+			Type TEXT,
+			User INTEGER,
+			Post INTEGER,
+			FOREIGN KEY (User) REFERENCES Users(ID),
+			FOREIGN KEY (Post) REFERENCES Posts(ID)
+		)
+		`,
 	}
 
 	for _, createTableQuery := range createTables {
