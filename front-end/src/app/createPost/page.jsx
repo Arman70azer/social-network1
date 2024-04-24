@@ -2,8 +2,11 @@
 import DashboardTop from "../components/dashboard"
 import styles from "../styles/createPost.module.css"
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+//permet de retourner sur la page d'acceuil
 
 export default function Page(){
+    const router = useRouter();
     const [formData, setFormData] = useState({
         title: '',
         content: '',
@@ -11,34 +14,46 @@ export default function Page(){
         file: null
     });
 
+
     const [fileValid, setFileValid] =useState(true)
+    const [contentPresent, setPresentContent] = useState(true)
 
     const handleSubmit = async (event) => {
         event.preventDefault(); // Empêcher le comportement par défaut du formulaire
 
-        if (fileValid){
-    
-            // Créer un objet FormData pour envoyer le formulaire avec le fichier
-            const formDataToSend = new FormData();
-            formDataToSend.append('title', formData.title);
-            formDataToSend.append('content', formData.content);
-            formDataToSend.append('typePost', formData.typePost);
-            // Ajouter le fichier s'il existe
-            if (formData.file) {
-                formDataToSend.append('file', formData.file); // Ajouter le fichier
-            }
+        if (formData.title && formData.content){
+            if (fileValid){
+        
+                // Créer un objet FormData pour envoyer le formulaire avec le fichier
+                const formDataToSend = new FormData();
+                formDataToSend.append('title', formData.title);
+                formDataToSend.append('content', formData.content);
+                formDataToSend.append('typePost', formData.typePost);
+                // Ajouter le fichier s'il existe
+                if (formData.file) {
+                    formDataToSend.append('file', formData.file); // Ajouter le fichier
+                }
 
-            // Envoyer les données du formulaire à l'URL souhaitée
-            try {
-                const response = await fetch('http://localhost:8000/createPost', {
-                    method: 'POST',
-                    body: formDataToSend
-                });
-                
-                // Gérer la réponse si nécessaire
-            } catch (error) {
-                console.error('Error submitting form:', error);
+                // Envoyer les données du formulaire à l'URL souhaitée
+                try {
+                    const response = await fetch('http://localhost:8000/createPost', {
+                        method: 'POST',
+                        body: formDataToSend
+                    });
+
+                    // Vérifiez si la réponse est réussie (statut 200)
+                    if (response.ok) {
+                        // Rediriger l'utilisateur vers la page d'accueil
+                        router.push('/home');
+                    } else {
+                        console.error('Erreur lors de l\'envoi du formulaire:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+                }
             }
+        }else{
+            setPresentContent(false)
         }
     };
 
@@ -84,6 +99,7 @@ export default function Page(){
                         <option value="Private">Private</option>
                     </select>
                     <button className={styles.buttonForm} type="submit">Publish</button>
+                    {!contentPresent && <span id="errorTypeFile" className={styles.error}>No title or no content</span>}
                 </form>
             </div>
         </div>

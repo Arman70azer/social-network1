@@ -1,13 +1,14 @@
 package structures
 
 type Post struct {
-	ID      int
-	Titre   string
-	Content string
-	Author  User
-	Date    string
-	Image   string
-	Type    string
+	ID        int
+	Titre     string
+	Content   string
+	Author    User
+	Date      string
+	ImageName string
+	UrlImage  string
+	Type      string
 }
 
 type User struct {
@@ -20,6 +21,7 @@ type User struct {
 	Birthday  string
 	Age       int
 	ImageName string
+	UrlImage  string
 	AboutMe   string
 	UUID      string
 }

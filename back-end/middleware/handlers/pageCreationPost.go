@@ -61,20 +61,17 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		user.Nickname = author
 		user.ID = dbFunc.SelectIdReferenceUser_db(author, dbOpen)
 		post := structures.Post{
-			Titre:   title,
-			Content: content,
-			Type:    typePost,
-			Image:   fileName,
-			Author:  user,
+			Titre:     title,
+			Content:   content,
+			Type:      typePost,
+			ImageName: fileName,
+			Author:    user,
 		}
 
 		fmt.Println(post)
 
 		if postNotExist(post, dbOpen) && post.Titre != "" && post.Content != "" {
 			dbFunc.PushInPosts_db(post, dbOpen)
-		} else {
-			//Penser à envoyer un message websocket au front-end pour avertir que le post existe
-			fmt.Println("Penser à envoyer un message websocket au front-end pour avertir que le post existe")
 		}
 
 		// Répondre avec un message de succès

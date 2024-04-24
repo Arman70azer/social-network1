@@ -17,7 +17,7 @@ export default function Page(){
         };
 
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
-        giveMessageWebsocket("home", "Martin", "eee", "Salut")
+        //giveMessageWebsocket("home", "Martin", "eee", "Salut")
         fetchData();
     }, []);
     console.log(posts);
@@ -29,13 +29,11 @@ export default function Page(){
                 <button className={styles.actualiserPosts}>Actualiser</button>
             </div>
             <div className={styles.Content}>
-            <div>
-        </div>
                 {posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
                         <div className={styles.alineProfilPost}>
                             <div className={styles.avatarProfil}>
-                                <img className={styles.avatarPost} src={`/images/${post.Author.ImageName}`}/>
+                                <img className={styles.avatarPost} src={`${post.Author.UrlImage}`} alt="Avatar" />
                             </div>
                             <button className={styles.authorPost}>
                                 {post.Author.Nickname}
@@ -46,7 +44,7 @@ export default function Page(){
                                 {post.Titre}:
                             </div>
                             <div className={styles.imagePostContainer}>
-                                <img className={styles.imagePost} src={`/images/${post.Image}`}/>
+                                <img className={styles.imagePost} src={`${post.UrlImage}`}/>
                             </div>
                             <div className={styles.contentPost}>
                                 {post.Content}
