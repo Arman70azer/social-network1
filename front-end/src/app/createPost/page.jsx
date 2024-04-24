@@ -1,18 +1,51 @@
 "use client"
 import DashboardTop from "../components/dashboard"
 import styles from "../styles/createPost.module.css"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import fetchUsersAndPosts from "../lib/fetPosts"
+
 //permet de retourner sur la page d'acceuil
 
 export default function Page(){
+
+    const [data, setPosts] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            // Récupérer les données des posts
+            const datafetch = await fetchUsersAndPosts();
+            setPosts(datafetch);
+        };
+
+        console.log("kkjk")
+
+        fetchData();
+    }, []);
+    console.log(data, "hhhhhhhhhhhhhhhh");
+    console.log("jjjjjj")
+    
     const router = useRouter();
     const [formData, setFormData] = useState({
         title: '',
         content: '',
         typePost: 'Public',
-        file: null
+        file: null,
+        users: [],
     });
+
+
+    const handleSelectChange = (event) => {
+        const selectedUserId = event.target.value;
+
+        // Vérifier si l'ID de l'utilisateur sélectionné n'est pas déjà dans la liste
+        if (selectedUserId && !formData.users.includes(selectedUserId)) {
+            setFormData({
+                ...formData,
+                users: [...formData.users, selectedUserId]
+            });
+        }
+    };
 
 
     const [fileValid, setFileValid] =useState(true)
@@ -87,7 +120,7 @@ export default function Page(){
         <div>
             <DashboardTop/>
             <div className={styles.center}>
-                <form className={styles.menuNewPost} onSubmit={handleSubmit}>
+                <form className={styles.menuNewPost}>
                     Write New Post :
                     <input className={styles.inputTitle} name="title" type="text" placeholder="Title" value={formData.title} onChange={handleChange}/>
                     <input type="file" className={styles.file} name="file" onChange={handleFile}/>
@@ -98,7 +131,23 @@ export default function Page(){
                         <option value="Public">Public</option>
                         <option value="Private">Private</option>
                     </select>
-                    <button className={styles.buttonForm} type="submit">Publish</button>
+
+                    <div>
+                        <select onChange={handleSelectChange}>
+                            <option value="">Sélectionnez un utilisateur</option>
+                            {data.Users && data.Users.map((user) => (
+                                <option key={user.ID} value={user.Nickname}>{user.Nickname}</option>
+                            ))}
+                        </select>
+                        {formData.users && formData.users.map((user)=>(
+                            <div>
+                                {user}
+                            </div>
+                        ))}
+                    </div>
+                    <br />
+
+                    <button className={styles.buttonForm} type="submit" onClick={handleSubmit}>Publish</button>
                     {!contentPresent && <span id="errorTypeFile" className={styles.error}>No title or no content</span>}
                 </form>
             </div>

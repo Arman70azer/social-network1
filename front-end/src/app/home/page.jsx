@@ -2,25 +2,25 @@
 import DashboardTop from "../components/dashboard";
 import DashboardBottom from "../components/dashboard2"
 import giveMessageWebsocket from "../lib/websocket"
-import fetchPosts from "../lib/fetPosts";
+import fetchUsersAndPosts from "../lib/fetPosts";
 import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
 
 export default function Page(){
-    const [posts, setPosts] = useState([]);
+    const [data, setPosts] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
             // Récupérer les données des posts
-            const postsData = await fetchPosts();
-            setPosts(postsData);
+            const datafetch = await fetchUsersAndPosts();
+            setPosts(datafetch);
         };
 
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         //giveMessageWebsocket("home", "Martin", "eee", "Salut")
         fetchData();
     }, []);
-    console.log(posts);
+    console.log(data);
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>
@@ -29,7 +29,7 @@ export default function Page(){
                 <button className={styles.actualiserPosts}>Actualiser</button>
             </div>
             <div className={styles.Content}>
-                {posts.map((post, index) => (
+                {data.Posts && data.Posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
                         <div className={styles.alineProfilPost}>
                             <div className={styles.avatarProfil}>
@@ -44,7 +44,7 @@ export default function Page(){
                                 {post.Titre}:
                             </div>
                             <div className={styles.imagePostContainer}>
-                                <img className={styles.imagePost} src={`${post.UrlImage}`}/>
+                               {post.ImageName&& <img className={styles.imagePost} src={`${post.UrlImage}`}/>}
                             </div>
                             <div className={styles.contentPost}>
                                 {post.Content}

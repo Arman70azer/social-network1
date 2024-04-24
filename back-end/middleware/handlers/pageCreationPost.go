@@ -22,7 +22,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		typePost := r.FormValue("typePost")
-		author := "Martin"
+		author := "Eliot"
 		var fileName string
 
 		// Récupérer le fichier

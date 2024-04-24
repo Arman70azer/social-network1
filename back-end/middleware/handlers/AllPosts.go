@@ -2,18 +2,22 @@ package handlers
 
 import (
 	dbFunc "back-end/middleware/dbFunc"
+	structures "back-end/middleware/struct"
 	"encoding/json"
 	"net/http"
 )
 
-func HandlerHome(w http.ResponseWriter, r *http.Request) {
+func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 
 	db := dbFunc.Open_db()
 
-	allPost := dbFunc.SelectAllPosts_db(db)
+	var data structures.Data
+
+	data.Posts = dbFunc.SelectAllPosts_db(db)
+	data.Users = dbFunc.SelectAllUsers_db(db)
 
 	// Convertissez les données en JSON
-	jsonData, err := json.Marshal(allPost)
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

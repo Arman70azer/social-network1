@@ -10,7 +10,7 @@ import (
 func main() {
 	db.Create_db()
 	fmt.Println("Server is running at http://localhost:8000")
-	http.HandleFunc("/api/home", handlers.HandlerHome)
+	http.HandleFunc("/api/home", handlers.HandlerInfoPostsAndUser)
 	http.HandleFunc("/createPost", handlers.CreationPost)
 	http.HandleFunc("/websocket", handlers.HandleWebSocket)
 	http.HandleFunc("/images/", handlers.ServeImage)

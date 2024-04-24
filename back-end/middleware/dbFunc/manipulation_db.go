@@ -71,6 +71,10 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 		}
 		post.UrlImage = "http://localhost:8000/images/" + post.ImageName
 		post.Author.UrlImage = "http://localhost:8000/images/" + post.Author.ImageName
+
+		if post.ImageName == "nothing" {
+			post.ImageName = ""
+		}
 		result = append(result, post)
 	}
 	if err := rows.Err(); err != nil {
@@ -81,7 +85,7 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 }
 func PushInPosts_db(post structures.Post, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouveau post
-	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image) VALUES (?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image, Type) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
@@ -97,7 +101,7 @@ func PushInPosts_db(post structures.Post, db *sql.DB) {
 	formatDate := currentDate.Format("02/01/2006 15:04:05")
 
 	// Exécuter la requête SQL pour insérer le nouveau post
-	_, err = stmt.Exec(post.Titre, post.Content, authorID, formatDate, post.ImageName)
+	_, err = stmt.Exec(post.Titre, post.Content, authorID, formatDate, post.ImageName, post.Type)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
@@ -129,3 +133,50 @@ func SelectIdReferenceUser_db(nickOrMail string, db *sql.DB) int {
 
 	return id
 }
+
+func SelectAllUsers_db(db *sql.DB) []structures.User {
+	var users []structures.User
+
+	// Préparer la requête SQL
+	stmt, err := db.Prepare("SELECT ID, Nickname, Birthday, Age, ImageName FROM Users")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for SelectAllUser :", err)
+		return users
+	}
+	defer stmt.Close()
+
+	// Exécuter la requête SQL pour obtenir un ensemble de résultats
+	rows, err := stmt.Query()
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de la requête SQL :", err)
+		return users
+	}
+	defer rows.Close()
+
+	// Itérer sur les résultats
+	for rows.Next() {
+		var user structures.User
+		// Scanner les valeurs dans la structure User
+		if err := rows.Scan(&user.ID, &user.Nickname, &user.Birthday, &user.Age, &user.ImageName); err != nil {
+			// Gérer l'erreur
+			fmt.Println("Erreur lors du scan des lignes:", err)
+			continue // Continuer à la prochaine ligne en cas d'erreur de scan
+		}
+		// Construire l'URL de l'image
+		user.UrlImage = "http://localhost:8000/images/" + user.ImageName
+
+		// Ajouter l'utilisateur à la slice users
+		users = append(users, user)
+	}
+
+	// Gérer les erreurs après la boucle
+	if err := rows.Err(); err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors du parcours des lignes:", err)
+	}
+
+	return users
+}
+

@@ -26,6 +26,11 @@ type User struct {
 	UUID      string
 }
 
+type Data struct {
+	Posts []Post
+	Users []User
+}
+
 type Chat struct {
 	Messages    []string `json:"messages"`
 	Sender      string   `json:"sender"`
