@@ -121,9 +121,7 @@
 
 .contentPost{
     margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin-left: 40%;
 
 }
 
@@ -159,13 +157,24 @@
     position: absolute;
 }
 
+.buttonPostsAll{
+    position: absolute;
+    font-size: 115%;
+    margin-left: 45% ;
+    transition: 0.2s;
+}
+
+.buttonPostsAll:hover{
+    font-size: 130%;
+}
+
 .buttonPostPrivates:hover{
     font-size: 130%;
 }
 
 .avatarPost {
-    width: 50px; /* Remplacez 50px par la largeur souhaitée */
-    height: 50px; /* Remplacez 50px par la hauteur souhaitée */
+    max-width: 90px; /* Remplacez 50px par la largeur souhaitée */
+    max-height: 90px; /* Remplacez 50px par la hauteur souhaitée */
     border-radius: 50px;
 }
 
@@ -237,6 +246,7 @@
 .buttonCreatePost{
     position: absolute;
     margin-left: 20px;
+    margin-top: 10% ;
     margin-bottom: 70%;
     border: 2px solid rgb(77, 134, 124); /* Bordure de 2 pixels solide de couleur whitesmoke */
     padding: 20px;
@@ -253,4 +263,9 @@
 .buttonCreatePost:hover{
     background-position: right bottom; /* Déplace le dégradé à droite */
     font-size: 102%;
+}
+
+.typePost{
+    margin-left: 230px;
+    font-size: 110%;
 }

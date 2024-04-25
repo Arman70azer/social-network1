@@ -41,6 +41,7 @@ func Create_db() {
 			Date TEXT,
 			Image TEXT,
 			Type TEXT,
+			PrivateViewers TEXT,
 			FOREIGN KEY (Author) REFERENCES Users(ID)
 		);`,
 		`CREATE TABLE IF NOT EXISTS Hashtags (

@@ -11,6 +11,9 @@ export default function Page(){
 
     const [data, setPosts] = useState([]);
 
+    const [searchTerm, setSearchTerm] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+
     useEffect(() => {
         const fetchData = async () => {
             // Récupérer les données des posts
@@ -19,6 +22,7 @@ export default function Page(){
         };
 
         fetchData();
+          // Mettre à jour les suggestions une seule fois
     }, []);
     
     const router = useRouter();
@@ -30,16 +34,31 @@ export default function Page(){
         users: [],
     });
 
-
-    const handleSelectChange = (event) => {
-        const selectedUserId = event.target.value;
-
-        // Vérifier si l'ID de l'utilisateur sélectionné n'est pas déjà dans la liste
-        if (selectedUserId && !formData.users.includes(selectedUserId)) {
+    const handleAddUser = (event) => {
+        event.preventDefault();
+        if (searchTerm && !formData.users.includes(searchTerm)) {
             setFormData({
                 ...formData,
-                users: [...formData.users, selectedUserId]
+                users: [...formData.users, searchTerm]
             });
+        }
+        setSearchTerm(''); // Efface le champ de recherche après l'ajout
+        setSuggestions([])
+    };    
+
+    // Fonction pour mettre à jour la barre de recherche et les suggestions
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+
+        if (searchTerm != ""){
+            // Filtrer les suggestions basées sur le terme de recherche et limiter à trois résultats
+            const filteredSuggestions = data.Users.filter(user =>
+                user.Nickname.toLowerCase().includes(value.toLowerCase())
+            ).slice(0, 3);
+            setSuggestions(filteredSuggestions);
+        }else{
+            setSuggestions([])
         }
     };
 
@@ -61,6 +80,10 @@ export default function Page(){
                 // Ajouter le fichier s'il existe
                 if (formData.file) {
                     formDataToSend.append('file', formData.file); // Ajouter le fichier
+                }
+
+                if (formData.typePost === "Private"){
+                    formDataToSend.append('users', formData.users)
                 }
 
                 // Envoyer les données du formulaire à l'URL souhaitée
@@ -112,6 +135,13 @@ export default function Page(){
         }
     };
 
+    const handleRemoveUser = (userId) => {
+        setFormData({
+            ...formData,
+            users: formData.users.filter((user) => user !== userId)
+        });
+    };
+
     return (
         <div>
             <DashboardTop/>
@@ -128,19 +158,33 @@ export default function Page(){
                         <option value="Private">Private</option>
                     </select>
 
-                    <div>
-                        <select onChange={handleSelectChange}>
-                            <option value="">Sélectionnez un utilisateur</option>
-                            {data.Users && data.Users.map((user) => (
-                                <option key={user.ID} value={user.Nickname}>{user.Nickname}</option>
+                    {formData.typePost === 'Private' && (
+                    <div className={styles.allUserForPrivate}>
+                        <input
+                        type="text"
+                        placeholder="Rechercher un utilisateur"
+                        id="searchPrivate"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        />
+                        <button onClick={(e) => handleAddUser(e)}>Ajouter</button>
+                        <label htmlFor="searchPrivate">
+                            
+                            {/* Afficher les suggestions filtrées */}
+                            {suggestions.map((user, index) => (
+                                <li key={index}>{user.Nickname}</li>
                             ))}
-                        </select>
-                        {formData.users && formData.users.map((user)=>(
-                            <div>
-                                {user}
-                            </div>
+                            
+                        </label>
+                        {formData.users && formData.users.map((user) => (
+                        <div key={user} className={styles.margeCrossUser}>
+                            {user}
+                            <button onClick={() => handleRemoveUser(user)}>X</button>
+                        </div>
                         ))}
                     </div>
+                    )}
+
                     <br />
 
                     <button className={styles.buttonForm} type="submit" onClick={handleSubmit}>Publish</button>

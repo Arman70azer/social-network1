@@ -54,7 +54,7 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 	var result []structures.Post
 
 	// p. représente les colonnes de Posts tandis que u. représente les colonnes de Users
-	query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS AuthorNickname, p.Date, p.Image, u.ImageName AS AuthorImageName, u.ID AS AuthorID FROM Posts p JOIN Users u ON p.Author = u.ID"
+	query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS AuthorNickname, p.Date, p.Image, u.ImageName AS AuthorImageName, u.ID AS AuthorID, p.Type FROM Posts p JOIN Users u ON p.Author = u.ID"
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -65,7 +65,7 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 
 	for rows.Next() {
 		var post structures.Post
-		if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author.Nickname, &post.Date, &post.ImageName, &post.Author.ImageName, &post.Author.ID); err != nil {
+		if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author.Nickname, &post.Date, &post.ImageName, &post.Author.ImageName, &post.Author.ID, &post.Type); err != nil {
 			log.Println("Erreur lors du scan des lignes:", err)
 			continue // Continuer à la prochaine ligne en cas d'erreur de scan
 		}
@@ -85,7 +85,7 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 }
 func PushInPosts_db(post structures.Post, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouveau post
-	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image, Type) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image, Type, PrivateViewers) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
@@ -100,8 +100,18 @@ func PushInPosts_db(post structures.Post, db *sql.DB) {
 	currentDate := time.Now()
 	formatDate := currentDate.Format("02/01/2006 15:04:05")
 
+	allPrivateviewers := ""
+
+	for i := 0; i < len(post.PrivateViewers); i++ {
+		if allPrivateviewers != "" {
+			allPrivateviewers = allPrivateviewers + "-" + post.PrivateViewers[i]
+		} else {
+			allPrivateviewers = allPrivateviewers + post.PrivateViewers[i]
+		}
+	}
+
 	// Exécuter la requête SQL pour insérer le nouveau post
-	_, err = stmt.Exec(post.Titre, post.Content, authorID, formatDate, post.ImageName, post.Type)
+	_, err = stmt.Exec(post.Titre, post.Content, authorID, formatDate, post.ImageName, post.Type, allPrivateviewers)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
@@ -179,4 +189,3 @@ func SelectAllUsers_db(db *sql.DB) []structures.User {
 
 	return users
 }
-

@@ -2,11 +2,12 @@ import styles from '../styles/home.module.css'; // Utilisez des guillemets simpl
 import Link from 'next/link';
 
 //TODO Mettre les href une fois les pages finit !!!!!
-function DashboardBottom () {
+function DashboardBottom (onlyPublicPosts) {
+
     return (
         <div className={styles.dashboardBottomPage}>
             <Link href="/createPost" className={styles.buttonCreatePost}>Create New Post [+]</Link>
-            <button className={styles.buttonPostPublic}>Publics Posts</button>
+            <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
             <button className={styles.buttonPostPrivates}>Privates Posts</button>
         </div>
     );

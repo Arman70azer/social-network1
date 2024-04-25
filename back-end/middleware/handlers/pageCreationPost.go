@@ -16,13 +16,16 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Autoriser l'en-tête Content-Type
 	w.Header().Set("Content-Type", "application/json")
 
-	// Vérifier si la méthode de la requête est POST
 	if r.Method == "POST" {
 
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		typePost := r.FormValue("typePost")
-		author := "Eliot"
+		author := "Arman"
+		var privateViewers []string
+		if typePost == "Private" {
+			privateViewers = r.Form["users"]
+		}
 		var fileName string
 
 		// Récupérer le fichier
@@ -60,12 +63,14 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		var user structures.User
 		user.Nickname = author
 		user.ID = dbFunc.SelectIdReferenceUser_db(author, dbOpen)
+
 		post := structures.Post{
-			Titre:     title,
-			Content:   content,
-			Type:      typePost,
-			ImageName: fileName,
-			Author:    user,
+			Titre:          title,
+			Content:        content,
+			Type:           typePost,
+			ImageName:      fileName,
+			Author:         user,
+			PrivateViewers: privateViewers,
 		}
 
 		fmt.Println(post)
