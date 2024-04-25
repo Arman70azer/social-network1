@@ -37,10 +37,15 @@ export default function Page(){
     const handleAddUser = (event) => {
         event.preventDefault();
         if (searchTerm && !formData.users.includes(searchTerm)) {
-            setFormData({
-                ...formData,
-                users: [...formData.users, searchTerm]
-            });
+            for (let i = 0; i< data.Users.length; i++){
+                if (data.Users[i].Nickname === searchTerm){
+                    setFormData({
+                        ...formData,
+                        users: [...formData.users, searchTerm]
+                    });
+                    break
+                }
+            }
         }
         setSearchTerm(''); // Efface le champ de recherche après l'ajout
         setSuggestions([])
