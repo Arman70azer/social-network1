@@ -18,12 +18,8 @@ export default function Page(){
             setPosts(datafetch);
         };
 
-        console.log("kkjk")
-
         fetchData();
     }, []);
-    console.log(data, "hhhhhhhhhhhhhhhh");
-    console.log("jjjjjj")
     
     const router = useRouter();
     const [formData, setFormData] = useState({
