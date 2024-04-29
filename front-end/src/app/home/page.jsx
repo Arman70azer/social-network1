@@ -44,6 +44,7 @@ export default function Page(){
     };
     
     useEffect(() => {
+       
         const fetchData = async () => {
             // Récupérer les données des posts
             const datafetch = await fetchUsersAndPosts();
@@ -53,8 +54,6 @@ export default function Page(){
 
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchData();
-
-
         if (!wsConnect){
             const ws = new WebSocket('ws://localhost:8000/websocket');
             wsConnect = openWebSocketConnexion(ws)
@@ -93,7 +92,50 @@ export default function Page(){
             }
         }
     }
+
+    //Cette function va push dans data les ajouts de commentaires et autres... dans la base de données 
+    //qui ont été valider par celle-ci  
+    const onMessageWS = () => {
+        if (data && wsConnect) {
+            // Gérer les messages reçus du serveur WebSocket
+            wsConnect.onmessage = (event) => {
+                const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
+                if (receivedMessage.Accept) {
+                    console.log("Message reçu du serveur WebSocket:", receivedMessage);
+                    console.log(data, "hhhhhhh")
+                    if (data.Posts) {
+                        // Filtrer les posts pour trouver celui qui correspond au post reçu
+                        const postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
+                        if (postTarget) {
+                            // Ajouter un nouveau commentaire au post cible
+                            postTarget.Commentaries.push({
+                                Content: receivedMessage.ObjectOfRequest,
+                                Author: { Nickname: receivedMessage.User },
+                                Post: { Titre: receivedMessage.Post },
+                                Date: receivedMessage.Date
+                            });
+                            // Mettre à jour toutes les données des posts avec le post modifié
+                            setAllData(prevData => {
+                                const updatedPosts = prevData.Posts.map(post => {
+                                    if (post.Titre === postTarget.Titre) {
+                                        return postTarget;
+                                    } else {
+                                        return post;
+                                    }
+                                });
+                                return { ...prevData, Posts: updatedPosts };
+                            });
+                            setData(allData)
+                        } else {
+                            console.log("Aucune donnée des posts trouvée.");
+                        }
+                    }
+                }
+            };
+        }
+    };
     
+    onMessageWS()
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>

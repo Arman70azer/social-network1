@@ -31,7 +31,8 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 				request.Post = commentary.Post.Titre
 				request.ObjetcOfRequest = commentary.Content
 				request.Accept = true
-				BroadcastMessageOneClient(request)
+				request.Date = commentary.Date
+				BroadcastMessageToAllClients(request)
 			} else {
 				request.Origin = "home"
 				request.Nature = "NewComment"
@@ -39,6 +40,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 				request.Post = commentary.Post.Titre
 				request.ObjetcOfRequest = commentary.Content
 				request.Accept = false
+				request.Date = commentary.Date
 				BroadcastMessageOneClient(request)
 			}
 		}

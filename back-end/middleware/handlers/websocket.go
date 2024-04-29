@@ -38,17 +38,22 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 
+	messageInit := readMessage(ws)
+
 	// Create a new client instance
-	client := &Client{conn: ws, User: readMessage(ws).User}
+	client := &Client{conn: ws, User: messageInit.User}
 
 	// Add the client to the map of clients
 	clients[ws] = client
 
-	// Example: Send a welcome message
-	err = ws.WriteMessage(websocket.TextMessage, []byte("Welcome to the server!"))
-	if err != nil {
-		log.Printf("Error sending welcome message: %v", err)
-	}
+	// Send a welcome message
+	var welcomeRequest structures.Request
+	welcomeRequest.Nature = "Welcome " + messageInit.User
+	welcomeRequest.Origin = "websocket"
+	welcomeRequest.Date = time.Now().Format("02/01/2006 15:04:05")
+	welcomeRequest.User = messageInit.User
+
+	BroadcastMessageOneClient(welcomeRequest)
 
 	// Example: Listen for messages from this client
 	for {
@@ -67,7 +72,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
 			// Accéder aux champs de la structure Request
 			fmt.Println("Origin:", data)
-			fmt.Println(clients[client.conn].User)
+			fmt.Println(clients[ws].User)
 
 		}
 
@@ -97,9 +102,14 @@ func BroadcastMessages() {
 // Envoie le message au client souhaiter pour répondre à une requête précise
 func BroadcastMessageOneClient(request structures.Request) {
 	// Envoyer le message au client spécifié
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		fmt.Println("Erreur lors de la conversion en JSON:", err)
+	}
+
 	for conn, client := range clients {
 		if client.User == request.User {
-			err := conn.WriteMessage(websocket.TextMessage, []byte("You are the only one"))
+			err := conn.WriteMessage(websocket.TextMessage, jsonData)
 			if err != nil {
 				log.Printf("Error sending message to client: %v", err)
 				conn.Close()
@@ -107,6 +117,25 @@ func BroadcastMessageOneClient(request structures.Request) {
 			} else {
 				fmt.Println("le message à été envoyé")
 			}
+		}
+	}
+}
+
+func BroadcastMessageToAllClients(request structures.Request) {
+	// Envoyer le message au client spécifié
+	jsonData, err := json.Marshal(request)
+	if err != nil {
+		fmt.Println("Erreur lors de la conversion en JSON:", err)
+	}
+
+	for conn, _ := range clients {
+		err := conn.WriteMessage(websocket.TextMessage, jsonData)
+		if err != nil {
+			log.Printf("Error sending message to client: %v", err)
+			conn.Close()
+			delete(clients, conn) // Remove the client from the map if unable to send message
+		} else {
+			fmt.Println("le message à été envoyé")
 		}
 	}
 }

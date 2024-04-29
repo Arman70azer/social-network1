@@ -13,7 +13,7 @@ func main() {
 	http.HandleFunc("/api/home", handlers.HandlerInfoPostsAndUser)
 	http.HandleFunc("/createPost", handlers.CreationPost)
 	http.HandleFunc("/websocket", handlers.HandleConnections)
-	go handlers.BroadcastMessages()
+	//go handlers.BroadcastMessages()
 	http.HandleFunc("/images/", handlers.ServeImage)
 
 	err := http.ListenAndServe(":8000", nil)
