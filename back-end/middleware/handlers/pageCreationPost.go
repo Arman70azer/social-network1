@@ -22,9 +22,14 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		content := r.FormValue("content")
 		typePost := r.FormValue("typePost")
 		author := "Arman"
-		var privateViewers []string
+		var privateUsers []structures.User
 		if typePost == "Private" {
-			privateViewers = r.Form["users"]
+			privateViewers := r.Form["users"]
+			for i := 0; i < len(privateViewers); i++ {
+				var user structures.User
+				user.Nickname = privateViewers[i]
+				privateUsers = append(privateUsers, user)
+			}
 		}
 		var fileName string
 
@@ -70,7 +75,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 			Type:           typePost,
 			ImageName:      fileName,
 			Author:         user,
-			PrivateViewers: privateViewers,
+			PrivateViewers: privateUsers,
 		}
 
 		fmt.Println(post)

@@ -1,94 +1,81 @@
 package handlers
 
 import (
-	"encoding/json"
+	structures "back-end/middleware/struct"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
 
+// Define a struct to store client information
+type Client struct {
+	conn *websocket.Conn
+	User structures.User
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool { //A mettre absolument pour pouvoir traiter les connexions
-		// Autoriser toutes les origines
+	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
 }
 
 // Define a map to store connected clients
-var clients = make(map[*websocket.Conn]bool)
-var clientsName []string
+var clients = make(map[*websocket.Conn]*Client)
 
-var lastMessage string // Variable globale pour stocker le dernier message reçu
+func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
-func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
-	log.Printf("New WebSocket connection from IP address: %s\n", r.RemoteAddr)
-	// Upgrade the HTTP connection to WebSocket
-	conn, err := upgrader.Upgrade(w, r, nil)
+	// Upgrade initial GET request to a websocket
+	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("Error upgrading connection to WebSocket:", err)
-		return
+		log.Fatal(err)
 	}
-	defer conn.Close()
+	defer ws.Close()
 
-	// Read messages from the client
+	// Create a new client instance
+	client := &Client{conn: ws}
+
+	// Add the client to the map of clients
+	clients[ws] = client
+
+	// Example: Send a welcome message
+	err = ws.WriteMessage(websocket.TextMessage, []byte("Welcome to the server!"))
+	if err != nil {
+		log.Printf("Error sending welcome message: %v", err)
+	}
+
+	// Example: Listen for messages from this client
 	for {
-		// Read the message from the client
-		_, message, err := conn.ReadMessage()
+		_, _, err := ws.ReadMessage()
 		if err != nil {
-			log.Println("Error reading message from client:", err)
+			log.Printf("Client disconnected: %v", err)
+			delete(clients, ws) // Remove the client from the map when disconnected
 			break
 		}
-
-		// Compare the new message with the last received message
-		if lastMessage != string(message) {
-			// Ajouter le client à la carte des clients connectés si ce n'est pas déjà fait
-			if _, ok := clients[conn]; !ok {
-				clients[conn] = true
-
-				// Récupérer le nom du client depuis le message JSON
-				var messageJSON map[string]interface{}
-				err := json.Unmarshal([]byte(message), &messageJSON)
-				if err != nil {
-					log.Println("Error parsing JSON:", err)
-				}
-				user, ok := messageJSON["user"].(string)
-				if !ok {
-					log.Println("Error getting user name from message:", err)
-				} else {
-					clientsName = append(clientsName, user)
-				}
-			}
-
-			lastMessage = string(message)
-
-			// Envoyer un message à tous les clients
-			broadcastMessageToAllClients("bien")
-
-			// Afficher le message reçu
-			log.Printf("Received message: %s\n", lastMessage)
-			log.Println(clientsName)
-			log.Println("Number of clients:", len(clients))
-		}
-
 	}
-
-	// Remove the client from the map of connected clients when the connection is closed
-	delete(clients, conn)
 }
 
-// Define a function to broadcast a message to all connected clients
-func broadcastMessageToAllClients(message string) {
-	// Iterate over all connected clients
-	for client := range clients {
-		// Send the message to each client
-		err := client.WriteMessage(websocket.TextMessage, []byte(message))
-		if err != nil {
-			log.Println("Error sending message to client:", err)
-			// If there is an error sending the message to a client,
-			// you may choose to handle it according to your application logic
+func BroadcastMessages() {
+	for {
+		// Example: Send a message to all connected clients every 10 seconds
+		for conn, _ := range clients {
+			err := conn.WriteMessage(websocket.TextMessage, []byte("Hello from the server! Are you here?"))
+			if err != nil {
+				log.Printf("Error sending message to client: %v", err)
+				conn.Close()
+				delete(clients, conn) // Remove the client from the map if unable to send message
+			} else {
+				fmt.Println("Il y a " + strconv.Itoa(len(clients)) + " de connecter: " + conn.Subprotocol())
+			}
+			// You can access client data here if needed
 		}
+
+		// Sleep for 10 seconds
+		time.Sleep(10 * time.Second)
 	}
 }

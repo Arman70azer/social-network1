@@ -104,9 +104,9 @@ func PushInPosts_db(post structures.Post, db *sql.DB) {
 
 	for i := 0; i < len(post.PrivateViewers); i++ {
 		if allPrivateviewers != "" {
-			allPrivateviewers = allPrivateviewers + "-" + post.PrivateViewers[i]
+			allPrivateviewers = allPrivateviewers + "-" + post.PrivateViewers[i].Nickname
 		} else {
-			allPrivateviewers = allPrivateviewers + post.PrivateViewers[i]
+			allPrivateviewers = allPrivateviewers + post.PrivateViewers[i].Nickname
 		}
 	}
 
@@ -135,6 +135,28 @@ func SelectIdReferenceUser_db(nickOrMail string, db *sql.DB) int {
 	// Exécuter la requête SQL avec le pseudo ou l'email fourni
 	var id int
 	err = stmt.QueryRow(nickOrMail, nickOrMail).Scan(&id)
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de la requête SQL for selectID :", err)
+		return 0
+	}
+
+	return id
+}
+
+func SelectIdReferencePost_db(tittle string, db *sql.DB) int {
+	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
+	stmt, err := db.Prepare("SELECT ID FROM Posts WHERE Titre = ?")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for selectID :", err)
+		return 0
+	}
+	defer stmt.Close()
+
+	// Exécuter la requête SQL avec le pseudo ou l'email fourni
+	var id int
+	err = stmt.QueryRow(tittle).Scan(&id)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de la requête SQL for selectID :", err)
@@ -188,4 +210,59 @@ func SelectAllUsers_db(db *sql.DB) []structures.User {
 	}
 
 	return users
+}
+
+func PushCommentary_db(comment structures.Commentary, db *sql.DB) {
+	// Préparer la requête SQL pour insérer un nouveau post
+	stmt, err := db.Prepare("INSERT INTO Commentary(Content, Author, Date, Post) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+	defer stmt.Close()
+
+	// Obtenir l'ID de référence de l'auteur du post
+	authorID := SelectIdReferenceUser_db(comment.Author.Nickname, db)
+	postID := SelectIdReferencePost_db(comment.Post.Titre, db)
+
+	// Exécuter la requête SQL pour insérer le nouveau post
+	_, err = stmt.Exec(comment.Content, authorID, comment.Date, postID)
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+}
+
+func SelectAllCommentary(db *sql.DB) []structures.Commentary {
+	var result []structures.Commentary
+
+	// p. représente les colonnes de Posts tandis que u. représente les colonnes de Users
+	query := `
+	SELECT c.Content, u.Nickname AS CommentaryAuthor, p.Titre AS CommentaryPost, c.Date 
+	FROM Commentary c 
+	JOIN Users u ON c.Author = u.ID 
+	JOIN Posts p ON c.Post = p.ID`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println("Erreur lors de la requête:", err)
+		return result
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var comment structures.Commentary
+		if err := rows.Scan(&comment.Content, &comment.Author.Nickname, &comment.Post.Titre, &comment.Date); err != nil {
+			log.Println("Erreur lors du scan des lignes:", err)
+			continue // Continuer à la prochaine ligne en cas d'erreur de scan
+		}
+		result = append(result, comment)
+	}
+	if err := rows.Err(); err != nil {
+		log.Println("Erreur lors du parcours des lignes:", err)
+	}
+
+	return result
 }

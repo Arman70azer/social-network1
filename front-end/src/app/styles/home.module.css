@@ -269,3 +269,23 @@
     margin-left: 230px;
     font-size: 110%;
 }
+
+.areaCommentary{
+    margin-top: 20px;
+    margin-left: 5px;
+    color: black;
+}
+
+.commentsContent {
+    background-color: #f0f0f0; /* Couleur de fond */
+    padding: 10px; /* Espacement interne */
+    margin-bottom: 10px; /* Marge en bas */
+    border-radius: 5px; /* Coins arrondis */
+    border: 1px solid #ccc; /* Bordure */
+}
+
+.inputComment{
+
+    margin-bottom: 20px;
+
+}

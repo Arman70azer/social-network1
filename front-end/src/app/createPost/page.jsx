@@ -160,7 +160,7 @@ export default function Page(){
                     <label className={styles.select} htmlFor="typePost">Type de publication :</label>
                     <select name="typePost" id="typePost" value={formData.typePost} onChange={handleChange}>
                         <option value="Public">Public</option>
-                        <option value="Private">Private</option>
+                        <option value="Private">Private (followers only)</option>
                     </select>
 
                     {formData.typePost === 'Private' && (

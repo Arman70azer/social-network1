@@ -9,8 +9,8 @@ type Post struct {
 	ImageName      string
 	UrlImage       string
 	Type           string
-	PrivateViewers []string
-	Commentary     string
+	PrivateViewers []User
+	Commentaries   []Commentary
 }
 
 type User struct {
@@ -37,4 +37,11 @@ type Chat struct {
 	Messages    []string `json:"messages"`
 	Sender      string   `json:"sender"`
 	MembersChat []string `json:"memberschat"`
+}
+
+type Commentary struct {
+	Content string
+	Author  User
+	Post    Post
+	Date    string
 }

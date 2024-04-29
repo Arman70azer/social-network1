@@ -3,17 +3,40 @@ package handlers
 import (
 	dbFunc "back-end/middleware/dbFunc"
 	structures "back-end/middleware/struct"
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 )
 
 func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
+	// Autoriser les requêtes CORS
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Autoriser l'en-tête Content-Type
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == "POST" {
+		if r.FormValue("nature") == "comment" {
+			var commentary structures.Commentary
+			commentary.Post.Titre = r.FormValue("post")
+			commentary.Author.Nickname = r.FormValue("author")
+			commentary.Content = r.FormValue("content")
+			commentary.Date = time.Now().Format("02/01/2006 15:04:05")
+
+			verifieNewComment(commentary)
+			fmt.Println(dbFunc.SelectAllCommentary(dbFunc.Open_db()))
+		}
+
+	}
 
 	db := dbFunc.Open_db()
 
 	var data structures.Data
 
-	data.Posts = dbFunc.SelectAllPosts_db(db)
+	posts := dbFunc.SelectAllPosts_db(db)
+
+	data.Posts = commentToPost(posts, db)
 	data.Users = dbFunc.SelectAllUsers_db(db)
 
 	// Convertissez les données en JSON
@@ -28,4 +51,52 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	// Renvoyez les données JSON en réponse
 	w.Write(jsonData)
+}
+
+// Sert à vérifier si toutes les données sont bonnes avant de push dans la db
+func verifieNewComment(commentary structures.Commentary) {
+	db := dbFunc.Open_db()
+
+	posts := dbFunc.SelectAllPosts_db(db)
+	users := dbFunc.SelectAllUsers_db(db)
+
+	postsBool := false
+	usersBool := false
+
+	for i := 0; i < len(posts); i++ {
+		if commentary.Post.Titre == posts[i].Titre {
+			postsBool = true
+			break
+		}
+	}
+
+	for i := 0; i < len(users); i++ {
+		if commentary.Author.Nickname == users[i].Nickname {
+			usersBool = true
+			break
+		}
+	}
+
+	if usersBool && postsBool && commentary.Content != "" {
+		dbFunc.PushCommentary_db(commentary, db)
+	}
+}
+
+func commentToPost(posts []structures.Post, db *sql.DB) []structures.Post {
+	comments := dbFunc.SelectAllCommentary(db)
+
+	count := 0
+
+	for i := 0; i < len(comments); i++ {
+		for a := 0; a < len(posts); a++ {
+			if comments[i].Post.Titre == posts[a].Titre {
+				posts[a].Commentaries = append(posts[a].Commentaries, comments[i])
+				fmt.Println(comments[count])
+				count++
+				break
+			}
+		}
+	}
+
+	return posts
 }

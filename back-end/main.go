@@ -12,7 +12,8 @@ func main() {
 	fmt.Println("Server is running at http://localhost:8000")
 	http.HandleFunc("/api/home", handlers.HandlerInfoPostsAndUser)
 	http.HandleFunc("/createPost", handlers.CreationPost)
-	http.HandleFunc("/websocket", handlers.HandleWebSocket)
+	http.HandleFunc("/websocket", handlers.HandleConnections)
+	go handlers.BroadcastMessages()
 	http.HandleFunc("/images/", handlers.ServeImage)
 
 	err := http.ListenAndServe(":8000", nil)

@@ -1,14 +1,18 @@
 "use client"
 import DashboardTop from "../components/dashboard";
-import giveMessageWebsocket from "../lib/websocket"
+import WebSocketGiveMessage from "../lib/websocket"
 import fetchUsersAndPosts from "../lib/fetPosts";
 import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import sendFormToHome from '../lib/sendFormToHome'
+
 
 export default function Page(){
     const [data, setData] = useState([]);
     const [allData, setAllData]=useState([])
+    const [seeThisPostCommentaries, setCommentaries] = useState("")
+    const [enterComment, setEnterComment] = useState("")
 
     const onlyPublicPosts = () => {
         if (data.Posts) {
@@ -47,9 +51,44 @@ export default function Page(){
         };
 
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
-        //giveMessageWebsocket("home", "Martin", "eee", "Salut")
         fetchData();
+
     }, []);
+
+    const seeCommentaries = (postName)=>{
+        if (seeThisPostCommentaries!="" && seeThisPostCommentaries===postName){
+            setCommentaries("")
+        }else{
+            setCommentaries(postName)
+        }
+    }
+
+    const submitCommentary = (event)=>{
+        if (event.key === 'Enter') {
+            console.log("enter")
+            setEnterComment("")
+
+            //Envoie du commentaire dans le back
+            if (enterComment!="" && seeThisPostCommentaries!=""){
+                const formNewCommentary = new FormData();
+                formNewCommentary.append("author", "Arman")
+                formNewCommentary.append("post", seeThisPostCommentaries)
+                formNewCommentary.append("content", enterComment)
+                formNewCommentary.append("origin", "home")
+                formNewCommentary.append("nature", "comment")
+
+                sendFormToHome(formNewCommentary)
+            }
+        }
+    }
+
+    // Créer une connexion WebSocket
+    window.onload = function() {
+        const ws = new WebSocket('ws://localhost:8000/websocket');
+        WebSocketGiveMessage(ws,{origin:"home", user:"Arman", sujet:"EnterToPageHome"})
+    }
+    
+
     console.log(data);
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
@@ -91,12 +130,32 @@ export default function Page(){
                                 <button className={styles.marginLeft}>Dislike</button>
                             </div>
                             <div className={styles.commentaires}>
-                                <button>See commentaries</button>
+                            <button onClick={() => seeCommentaries(post.Titre)}>
+                                {post.Commentaries ? `See commentaries (${post.Commentaries.length})` : "See commentaries"}
+                            </button>
+
                             </div>
                             <div className={styles.datePost}>
                                 {post.Date}
                             </div>
                         </div>
+                        {seeThisPostCommentaries === post.Titre && 
+                            <div className={styles.areaCommentary}>
+                                <div className={styles.inputComment}>
+                                    <input type="text" placeholder="Add commentary" onKeyDown={(event) => submitCommentary(event)} 
+                                    value={enterComment} 
+                                    onChange={(event) => setEnterComment(event.target.value)} />
+                                </div>
+
+                                {post.Commentaries && post.Commentaries.map((comment)=>(
+                                    <div className={styles.commentsContent}>
+                                         <Link href="/profil">{comment.Author.Nickname}: </Link>
+                                         {comment.Content}
+                                    </div>
+                                ))
+                                }
+                            </div>
+                        }
                     </div>
                 ))}
             </div>
