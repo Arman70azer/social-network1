@@ -1,13 +1,14 @@
 "use client"
 import DashboardTop from "../components/dashboard";
-import WebSocketGiveMessage from "../lib/websocket"
+import openWebSocketConnexion from "../lib/websocket"
 import fetchUsersAndPosts from "../lib/fetPosts";
 import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import sendFormToHome from '../lib/sendFormToHome'
+import sendRequestToWebsocket from '../lib/wsSendMessage'
 
-
+let wsConnect;//Notre ws est stocké ici
 export default function Page(){
     const [data, setData] = useState([]);
     const [allData, setAllData]=useState([])
@@ -53,6 +54,15 @@ export default function Page(){
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchData();
 
+
+        if (!wsConnect){
+            const ws = new WebSocket('ws://localhost:8000/websocket');
+            wsConnect = openWebSocketConnexion(ws)
+            setTimeout(() => {
+                sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "enterToHome", User:"Arman" });
+            }, 200);
+        }
+
     }, []);
 
     const seeCommentaries = (postName)=>{
@@ -78,18 +88,12 @@ export default function Page(){
                 formNewCommentary.append("nature", "comment")
 
                 sendFormToHome(formNewCommentary)
+                
+                sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "newComment", User:"Arman", ObjetcOfRequest: seeThisPostCommentaries });
             }
         }
     }
-
-    // Créer une connexion WebSocket
-    window.onload = function() {
-        const ws = new WebSocket('ws://localhost:8000/websocket');
-        WebSocketGiveMessage(ws,{origin:"home", user:"Arman", sujet:"EnterToPageHome"})
-    }
     
-
-    console.log(data);
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>
@@ -147,9 +151,9 @@ export default function Page(){
                                     onChange={(event) => setEnterComment(event.target.value)} />
                                 </div>
 
-                                {post.Commentaries && post.Commentaries.map((comment)=>(
-                                    <div className={styles.commentsContent}>
-                                         <Link href="/profil">{comment.Author.Nickname}: </Link>
+                                {post.Commentaries && post.Commentaries.map((comment, index)=>(
+                                    <div className={styles.commentsContent} key={index}>
+                                         <Link href={`/profil/`+comment.Author.Nickname}>{comment.Author.Nickname}: </Link>
                                          {comment.Content}
                                     </div>
                                 ))

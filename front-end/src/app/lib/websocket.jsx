@@ -12,4 +12,5 @@ export default function openWebSocketConnexion(ws) {
     // Gérez les erreurs de connexion ici
   };
 
+  return ws
 }

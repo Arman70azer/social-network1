@@ -5,7 +5,6 @@ import (
 	structures "back-end/middleware/struct"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -24,8 +23,24 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 			commentary.Content = r.FormValue("content")
 			commentary.Date = time.Now().Format("02/01/2006 15:04:05")
 
-			verifieNewComment(commentary)
-			fmt.Println(dbFunc.SelectAllCommentary(dbFunc.Open_db()))
+			var request structures.Request
+			if verifieNewComment(commentary) {
+				request.Origin = "home"
+				request.Nature = "NewComment"
+				request.User = commentary.Author.Nickname
+				request.Post = commentary.Post.Titre
+				request.ObjetcOfRequest = commentary.Content
+				request.Accept = true
+				BroadcastMessageOneClient(request)
+			} else {
+				request.Origin = "home"
+				request.Nature = "NewComment"
+				request.User = commentary.Author.Nickname
+				request.Post = commentary.Post.Titre
+				request.ObjetcOfRequest = commentary.Content
+				request.Accept = false
+				BroadcastMessageOneClient(request)
+			}
 		}
 
 	}
@@ -54,7 +69,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // Sert à vérifier si toutes les données sont bonnes avant de push dans la db
-func verifieNewComment(commentary structures.Commentary) {
+func verifieNewComment(commentary structures.Commentary) bool {
 	db := dbFunc.Open_db()
 
 	posts := dbFunc.SelectAllPosts_db(db)
@@ -79,20 +94,20 @@ func verifieNewComment(commentary structures.Commentary) {
 
 	if usersBool && postsBool && commentary.Content != "" {
 		dbFunc.PushCommentary_db(commentary, db)
+		return true
 	}
+
+	return false
 }
 
+// Rajoute les commentaires aux posts
 func commentToPost(posts []structures.Post, db *sql.DB) []structures.Post {
 	comments := dbFunc.SelectAllCommentary(db)
-
-	count := 0
 
 	for i := 0; i < len(comments); i++ {
 		for a := 0; a < len(posts); a++ {
 			if comments[i].Post.Titre == posts[a].Titre {
 				posts[a].Commentaries = append(posts[a].Commentaries, comments[i])
-				fmt.Println(comments[count])
-				count++
 				break
 			}
 		}

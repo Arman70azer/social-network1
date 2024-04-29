@@ -45,3 +45,12 @@ type Commentary struct {
 	Post    Post
 	Date    string
 }
+
+type Request struct {
+	Origin          string
+	Nature          string
+	User            string
+	ObjetcOfRequest string
+	Post            string
+	Accept          bool
+}
