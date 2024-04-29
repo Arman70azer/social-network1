@@ -53,5 +53,5 @@ type Request struct {
 	ObjetcOfRequest string `json:"ObjectOfRequest"`
 	Post            string `json:"Post"`
 	Accept          bool   `json:"Accept"`
-	Date            string `json:Date`
+	Date            string `json:"Date"`
 }

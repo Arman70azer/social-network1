@@ -197,6 +197,7 @@ export default function Page(){
                                     <div className={styles.commentsContent} key={index}>
                                          <Link href={`/profil/`+comment.Author.Nickname}>{comment.Author.Nickname}: </Link>
                                          {comment.Content}
+                                         <div className={styles.dateComment}>{comment.Date}</div>
                                     </div>
                                 ))
                                 }

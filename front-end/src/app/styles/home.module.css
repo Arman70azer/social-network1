@@ -285,7 +285,9 @@
 }
 
 .inputComment{
-
     margin-bottom: 20px;
+}
 
+.dateComment {
+    margin-left: 80%; /* Supprime la marge à gauche */
 }
