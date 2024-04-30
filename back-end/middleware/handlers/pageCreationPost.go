@@ -21,7 +21,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		title := r.FormValue("title")
 		content := r.FormValue("content")
 		typePost := r.FormValue("typePost")
-		author := "Arman"
+		author := r.FormValue("user")
 		var privateUsers []structures.User
 		if typePost == "Private" {
 			privateViewers := r.Form["users"]

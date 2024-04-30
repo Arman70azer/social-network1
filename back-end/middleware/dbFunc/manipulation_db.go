@@ -266,3 +266,84 @@ func SelectAllCommentary(db *sql.DB) []structures.Commentary {
 
 	return result
 }
+
+func SelectAllLikeOrDislike_db(db *sql.DB) []structures.LikeOrDislike {
+	var result []structures.LikeOrDislike
+
+	query := `
+	SELECT l.Type, u.Nickname AS LikeDislikeUser, p.Titre AS LikeDislikePost, l.Date
+	FROM LikesDislikes l
+	JOIN Users u ON l.User = u.ID
+	JOIN Posts p ON l.Post = p.ID`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println("erreur lors de la requête (SelectAllLikeOrDislike_db):", err)
+		return result
+	}
+
+	for rows.Next() {
+		var likeDslike structures.LikeOrDislike
+
+		if err := rows.Scan(&likeDslike.Type, &likeDslike.User, &likeDslike.Post, &likeDslike.Date); err != nil {
+			log.Println("Erreur lors du scan des lignes:", err)
+			continue // Continuer à la prochaine ligne en cas d'erreur de scan
+		}
+		result = append(result, likeDslike)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Erreur lors du parcours des lignes:", err)
+	}
+
+	return result
+}
+
+func PushLikeDislike_db(db *sql.DB, like structures.LikeOrDislike) {
+
+	// Préparer la requête SQL pour insérer un nouveau post
+	stmt, err := db.Prepare("INSERT INTO LikesDislikes(Type, Post, User, Date) VALUES (?, ?, ?, ?)")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for PushLikeDislike_db :", err)
+		return
+	}
+	defer stmt.Close()
+
+	// Obtenir l'ID de référence de l'auteur du post
+	authorID := SelectIdReferenceUser_db(like.User, db)
+	postID := SelectIdReferencePost_db(like.Post, db)
+
+	// Exécuter la requête SQL pour insérer le nouveau post
+	_, err = stmt.Exec(like.Type, postID, authorID, like.Date)
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+
+}
+
+func DeleteLikeDislike_db(db *sql.DB, like structures.LikeOrDislike) {
+
+	// requête SQL pour supprimer la ligne basée sur les valeurs spécifiées
+	stmt, err := db.Prepare("DELETE FROM LikesDislikes WHERE Type=? AND Post=? AND User=?")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for DeleteLikeDislike_db :", err)
+		return
+	}
+	defer stmt.Close()
+
+	// Obtenir l'ID de référence de l'auteur du post
+	authorID := SelectIdReferenceUser_db(like.User, db)
+	postID := SelectIdReferencePost_db(like.Post, db)
+
+	// Exécuter la requête SQL pour insérer le nouveau post
+	_, err = stmt.Exec(like.Type, postID, authorID)
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+}

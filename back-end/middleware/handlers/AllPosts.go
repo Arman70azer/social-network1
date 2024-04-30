@@ -5,6 +5,7 @@ import (
 	structures "back-end/middleware/struct"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -19,12 +20,13 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 		if r.FormValue("nature") == "comment" {
 			var commentary structures.Commentary
 			commentary.Post.Titre = r.FormValue("post")
-			commentary.Author.Nickname = r.FormValue("author")
+			commentary.Author.Nickname = r.FormValue("user")
 			commentary.Content = r.FormValue("content")
 			commentary.Date = time.Now().Format("02/01/2006 15:04:05")
 
-			var request structures.Request
+			//Dès que le commentaire est passé dans la db
 			if verifieNewComment(commentary) {
+				var request structures.Request
 				request.Origin = "home"
 				request.Nature = "NewComment"
 				request.User = commentary.Author.Nickname
@@ -34,14 +36,20 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 				request.Date = commentary.Date
 				BroadcastMessageToAllClients(request)
 			} else {
-				request.Origin = "home"
-				request.Nature = "NewComment"
-				request.User = commentary.Author.Nickname
-				request.Post = commentary.Post.Titre
-				request.ObjetcOfRequest = commentary.Content
-				request.Accept = false
-				request.Date = commentary.Date
-				BroadcastMessageOneClient(request)
+				fmt.Println("Error dans la func verifieNewComment dans AllPost.go")
+			}
+		} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
+			var like structures.LikeOrDislike
+
+			like.Post = r.FormValue("post")
+			like.Type = r.FormValue("nature")
+			like.User = r.FormValue("user")
+			like.Date = time.Now().Format("02/01/2006 15:04:05")
+
+			if alreadyLike(like) {
+				fmt.Println("like delete")
+			} else {
+				fmt.Println("like add")
 			}
 		}
 
@@ -116,4 +124,30 @@ func commentToPost(posts []structures.Post, db *sql.DB) []structures.Post {
 	}
 
 	return posts
+}
+
+func alreadyLike(like structures.LikeOrDislike) bool {
+	db := dbFunc.Open_db()
+
+	likes_db := dbFunc.SelectAllLikeOrDislike_db(db)
+
+	alreadyLike := false
+
+	for i := 0; i < len(likes_db); i++ {
+		if likes_db[i].User == like.User && likes_db[i].Post == like.Post && likes_db[i].Type == like.Type {
+			alreadyLike = true
+			break
+		} else if likes_db[i].User == like.User && likes_db[i].Post == like.Post {
+			//Si il a déjà like et qu'il dislike par la suite pour l'exemple on supprime l'ancien like pour le nouvelle avis
+			dbFunc.DeleteLikeDislike_db(db, likes_db[i])
+		}
+	}
+
+	if !alreadyLike {
+		dbFunc.PushLikeDislike_db(db, like)
+		return alreadyLike
+	} else {
+		dbFunc.DeleteLikeDislike_db(db, like)
+		return alreadyLike
+	}
 }

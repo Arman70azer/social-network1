@@ -79,6 +79,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// Sert à savoir si les utilisateurs sont toujours connecter. S'active toutes les 10 secondes
 func BroadcastMessages() {
 	for {
 		// Example: Send a message to all connected clients every 10 seconds
@@ -99,7 +100,8 @@ func BroadcastMessages() {
 	}
 }
 
-// Envoie le message au client souhaiter pour répondre à une requête précise
+// Envoie le message au client souhaiter pour répondre à une requête précise.
+// Pense aussi à rajouter l'user pour savoir à qui envoyer le message!!!
 func BroadcastMessageOneClient(request structures.Request) {
 	// Envoyer le message au client spécifié
 	jsonData, err := json.Marshal(request)
@@ -121,6 +123,7 @@ func BroadcastMessageOneClient(request structures.Request) {
 	}
 }
 
+// Envoie un message à tout les users connectés qui sont stockés dans clients
 func BroadcastMessageToAllClients(request structures.Request) {
 	// Envoyer le message au client spécifié
 	jsonData, err := json.Marshal(request)
@@ -140,6 +143,7 @@ func BroadcastMessageToAllClients(request structures.Request) {
 	}
 }
 
+// Lit les messages envoyées sous la forme de la struct "Requete" (ne pas oublier!!!)
 func readMessage(ws *websocket.Conn) structures.Request {
 	var data structures.Request
 	_, message, err := ws.ReadMessage()

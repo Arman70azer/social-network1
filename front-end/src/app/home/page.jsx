@@ -80,7 +80,7 @@ export default function Page(){
             //Envoie du commentaire dans le back
             if (enterComment!="" && seeThisPostCommentaries!=""){
                 const formNewCommentary = new FormData();
-                formNewCommentary.append("author", "Arman")
+                formNewCommentary.append("user", "Arman")
                 formNewCommentary.append("post", seeThisPostCommentaries)
                 formNewCommentary.append("content", enterComment)
                 formNewCommentary.append("origin", "home")
@@ -101,9 +101,10 @@ export default function Page(){
             wsConnect.onmessage = (event) => {
                 const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
                 if (receivedMessage.Accept) {
+
                     console.log("Message reçu du serveur WebSocket:", receivedMessage);
                     console.log(data, "hhhhhhh")
-                    if (data.Posts) {
+                    if (data.Posts && receivedMessage.Nature === "NewComment") {
                         // Filtrer les posts pour trouver celui qui correspond au post reçu
                         const postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
                         if (postTarget) {
@@ -129,11 +130,40 @@ export default function Page(){
                         } else {
                             console.log("Aucune donnée des posts trouvée.");
                         }
+                    }else if (data.Post && receivedMessage.Nature==="NewLike"){
+
                     }
                 }
             };
         }
     };
+
+    const actualiserPage = async ()=>{
+    
+        const datafetch = await fetchUsersAndPosts();
+        setData(datafetch);
+        setAllData(datafetch)
+    }
+
+    const like = (titrePost)=>{
+        const formLikePost = new FormData();
+        formLikePost.append("post", titrePost)
+        formLikePost.append("user", "Arman")
+        formLikePost.append("nature", "like")
+        formLikePost.append("origin", "home")
+
+        sendFormToHome(formLikePost)
+    }
+
+    const dislike = (titrePost)=>{
+        const formDislikePost = new FormData();
+        formDislikePost.append("post", titrePost)
+        formDislikePost.append("user", "Arman")
+        formDislikePost.append("nature", "dislike")
+        formDislikePost.append("origin", "home")
+
+        sendFormToHome(formDislikePost)
+    } 
     
     onMessageWS()
     //post.map va parcourir tout les posts dans "posts" et les afficher
@@ -141,7 +171,7 @@ export default function Page(){
         <div>
             <DashboardTop/>
             <div className={styles.centerElementChilds}>
-                <button className={styles.actualiserPosts}>Actualiser</button>
+                <button className={styles.actualiserPosts} onClick={actualiserPage}>Actualiser</button>
             </div>
             <div className={styles.Content}>
                 {data.Posts && data.Posts.map((post, index) => (
@@ -170,10 +200,10 @@ export default function Page(){
                         </div>
                         <div className={styles.postFooter}>
                             <div className={styles.buttonLike}>
-                                <button>Like</button>
+                                <button onClick={()=>like(post.Titre)}>{post.Likes ? `Like (${post.Likes.length})`: "Like"}</button>
                             </div>
                             <div className={styles.buttonDislike}>
-                                <button className={styles.marginLeft}>Dislike</button>
+                                <button onClick={()=>dislike(post.Titre)} className={styles.marginLeft}>{post.Dislikes ? `Dislikes (${post.Dislikes.length})`: "Dislikes"}</button>
                             </div>
                             <div className={styles.commentaires}>
                             <button onClick={() => seeCommentaries(post.Titre)}>

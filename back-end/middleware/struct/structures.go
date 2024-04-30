@@ -11,6 +11,8 @@ type Post struct {
 	Type           string
 	PrivateViewers []User
 	Commentaries   []Commentary
+	Likes          []LikeOrDislike
+	Dislikes       []LikeOrDislike
 }
 
 type User struct {
@@ -54,4 +56,11 @@ type Request struct {
 	Post            string `json:"Post"`
 	Accept          bool   `json:"Accept"`
 	Date            string `json:"Date"`
+}
+
+type LikeOrDislike struct {
+	Type string
+	User string
+	Post string
+	Date string
 }

@@ -66,6 +66,7 @@ func Create_db() {
 			Type TEXT,
 			User INTEGER,
 			Post INTEGER,
+			Date TEXT,
 			FOREIGN KEY (User) REFERENCES Users(ID),
 			FOREIGN KEY (Post) REFERENCES Posts(ID)
 		)

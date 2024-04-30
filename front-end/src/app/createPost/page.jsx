@@ -82,7 +82,7 @@ export default function Page(){
                 formDataToSend.append('title', formData.title);
                 formDataToSend.append('content', formData.content);
                 formDataToSend.append('typePost', formData.typePost);
-                // Ajouter le fichier s'il existe
+                formDataToSend.append('user', "Arman")
                 if (formData.file) {
                     formDataToSend.append('file', formData.file); // Ajouter le fichier
                 }
