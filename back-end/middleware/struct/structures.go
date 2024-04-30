@@ -49,13 +49,14 @@ type Commentary struct {
 }
 
 type Request struct {
-	Origin          string `json:"Origin"`
-	Nature          string `json:"Nature"`
-	User            string `json:"User"`
-	ObjetcOfRequest string `json:"ObjectOfRequest"`
-	Post            string `json:"Post"`
-	Accept          bool   `json:"Accept"`
-	Date            string `json:"Date"`
+	Origin           string `json:"Origin"`
+	Nature           string `json:"Nature"`
+	User             string `json:"User"`
+	ObjetcOfRequest  string `json:"ObjectOfRequest"`
+	Post             string `json:"Post"`
+	Accept           bool   `json:"Accept"`
+	Date             string `json:"Date"`
+	OtherLikeDislike bool   `json:"OtherLikeDislike"`
 }
 
 type LikeOrDislike struct {

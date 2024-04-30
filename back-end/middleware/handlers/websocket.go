@@ -31,6 +31,8 @@ var clients = make(map[*websocket.Conn]*Client)
 
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
+	log.Println("Quelqu'un c'est connecté sur le ws")
+
 	// Upgrade initial GET request to a websocket
 	ws, err := Upgrader.Upgrade(w, r, nil)
 	if err != nil {

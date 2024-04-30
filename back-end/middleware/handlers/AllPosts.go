@@ -46,11 +46,24 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 			like.User = r.FormValue("user")
 			like.Date = time.Now().Format("02/01/2006 15:04:05")
 
-			if alreadyLike(like) {
-				fmt.Println("like delete")
+			var request structures.Request
+			request.User = like.User
+			request.Post = like.Post
+			request.Accept = true
+			request.Origin = "home"
+			request.Nature = "New-" + like.Type
+
+			likeAlready, otherTypeLikeExist := alreadyLike(like)
+
+			request.OtherLikeDislike = otherTypeLikeExist
+			if likeAlready {
+				request.ObjetcOfRequest = "remove"
+				fmt.Println("like remove")
 			} else {
+				request.ObjetcOfRequest = "add"
 				fmt.Println("like add")
 			}
+			BroadcastMessageToAllClients(request)
 		}
 
 	}
@@ -61,7 +74,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 
 	posts := dbFunc.SelectAllPosts_db(db)
 
-	data.Posts = commentToPost(posts, db)
+	data.Posts = commentAndLikeToPost(posts, db)
 	data.Users = dbFunc.SelectAllUsers_db(db)
 
 	// Convertissez les données en JSON
@@ -110,15 +123,32 @@ func verifieNewComment(commentary structures.Commentary) bool {
 	return false
 }
 
-// Rajoute les commentaires aux posts
-func commentToPost(posts []structures.Post, db *sql.DB) []structures.Post {
+// Rajoute les commentaires, les likes et les dislikes aux posts
+func commentAndLikeToPost(posts []structures.Post, db *sql.DB) []structures.Post {
 	comments := dbFunc.SelectAllCommentary(db)
+	likesDislikes := dbFunc.SelectAllLikeOrDislike_db(db)
 
 	for i := 0; i < len(comments); i++ {
 		for a := 0; a < len(posts); a++ {
 			if comments[i].Post.Titre == posts[a].Titre {
 				posts[a].Commentaries = append(posts[a].Commentaries, comments[i])
 				break
+			} else if posts[a].Commentaries == nil { //On précise qu'il n'y a rien pour éviter les erreurs en next.jsx car sinon c'est considèrer comme
+				posts[a].Commentaries = []structures.Commentary{}
+			}
+		}
+	}
+
+	for i := 0; i < len(likesDislikes); i++ {
+		for a := 0; a < len(posts); a++ {
+			if likesDislikes[i].Post == posts[a].Titre {
+				if likesDislikes[i].Type == "like" {
+					posts[a].Likes = append(posts[a].Likes, likesDislikes[i])
+					break
+				} else {
+					posts[a].Dislikes = append(posts[a].Dislikes, likesDislikes[i])
+					break
+				}
 			}
 		}
 	}
@@ -126,12 +156,13 @@ func commentToPost(posts []structures.Post, db *sql.DB) []structures.Post {
 	return posts
 }
 
-func alreadyLike(like structures.LikeOrDislike) bool {
+func alreadyLike(like structures.LikeOrDislike) (bool, bool) {
 	db := dbFunc.Open_db()
 
 	likes_db := dbFunc.SelectAllLikeOrDislike_db(db)
 
 	alreadyLike := false
+	otherLikeExistant := false
 
 	for i := 0; i < len(likes_db); i++ {
 		if likes_db[i].User == like.User && likes_db[i].Post == like.Post && likes_db[i].Type == like.Type {
@@ -140,14 +171,15 @@ func alreadyLike(like structures.LikeOrDislike) bool {
 		} else if likes_db[i].User == like.User && likes_db[i].Post == like.Post {
 			//Si il a déjà like et qu'il dislike par la suite pour l'exemple on supprime l'ancien like pour le nouvelle avis
 			dbFunc.DeleteLikeDislike_db(db, likes_db[i])
+			otherLikeExistant = true
 		}
 	}
 
 	if !alreadyLike {
 		dbFunc.PushLikeDislike_db(db, like)
-		return alreadyLike
+		return alreadyLike, otherLikeExistant
 	} else {
 		dbFunc.DeleteLikeDislike_db(db, like)
-		return alreadyLike
+		return alreadyLike, otherLikeExistant
 	}
 }

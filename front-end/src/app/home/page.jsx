@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import sendFormToHome from '../lib/sendFormToHome'
 import sendRequestToWebsocket from '../lib/wsSendMessage'
+import { Content } from "next/font/google";
 
 let wsConnect;//Notre ws est stocké ici
 export default function Page(){
@@ -104,10 +105,14 @@ export default function Page(){
 
                     console.log("Message reçu du serveur WebSocket:", receivedMessage);
                     console.log(data, "hhhhhhh")
-                    if (data.Posts && receivedMessage.Nature === "NewComment") {
-                        // Filtrer les posts pour trouver celui qui correspond au post reçu
-                        const postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
-                        if (postTarget) {
+                    // Filtrer les posts pour trouver celui qui correspond au post reçu
+                    const postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
+                    if (postTarget) {
+                        if (receivedMessage.Nature === "NewComment" ) {
+                            if (!postTarget.Commentaries) {
+                                // Si Commentaires n'existe pas, le créer comme un tableau vide
+                                postTarget.Commentaries = [];
+                            }
                             // Ajouter un nouveau commentaire au post cible
                             postTarget.Commentaries.push({
                                 Content: receivedMessage.ObjectOfRequest,
@@ -115,23 +120,60 @@ export default function Page(){
                                 Post: { Titre: receivedMessage.Post },
                                 Date: receivedMessage.Date
                             });
-                            // Mettre à jour toutes les données des posts avec le post modifié
-                            setAllData(prevData => {
-                                const updatedPosts = prevData.Posts.map(post => {
-                                    if (post.Titre === postTarget.Titre) {
-                                        return postTarget;
-                                    } else {
-                                        return post;
-                                    }
-                                });
-                                return { ...prevData, Posts: updatedPosts };
-                            });
-                            setData(allData)
-                        } else {
-                            console.log("Aucune donnée des posts trouvée.");
                         }
-                    }else if (data.Post && receivedMessage.Nature==="NewLike"){
-
+                        if (receivedMessage.Nature==="New-like"){
+                            if (!postTarget.Likes) {
+                                // Si Likes n'existe pas, le créer comme un tableau vide
+                                postTarget.Likes = [];
+                            }
+                            if (receivedMessage.ObjectOfRequest === "add") {
+                                // Ajouter un like à postTarget.Likes
+                                postTarget.Likes.push({
+                                    Type: "like",
+                                    User: receivedMessage.User,
+                                    Post: receivedMessage.Post
+                                });
+                            
+                                // Si receivedMessage.OtherLikeDislike est vrai, supprimer les dislikes de l'utilisateur spécifié
+                                if (receivedMessage.OtherLikeDislike) {
+                                    postTarget.Dislikes = postTarget.Dislikes.filter(dislikePost => dislikePost.User !== receivedMessage.User);
+                                }
+                            
+                            } else if (receivedMessage.ObjectOfRequest === "remove") {
+                                postTarget.Likes = postTarget.Likes.filter(like => like.User !== receivedMessage.User);
+                            }                            
+                        }else if (receivedMessage.Nature ==="New-dislike"){
+                            if (!postTarget.Dislikes) {
+                                // Si Dislikes n'existe pas, le créer comme un tableau vide
+                                postTarget.Dislikes = [];
+                            }
+                            if (receivedMessage.ObjectOfRequest === "add") {
+                                postTarget.Dislikes.push({
+                                    Type: "dislike",
+                                    User: receivedMessage.User,
+                                    Post: receivedMessage.Post
+                                });
+                                if (receivedMessage.OtherLikeDislike) {
+                                    postTarget.Likes = postTarget.Likes.filter(likePost => likePost.User !== receivedMessage.User);
+                                }
+                            } else if (receivedMessage.ObjectOfRequest === "remove") {
+                                postTarget.Dislikes = postTarget.Dislikes.filter(like => like.User !== receivedMessage.User);
+                            }                            
+                        }
+                         // Mettre à jour toutes les données des posts avec le post modifié
+                        setAllData(prevData => {
+                            const updatedPosts = prevData.Posts.map(post => {
+                                if (post.Titre === postTarget.Titre) {
+                                    return postTarget;
+                                } else {
+                                    return post;
+                                }
+                            });
+                            return { ...prevData, Posts: updatedPosts };
+                        });
+                        setData(allData)
+                    } else {
+                        console.log("Aucune donnée des posts trouvée.");
                     }
                 }
             };
@@ -200,10 +242,20 @@ export default function Page(){
                         </div>
                         <div className={styles.postFooter}>
                             <div className={styles.buttonLike}>
-                                <button onClick={()=>like(post.Titre)}>{post.Likes ? `Like (${post.Likes.length})`: "Like"}</button>
+                                <button
+                                    onClick={() => like(post.Titre)}
+                                    style={{ color: post.Likes && post.Likes.some(likeOrDislike => likeOrDislike.User === "Arman") ? "blue" : "white" }}
+                                >
+                                    {post.Likes && post.Likes.length> 0 ? `Like (${post.Likes.length})` : "Like"}
+                                </button>
                             </div>
                             <div className={styles.buttonDislike}>
-                                <button onClick={()=>dislike(post.Titre)} className={styles.marginLeft}>{post.Dislikes ? `Dislikes (${post.Dislikes.length})`: "Dislikes"}</button>
+                                <button onClick={()=>dislike(post.Titre)} 
+                                className={styles.marginLeft}
+                                style={{ color: post.Dislikes && post.Dislikes.some(likeOrDislike => likeOrDislike.User === "Arman") ? "red" : "white" }}
+                                >
+                                   {post.Dislikes && post.Dislikes.length > 0 ? `Dislikes (${post.Dislikes.length})` : "Dislikes"}
+                                </button>
                             </div>
                             <div className={styles.commentaires}>
                             <button onClick={() => seeCommentaries(post.Titre)}>
