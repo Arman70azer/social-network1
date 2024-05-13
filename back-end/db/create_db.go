@@ -1,12 +1,17 @@
 package db
 
 import (
+	structures "back-end/middleware/struct"
 	"database/sql"
+	"fmt"
 	"log"
+	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Va créer la db dès le lancement du serveur
 func Create_db() {
 	database, err := sql.Open("sqlite3", "db/social-network.db")
 	if err != nil {
@@ -19,68 +24,26 @@ func Create_db() {
 		log.Fatal("Error starting transaction:", err)
 	}
 
-	createTables := []string{
-		`CREATE TABLE IF NOT EXISTS Users (
-			ID INTEGER PRIMARY KEY,
-			Nickname TEXT,
-			Email TEXT,
-			Password TEXT,
-			FirstName TEXT,
-			LastName TEXT,
-			Birthday TEXT,
-			Age INTEGER,
-			ImageName TEXT,
-			AboutMe TEXT,
-			UUID TEXT
-		);`,
-		`CREATE TABLE IF NOT EXISTS Posts (
-			ID INTEGER PRIMARY KEY,
-			Titre TEXT,
-			Content TEXT,
-			Author INTEGER,
-			Date TEXT,
-			Image TEXT,
-			Type TEXT,
-			PrivateViewers TEXT,
-			FOREIGN KEY (Author) REFERENCES Users(ID)
-		);`,
-		`CREATE TABLE IF NOT EXISTS Hashtags (
-			ID INTEGER PRIMARY KEY,
-			Tag TEXT
-		);`,
-		`CREATE TABLE IF NOT EXISTS PostHashtags (
-			PostID INTEGER,
-			HashtagID INTEGER,
-			FOREIGN KEY (PostID) REFERENCES Posts(ID),
-			FOREIGN KEY (HashtagID) REFERENCES Hashtags(ID)
-		);`,
-		`CREATE TABLE IF NOT EXISTS Commentary (
-			Content TEXT,
-			Author INTEGER,
-			Post INTEGER,
-			Date TEXT,
-			FOREIGN KEY (Author) REFERENCES Users(ID),
-			FOREIGN KEY (Post) REFERENCES Posts(ID)
-		);`,
-		`CREATE TABLE IF NOT EXISTS LikesDislikes (
-			Type TEXT,
-			User INTEGER,
-			Post INTEGER,
-			Date TEXT,
-			FOREIGN KEY (User) REFERENCES Users(ID),
-			FOREIGN KEY (Post) REFERENCES Posts(ID)
-		)
-		`,
-	}
+	migrations := allMigrations()
 
-	for _, createTableQuery := range createTables {
-		_, err := tx.Exec(createTableQuery)
-		if err != nil {
-			log.Println("Error creating table:", err)
-			if rollbackErr := tx.Rollback(); rollbackErr != nil {
-				log.Fatal("Error rolling back transaction:", rollbackErr)
+	for _, createTableQuery := range migrations {
+		if createTableQuery.Type == "up" {
+			_, err := tx.Exec(createTableQuery.Request)
+			if err != nil {
+				for _, migration := range migrations {
+					if migration.Type == "down" && migration.ID == createTableQuery.ID {
+						_, err := tx.Exec(migration.Request)
+						fmt.Println("migration of type down has been execute ---> " + migration.ID)
+						if err != nil {
+							log.Println("Erreur lors de l'exécution de la migration de rollback:", err)
+							if rollbackErr := tx.Rollback(); rollbackErr != nil {
+								log.Fatal("Erreur lors du rollback de la transaction:", rollbackErr)
+							}
+							return
+						}
+					}
+				}
 			}
-			return
 		}
 	}
 
@@ -88,4 +51,56 @@ func Create_db() {
 	if err != nil {
 		log.Fatal("Error committing transaction:", err)
 	}
+}
+
+// ReadSQLFile lit le contenu d'un fichier SQL et le retourne sous forme de chaîne de caractères
+func readSQLFile(file string) string {
+	content, err := os.ReadFile("db/migrations/" + file)
+	if err != nil {
+		return "erreur lors de la lecture du fichier pour le fichier : " + file
+	}
+	return string(content)
+}
+
+// Renvoie un array contenant toutes les requêtes sql (migrations) à effectuer (up et down)
+func allMigrations() []structures.Migrations {
+	// Chemin du dossier des migrations
+	migrationsDir := "db/migrations"
+
+	// Ouvrir le dossier des migrations
+	dir, err := os.Open(migrationsDir)
+	if err != nil {
+		log.Fatalf("Erreur lors de l'ouverture du dossier des migrations : %v", err)
+	}
+	defer dir.Close()
+
+	// Lire les noms des fichiers du dossier des migrations
+	fileInfos, err := dir.Readdir(-1)
+	if err != nil {
+		log.Fatalf("Erreur lors de la lecture des fichiers du dossier des migrations : %v", err)
+	}
+
+	var upFiles []structures.Migrations
+
+	// Parcourir les noms des fichiers et filtrer ceux qui contiennent "up"
+	for _, fileInfo := range fileInfos {
+		var upFile structures.Migrations
+		if strings.Contains(fileInfo.Name(), "up") {
+			upFile.Name = fileInfo.Name()
+			upFile.Type = "up"
+			upFile.Request = readSQLFile(fileInfo.Name())
+			upFile.ID = strings.Split(fileInfo.Name(), "_")[0]
+
+			upFiles = append(upFiles, upFile)
+		} else {
+			upFile.Name = fileInfo.Name()
+			upFile.Type = "down"
+			upFile.Request = readSQLFile(fileInfo.Name())
+			upFile.ID = strings.Split(fileInfo.Name(), "_")[0]
+
+			upFiles = append(upFiles, upFile)
+		}
+	}
+
+	return upFiles
 }

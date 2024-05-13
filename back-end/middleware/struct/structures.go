@@ -65,3 +65,10 @@ type LikeOrDislike struct {
 	Post string
 	Date string
 }
+
+type Migrations struct {
+	Name    string
+	Type    string
+	Request string
+	ID      string
+}

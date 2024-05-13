@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS Hashtags (
+    ID INTEGER PRIMARY KEY,
+    Tag TEXT
+);
