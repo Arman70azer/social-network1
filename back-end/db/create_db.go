@@ -86,20 +86,15 @@ func allMigrations() []structures.Migrations {
 	for _, fileInfo := range fileInfos {
 		var upFile structures.Migrations
 		if strings.Contains(fileInfo.Name(), "up") {
-			upFile.Name = fileInfo.Name()
 			upFile.Type = "up"
-			upFile.Request = readSQLFile(fileInfo.Name())
-			upFile.ID = strings.Split(fileInfo.Name(), "_")[0]
-
-			upFiles = append(upFiles, upFile)
 		} else {
-			upFile.Name = fileInfo.Name()
 			upFile.Type = "down"
-			upFile.Request = readSQLFile(fileInfo.Name())
-			upFile.ID = strings.Split(fileInfo.Name(), "_")[0]
-
-			upFiles = append(upFiles, upFile)
 		}
+		upFile.Name = fileInfo.Name()
+		upFile.Request = readSQLFile(fileInfo.Name())
+		upFile.ID = strings.Split(fileInfo.Name(), "_")[0]
+
+		upFiles = append(upFiles, upFile)
 	}
 
 	return upFiles
