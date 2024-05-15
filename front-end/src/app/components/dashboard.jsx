@@ -8,7 +8,7 @@ function DashboardTop () {
         <div className={styles.dashboardTopPage}>
             <Link href="/home" className={styles.titleHome}>Social-Network</Link>
             <Link href="/message" className={styles.buttonConversations}>Conversations</Link>
-            <Link href="/notification" className={styles.buttonNotif}>Notifications</Link>
+            <Link href="/notification" className={styles.buttonNotif}>Event</Link>
             <Link href="/profil" className={styles.buttonProfil}>Profil</Link>
             <Link href="/login" className={styles.buttonLogout}>Logout</Link>
         </div>

@@ -27,7 +27,6 @@ export default function Page(){
     
     const router = useRouter();
     const [formData, setFormData] = useState({
-        title: '',
         content: '',
         typePost: 'Public',
         file: null,
@@ -74,12 +73,11 @@ export default function Page(){
     const handleSubmit = async (event) => {
         event.preventDefault(); // Empêcher le comportement par défaut du formulaire
 
-        if (formData.title && formData.content){
+        if (formData.content){
             if (fileValid){
         
                 // Créer un objet FormData pour envoyer le formulaire avec le fichier
                 const formDataToSend = new FormData();
-                formDataToSend.append('title', formData.title);
                 formDataToSend.append('content', formData.content);
                 formDataToSend.append('typePost', formData.typePost);
                 formDataToSend.append('user', "Arman")
@@ -153,7 +151,6 @@ export default function Page(){
             <div className={styles.center}>
                 <form className={styles.menuNewPost}>
                     Write New Post :
-                    <input className={styles.inputTitle} name="title" type="text" placeholder="Title" value={formData.title} onChange={handleChange}/>
                     <input type="file" className={styles.file} name="file" onChange={handleFile}/>
                     {!fileValid && <span id="errorTypeFile" className={styles.error}>This file is not a image</span>}
                     <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>
@@ -193,7 +190,7 @@ export default function Page(){
                     <br />
 
                     <button className={styles.buttonForm} type="submit" onClick={handleSubmit}>Publish</button>
-                    {!contentPresent && <span id="errorTypeFile" className={styles.error}>No title or no content</span>}
+                    {!contentPresent && <span id="errorTypeFile" className={styles.error}>No content</span>}
                 </form>
             </div>
         </div>

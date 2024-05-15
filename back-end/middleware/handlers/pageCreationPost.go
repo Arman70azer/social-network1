@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 func CreationPost(w http.ResponseWriter, r *http.Request) {
@@ -17,8 +18,6 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method == "POST" {
-
-		title := r.FormValue("title")
 		content := r.FormValue("content")
 		typePost := r.FormValue("typePost")
 		author := r.FormValue("user")
@@ -69,13 +68,18 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		user.Nickname = author
 		user.ID = dbFunc.SelectIdReferenceUser_db(author, dbOpen)
 
+		// Obtenir la date actuelle
+		currentDate := time.Now()
+		formatDate := currentDate.Format("02/01/2006 15:04:05")
+
 		post := structures.Post{
-			Titre:          title,
+			Titre:          user.Nickname + "-" + formatDate,
 			Content:        content,
 			Type:           typePost,
 			ImageName:      fileName,
 			Author:         user,
 			PrivateViewers: privateUsers,
+			Date:           formatDate,
 		}
 
 		fmt.Println(post)

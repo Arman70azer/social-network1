@@ -231,14 +231,12 @@ export default function Page(){
                         </div>
                         <div className={styles.postContent}>
                             <div className={styles.titlePost}>
-                                {post.Titre}:
-                            </div>
-                            <div className={styles.imagePostContainer}>
-                               {post.ImageName&& <img className={styles.imagePost} src={`${post.UrlImage}`}/>}
-                            </div>
-                            <div className={styles.contentPost}>
                                 {post.Content}
                             </div>
+                            {post.ImageName &&(
+                            <div className={styles.imagePostContainer}>
+                               <img className={styles.imagePost} src={`${post.UrlImage}`}/>
+                            </div>)}
                         </div>
                         <div className={styles.postFooter}>
                             <div className={styles.buttonLike}>
@@ -292,7 +290,6 @@ export default function Page(){
                 <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
                 <button className={styles.buttonPostPrivates} onClick={onlyPrivatePosts}>Privates Posts</button>
                 <button className={styles.buttonPostsAll} onClick={resetDataToOrigine}> All Posts </button>
-
                 <Link href="/createPost" className={styles.buttonCreatePost}>Add New Post [+]</Link>
             </div>
         </div>

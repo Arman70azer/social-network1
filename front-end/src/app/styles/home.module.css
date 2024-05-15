@@ -108,6 +108,7 @@
 .titlePost{
     margin-top: 20px;
     margin-left: 20px;
+    margin-bottom: 20px;
     font-size: 120%;
 }
 
@@ -122,11 +123,15 @@
     color: rgb(128, 247, 255);
 }
 
-.contentPost{
+.contentPost {
+    padding: 10px 10px;
+    border-radius: 10px;
+    border: 5px solid black; /* Ajoutez une bordure solide de 1 pixel de couleur noire */
     margin-top: 10px;
-    margin-left: 40%;
-
+    margin-left: 40px;
+    margin-right: 40px;
 }
+
 
 .dashboardBottomPage {
     position: fixed;
@@ -182,8 +187,7 @@
 
 @media screen and (max-width: 1200px) {
     .buttonPostsAll,
-    .buttonPostPrivates,
-    .buttonPostPublic {
+    .buttonPostPrivates{
         margin-left: max(20px, 60px); /* Marge gauche réduite */
     }
 }

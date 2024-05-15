@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"sort"
 	"time"
 )
 
@@ -81,6 +82,14 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 		log.Println("Erreur lors du parcours des lignes:", err)
 	}
 
+	//On trie les posts avants de les envoyers par rapport à leur date de parutions
+	sort.Slice(result, func(i, j int) bool {
+		// Convertir les dates en objets time.Time pour pouvoir les comparer
+		dateI, _ := time.Parse("02/01/2006 15:04:05", result[i].Date)
+		dateJ, _ := time.Parse("02/01/2006 15:04:05", result[j].Date)
+		return dateI.After(dateJ)
+	})
+
 	return result
 }
 func PushInPosts_db(post structures.Post, db *sql.DB) {
@@ -96,10 +105,6 @@ func PushInPosts_db(post structures.Post, db *sql.DB) {
 	// Obtenir l'ID de référence de l'auteur du post
 	authorID := SelectIdReferenceUser_db(post.Author.Nickname, db)
 
-	// Obtenir la date actuelle
-	currentDate := time.Now()
-	formatDate := currentDate.Format("02/01/2006 15:04:05")
-
 	allPrivateviewers := ""
 
 	for i := 0; i < len(post.PrivateViewers); i++ {
@@ -111,7 +116,7 @@ func PushInPosts_db(post structures.Post, db *sql.DB) {
 	}
 
 	// Exécuter la requête SQL pour insérer le nouveau post
-	_, err = stmt.Exec(post.Titre, post.Content, authorID, formatDate, post.ImageName, post.Type, allPrivateviewers)
+	_, err = stmt.Exec(post.Titre, post.Content, authorID, post.Date, post.ImageName, post.Type, allPrivateviewers)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
