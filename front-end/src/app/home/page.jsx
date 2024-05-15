@@ -289,10 +289,11 @@ export default function Page(){
                 ))}
             </div>
             <div className={styles.dashboardBottomPage}>
-                <Link href="/createPost" className={styles.buttonCreatePost}>Create New Post [+]</Link>
                 <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
                 <button className={styles.buttonPostPrivates} onClick={onlyPrivatePosts}>Privates Posts</button>
                 <button className={styles.buttonPostsAll} onClick={resetDataToOrigine}> All Posts </button>
+
+                <Link href="/createPost" className={styles.buttonCreatePost}>Add New Post [+]</Link>
             </div>
         </div>
     );

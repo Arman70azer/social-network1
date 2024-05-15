@@ -8,6 +8,7 @@
     color: white;
     display: flex;
     align-items: center;
+    flex-direction: row; /* Place les éléments dans une ligne */
     justify-content: space-between;
     padding: 0 20px;
     z-index: 999; /* Assurez-vous que le tableau de bord s'affiche au-dessus du contenu de la page */
@@ -16,8 +17,7 @@
 .buttonLogout{ 
     font-size: 110%;
     transition: 0.2s;
-    position: absolute;
-    right: 20px;
+    margin-left: 20px;
 }
 
 .buttonLogout:hover{
@@ -26,7 +26,6 @@
 
 .titleHome {
     font-size: 170%;
-    position: absolute;
     padding: 20px 20px; /* Ajoute un remplissage de 10px en haut et en bas, et de 20px à gauche et à droite */
     color: rgb(23, 24, 29);
     background: linear-gradient(to right, aqua 0%, aquamarine 50%, aqua 100%);
@@ -40,11 +39,17 @@
     background-position: right bottom; /* Déplace le dégradé à droite */
 }
 
-.buttonProfil{
-    right: 130px;
+.buttonProfil {
     font-size: 115%;
     transition: 0.2s;
-    position: absolute;
+    margin-left: 400px; /* Marge gauche initiale */
+}
+
+/* Media query pour ajuster la marge gauche lorsque la fenêtre est réduite */
+@media screen and (max-width: 1200px) {
+    .buttonProfil {
+        margin-left: 20px; /* Marge gauche réduite */
+    }
 }
 
 .buttonProfil:hover{
@@ -54,8 +59,7 @@
 .buttonConversations{
     transition: 0.2s;
     font-size: 110%;
-    left: 300px;
-    position: absolute;
+    margin-left: max(20px, 0px); /* Limite la marge gauche à 30px maximum */
 }
 
 .buttonConversations:hover {
@@ -63,10 +67,9 @@
 }
 
 .buttonNotif{
-    position: absolute;
     transition: 0.2s;
     font-size: 110%;
-    left:500px
+    margin-left: 20px;
 }
 
 .buttonNotif:hover {
@@ -135,32 +138,30 @@
     color: white;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    flex-direction: row;
     padding: 0 20px;
     z-index: 999; /* Assurez-vous que le tableau de bord s'affiche au-dessus du contenu de la page */
 }
 
 .buttonPostPublic{
-    margin-left: 30%;
     font-size: 115%;
     transition: 0.2s;
-    position: absolute;
 }
 
 .buttonPostPublic:hover{
     font-size: 130%;
 }
 .buttonPostPrivates{
-    margin-left: 60%;
+    margin-left: 60px;
     font-size: 115%;
     transition: 0.2s;
-    position: absolute;
 }
 
 .buttonPostsAll{
-    position: absolute;
     font-size: 115%;
-    margin-left: 45% ;
+    margin-left: 60px ;
+    margin-right: 40px;
     transition: 0.2s;
 }
 
@@ -170,6 +171,21 @@
 
 .buttonPostPrivates:hover{
     font-size: 130%;
+}
+
+.centerElementInrow{
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+}
+
+@media screen and (max-width: 1200px) {
+    .buttonPostsAll,
+    .buttonPostPrivates,
+    .buttonPostPublic {
+        margin-left: max(20px, 60px); /* Marge gauche réduite */
+    }
 }
 
 .avatarPost {
@@ -187,7 +203,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 40px;
 }
 
 .postFooter {
@@ -244,10 +260,7 @@
 }
 
 .buttonCreatePost{
-    position: absolute;
-    margin-left: 20px;
-    margin-top: 10% ;
-    margin-bottom: 70%;
+    margin-left: max(10px, 10px);
     border: 2px solid rgb(77, 134, 124); /* Bordure de 2 pixels solide de couleur whitesmoke */
     padding: 20px;
     color: rgb(0, 0, 0);
