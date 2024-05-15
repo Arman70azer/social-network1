@@ -14,6 +14,10 @@
     z-index: 999; /* Assurez-vous que le tableau de bord s'affiche au-dessus du contenu de la page */
 }
 
+.dashboardTopPage > * {
+    margin-left: 20px; /* Ajustez cette valeur selon vos besoins */
+}
+
 .buttonLogout{ 
     font-size: 110%;
     transition: 0.2s;
@@ -59,7 +63,6 @@
 .buttonConversations{
     transition: 0.2s;
     font-size: 110%;
-    margin-left: max(20px, 0px); /* Limite la marge gauche à 30px maximum */
 }
 
 .buttonConversations:hover {
