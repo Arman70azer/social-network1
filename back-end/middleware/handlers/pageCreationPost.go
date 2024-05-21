@@ -86,6 +86,13 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 
 		if postNotExist(post, dbOpen) && post.Titre != "" && post.Content != "" {
 			dbFunc.PushInPosts_db(post, dbOpen)
+			var request structures.Request
+			request.Accept = true
+			request.Post = user.Nickname + "-" + formatDate
+			request.User = post.Author.Nickname
+			request.Date = formatDate
+			request.Nature = "New-post"
+			BroadcastMessageToAllClients(request)
 		}
 
 		// Répondre avec un message de succès

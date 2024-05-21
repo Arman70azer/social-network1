@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	fmt.Println("hhhh")
 	db.Create_db()
 	fmt.Println("Server is running at http://localhost:8000")
 	http.HandleFunc("/api/home", handlers.HandlerInfoPostsAndUser)

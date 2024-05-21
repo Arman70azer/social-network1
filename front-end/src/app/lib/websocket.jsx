@@ -1,4 +1,6 @@
-export default function openWebSocketConnexion(ws) {
+
+export default function openWebSocketConnexion() {
+  const ws = new WebSocket('ws://localhost:8000/websocket');
 
   // Gérer les erreurs de connexion WebSocket
   ws.onerror = (error) => {

@@ -28,7 +28,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 			if verifieNewComment(commentary) {
 				var request structures.Request
 				request.Origin = "home"
-				request.Nature = "NewComment"
+				request.Nature = "New-comment"
 				request.User = commentary.Author.Nickname
 				request.Post = commentary.Post.Titre
 				request.ObjetcOfRequest = commentary.Content

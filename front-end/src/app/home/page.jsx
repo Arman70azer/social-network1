@@ -15,6 +15,7 @@ export default function Page(){
     const [allData, setAllData]=useState([])
     const [seeThisPostCommentaries, setCommentaries] = useState("")
     const [enterComment, setEnterComment] = useState("")
+    const [newPosts, setNewPosts] = useState([])
 
     const onlyPublicPosts = () => {
         if (data.Posts) {
@@ -56,8 +57,7 @@ export default function Page(){
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchData();
         if (!wsConnect){
-            const ws = new WebSocket('ws://localhost:8000/websocket');
-            wsConnect = openWebSocketConnexion(ws)
+            wsConnect = openWebSocketConnexion()
             setTimeout(() => {
                 sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "enterToHome", User:"Arman" });
             }, 200);
@@ -108,7 +108,7 @@ export default function Page(){
                     // Filtrer les posts pour trouver celui qui correspond au post reçu
                     const postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
                     if (postTarget) {
-                        if (receivedMessage.Nature === "NewComment" ) {
+                        if (receivedMessage.Nature === "New-comment" ) {
                             if (!postTarget.Commentaries) {
                                 // Si Commentaires n'existe pas, le créer comme un tableau vide
                                 postTarget.Commentaries = [];
@@ -172,6 +172,14 @@ export default function Page(){
                             return { ...prevData, Posts: updatedPosts };
                         });
                         setData(allData)
+                    }else if (receivedMessage.Nature = "New-post"){
+                        console.log("new post websocket")
+                        const newposty = {
+                            Date : receivedMessage.Date,
+                            User : receivedMessage.User,
+                            Content : receivedMessage.Content
+                        }
+                        setNewPosts((prevState)=>[...prevState, newposty])
                     } else {
                         console.log("Aucune donnée des posts trouvée.");
                     }
@@ -185,6 +193,7 @@ export default function Page(){
         const datafetch = await fetchUsersAndPosts();
         setData(datafetch);
         setAllData(datafetch)
+        setNewPosts([])
     }
 
     const like = (titrePost)=>{
@@ -213,7 +222,9 @@ export default function Page(){
         <div>
             <DashboardTop/>
             <div className={styles.centerElementChilds}>
-                <button className={styles.actualiserPosts} onClick={actualiserPage}>Actualiser</button>
+                <button className={styles.actualiserPosts} onClick={actualiserPage}>
+                    {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
+                </button>
             </div>
             <div className={styles.Content}>
                 {data.Posts && data.Posts.map((post, index) => (
@@ -257,7 +268,7 @@ export default function Page(){
                             </div>
                             <div className={styles.commentaires}>
                             <button onClick={() => seeCommentaries(post.Titre)}>
-                                {post.Commentaries ? `See commentaries (${post.Commentaries.length})` : "See commentaries"}
+                                {post.Commentaries && post.Commentaries.length>0 ? `See commentaries (${post.Commentaries.length})` : "See commentaries"}
                             </button>
 
                             </div>
