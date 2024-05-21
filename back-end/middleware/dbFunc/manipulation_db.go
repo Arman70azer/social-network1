@@ -92,6 +92,7 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 
 	return result
 }
+
 func PushInPosts_db(post structures.Post, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouveau post
 	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image, Type, PrivateViewers) VALUES (?, ?, ?, ?, ?, ?, ?)")
@@ -351,4 +352,81 @@ func DeleteLikeDislike_db(db *sql.DB, like structures.LikeOrDislike) {
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
 		return
 	}
+}
+
+func SelectAllEvents_db(db *sql.DB) []structures.Post {
+	var result []structures.Post
+
+	// p. représente les colonnes de Posts tandis que u. représente les colonnes de Users
+	query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS AuthorNickname, p.Date, p.Image, u.ImageName AS AuthorImageName, u.ID AS AuthorID, p.Type FROM Events p JOIN Users u ON p.Author = u.ID"
+
+	rows, err := db.Query(query)
+	if err != nil {
+		log.Println("Erreur lors de la requête:", err)
+		return result
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var post structures.Post
+		if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author.Nickname, &post.Date, &post.ImageName, &post.Author.ImageName, &post.Author.ID, &post.Type); err != nil {
+			log.Println("Erreur lors du scan des lignes:", err)
+			continue // Continuer à la prochaine ligne en cas d'erreur de scan
+		}
+		post.UrlImage = "http://localhost:8000/images/" + post.ImageName
+		post.Author.UrlImage = "http://localhost:8000/images/" + post.Author.ImageName
+
+		if post.ImageName == "nothing" {
+			post.ImageName = ""
+		}
+		result = append(result, post)
+	}
+	if err := rows.Err(); err != nil {
+		log.Println("Erreur lors du parcours des lignes:", err)
+	}
+
+	//On trie les posts avants de les envoyers par rapport à leur date de parutions
+	sort.Slice(result, func(i, j int) bool {
+		// Convertir les dates en objets time.Time pour pouvoir les comparer
+		dateI, _ := time.Parse("02/01/2006 15:04:05", result[i].Date)
+		dateJ, _ := time.Parse("02/01/2006 15:04:05", result[j].Date)
+		return dateI.After(dateJ)
+	})
+
+	return result
+}
+
+func PushInEvents_db(event structures.Post, db *sql.DB) {
+	// Préparer la requête SQL pour insérer un nouveau post
+	stmt, err := db.Prepare("INSERT INTO Events(Titre, Content, Author, Date, Image, Type, PrivateViewers) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+	defer stmt.Close()
+
+	// Obtenir l'ID de référence de l'auteur du post
+	authorID := SelectIdReferenceUser_db(event.Author.Nickname, db)
+
+	allPrivateviewers := ""
+
+	for i := 0; i < len(event.PrivateViewers); i++ {
+		if allPrivateviewers != "" {
+			allPrivateviewers = allPrivateviewers + "-" + event.PrivateViewers[i].Nickname
+		} else {
+			allPrivateviewers = allPrivateviewers + event.PrivateViewers[i].Nickname
+		}
+	}
+
+	// Exécuter la requête SQL pour insérer le nouveau post
+	_, err = stmt.Exec(event.Titre, event.Content, authorID, event.Date, event.ImageName, event.Type, allPrivateviewers)
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+
+	// Le post a été inséré avec succès
+	fmt.Println("L'event a été inséré avec succès.")
 }

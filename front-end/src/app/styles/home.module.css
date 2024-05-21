@@ -29,7 +29,7 @@
     top: 100%; /* Positionne la bulle juste en dessous du bouton Event */
     left: 50%;
     transform: translateX(-50%);
-    background-color: black;
+    background-color: black; /* Couleur de fond de la bulle */
     border: 1px solid #ccc;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 10px;
@@ -37,14 +37,16 @@
     z-index: 10;
     display: flex;
     flex-direction: column;
-    margin-top: 10px; /* Espace entre le bouton Event et la bulle */
-    margin-left: 10px;
+    max-width: 300px; /* Limite la largeur de la fenêtre à 300px */
+    max-height: 400px; /* Limite la hauteur de la fenêtre à 400px */
+    overflow-y: auto; /* Permet le défilement vertical */
+    overflow-x: hidden; /* Cache le défilement horizontal */
 }
 
 .extraButtons::before {
     content: '';
     position: absolute;
-    top: -20px; /* Positionne la flèche au-dessus de la bulle */
+    top: -5px; /* Positionne la flèche au-dessus de la bulle, ajustez cette valeur pour plus de dépassement */
     left: 50%;
     transform: translateX(-50%);
     border-width: 10px;
@@ -52,13 +54,36 @@
     border-color: transparent transparent white transparent; /* Flèche blanche pointant vers le haut */
 }
 
+
+/* Si vous utilisez une couleur de fond noire pour .extraButtons */
+.extraButtons.black {
+    background-color: black;
+}
+
+.extraButtons.black::before {
+    border-color: transparent transparent black transparent; /* Flèche noire pointant vers le haut */
+}
+
+
 .extraButton {
     margin: 5px 0;
-    padding: 10px 20px;
+    padding: 5px; /* Valeur de padding de base */
     cursor: pointer;
-    border: 1px solid #ccc ;
-    border-radius: 0px ;
+    max-width: 200px; /* Largeur maximale du bouton */
+    white-space: nowrap; /* Empêche le texte de se briser sur plusieurs lignes */
+    overflow: hidden; /* Masque tout contenu dépassant de la largeur maximale */
+    text-overflow: ellipsis; /* Affiche un point de suspension (...) si le texte dépasse la largeur maximale */
 }
+
+.extraButtonDesc{
+    margin: 5px 0;
+    padding: 5px; /* Valeur de padding de base */
+    max-width: 200px; /* Largeur maximale du bouton */
+    white-space: nowrap; /* Empêche le texte de se briser sur plusieurs lignes */
+    overflow: hidden; /* Masque tout contenu dépassant de la largeur maximale */
+    text-overflow: ellipsis; /* Affiche un point de suspension (...) si le texte dépasse la largeur maximale */
+}
+
 
 .buttonLogout{ 
     font-size: 110%;

@@ -28,10 +28,11 @@ export default function Page(){
     const router = useRouter();
     const [formData, setFormData] = useState({
         content: '',
-        typePost: 'Public',
+        type: 'Public',
         file: null,
         users: [],
-        type: '[Choose event or post]'
+        nature: 'Post',
+        title:''
     });
 
     const handleAddUser = (event) => {
@@ -80,13 +81,15 @@ export default function Page(){
                 // Créer un objet FormData pour envoyer le formulaire avec le fichier
                 const formDataToSend = new FormData();
                 formDataToSend.append('content', formData.content);
-                formDataToSend.append('typePost', formData.typePost);
+                formDataToSend.append('type', formData.type);
                 formDataToSend.append('user', "Arman")
+                formDataToSend.append('nature', formData.nature)
+                formDataToSend.append('title', formData.title)
                 if (formData.file) {
                     formDataToSend.append('file', formData.file); // Ajouter le fichier
                 }
 
-                if (formData.typePost === "Private"){
+                if (formData.type === "Private"){
                     formDataToSend.append('users', formData.users)
                 }
 
@@ -148,29 +151,44 @@ export default function Page(){
 
     return (
         <div>
-            <DashboardTop/>
+           {data.Events ? <DashboardTop events={data.Events} /> : <DashboardTop />}
             <div className={styles.center}>
                 <form className={styles.menuNewPost}>
-                    Write New {formData.type} : <select name="type" id="type" value={formData.type} onChange={handleChange}></select>
+                    <label htmlFor="nature">Write New {formData.nature}:</label>
+                    <select name="nature" id="nature" value={formData.nature} onChange={handleChange}>
+                        <option value="Post">Post</option>
+                        <option value="Event">Event</option>
+                    </select>
+                    {formData.nature === 'Event' && (
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
+                            placeholder="Title"
+                        />
+                    )}
                     <input type="file" className={styles.file} name="file" onChange={handleFile}/>
                     {!fileValid && <span id="errorTypeFile" className={styles.error}>This file is not a image</span>}
                     <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>
-                    <label className={styles.select} htmlFor="typePost">Type de publication :</label>
-                    <select name="typePost" id="typePost" value={formData.typePost} onChange={handleChange}>
+                    <label className={styles.select} htmlFor="type">Type de publication :</label>
+                    <select name="type" id="type" value={formData.type} onChange={handleChange}>
                         <option value="Public">Public</option>
                         <option value="Private">Private (followers only)</option>
                     </select>
 
-                    {formData.typePost === 'Private' && (
+                    {formData.type === 'Private' && (
                     <div className={styles.allUserForPrivate}>
                         <input
                         type="text"
-                        placeholder="Rechercher un utilisateur"
+                        placeholder="No followers"
                         id="searchPrivate"
                         value={searchTerm}
                         onChange={handleSearchChange}
                         />
-                        <button onClick={(e) => handleAddUser(e)}>Ajouter</button>
+                        <button onClick={(e) => handleAddUser(e)}>Add</button>
                         <label htmlFor="searchPrivate">
                             
                             {/* Afficher les suggestions filtrées */}

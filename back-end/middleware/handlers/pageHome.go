@@ -73,9 +73,11 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 	var data structures.Data
 
 	posts := dbFunc.SelectAllPosts_db(db)
+	events := dbFunc.SelectAllEvents_db(db)
 
 	data.Posts = commentAndLikeToPost(posts, db)
 	data.Users = dbFunc.SelectAllUsers_db(db)
+	data.Events = events
 
 	// Convertissez les données en JSON
 	jsonData, err := json.Marshal(data)

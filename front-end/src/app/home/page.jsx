@@ -220,7 +220,7 @@ export default function Page(){
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>
-            <DashboardTop/>
+            {data.Events ? <DashboardTop events={data.Events} /> : <DashboardTop />}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
@@ -304,7 +304,7 @@ export default function Page(){
                 <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
                 <button className={styles.buttonPostPrivates} onClick={onlyPrivatePosts}>Privates Posts</button>
                 <button className={styles.buttonPostsAll} onClick={resetDataToOrigine}> All Posts </button>
-                <Link href="/createPost" className={styles.buttonCreatePost}>Add New Post [+]</Link>
+                <Link href="/createPost" className={styles.buttonCreatePost}>Add New Post or Event [+]</Link>
             </div>
         </div>
     );

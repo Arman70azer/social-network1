@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"time"
 )
 
@@ -19,8 +20,11 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 		content := r.FormValue("content")
-		typePost := r.FormValue("typePost")
+		typePost := r.FormValue("type")
 		author := r.FormValue("user")
+		nature := r.FormValue("nature")
+		titleEvent := r.FormValue("title")
+
 		var privateUsers []structures.User
 		if typePost == "Private" {
 			privateViewers := r.Form["users"]
@@ -32,7 +36,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		}
 		var fileName string
 
-		// Récupérer le fichier
+		// Récupérer le fichier image
 		file, handler, err := r.FormFile("file")
 		if err != nil {
 			fileName = "nothing"
@@ -73,7 +77,6 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		formatDate := currentDate.Format("02/01/2006 15:04:05")
 
 		post := structures.Post{
-			Titre:          user.Nickname + "-" + formatDate,
 			Content:        content,
 			Type:           typePost,
 			ImageName:      fileName,
@@ -84,15 +87,30 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println(post)
 
-		if postNotExist(post, dbOpen) && post.Titre != "" && post.Content != "" {
-			dbFunc.PushInPosts_db(post, dbOpen)
-			var request structures.Request
-			request.Accept = true
-			request.Post = user.Nickname + "-" + formatDate
-			request.User = post.Author.Nickname
-			request.Date = formatDate
-			request.Nature = "New-post"
-			BroadcastMessageToAllClients(request)
+		if post.Content != "" && regexTestSecu(post.Content) {
+			if postNotExist(post, dbOpen) && nature == "Post" {
+				post.Titre = user.Nickname + "-" + formatDate
+				dbFunc.PushInPosts_db(post, dbOpen)
+				var request structures.Request
+				request.Accept = true
+				request.Post = post.Titre
+				request.User = post.Author.Nickname
+				request.Date = formatDate
+				request.Nature = "New-post"
+				BroadcastMessageToAllClients(request)
+			} else if nature == "Event" && eventNotExist(post, dbOpen) && titleEvent != "" && regexTestSecu(titleEvent) {
+				post.Titre = titleEvent
+				dbFunc.PushInEvents_db(post, dbOpen)
+				var request structures.Request
+				request.Accept = true
+				request.Post = titleEvent
+				request.User = post.Author.Nickname
+				request.Date = formatDate
+				request.Nature = "New-event"
+				BroadcastMessageToAllClients(request)
+			}
+		} else {
+			fmt.Println("Un post ou un event n'est pas autoriser")
 		}
 
 		// Répondre avec un message de succès
@@ -116,4 +134,25 @@ func postNotExist(post structures.Post, db *sql.DB) bool {
 	}
 
 	return true
+}
+
+func eventNotExist(event structures.Post, db *sql.DB) bool {
+	eventDb := dbFunc.SelectAllEvents_db(db)
+
+	for i := 0; i < len(eventDb); i++ {
+		if eventDb[i].Titre == event.Titre && eventDb[i].Author.ID == event.Author.ID {
+			return false
+		}
+		if eventDb[i].Content == event.Content && eventDb[i].Author.ID == event.Author.ID {
+			return false
+		}
+	}
+
+	return true
+}
+
+func regexTestSecu(str string) bool {
+	re := regexp.MustCompile(`^\s|^\s*$|<script.*?>.*?</script.*?>`)
+
+	return !re.MatchString(str)
 }

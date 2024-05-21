@@ -6,7 +6,7 @@ function DashboardBottom (onlyPublicPosts) {
 
     return (
         <div className={styles.dashboardBottomPage}>
-            <Link href="/createPost" className={styles.buttonCreatePost}>Create New Post [+]</Link>
+            <Link href="/createPost" className={styles.buttonCreatePost}>Create New Post/Event [+]</Link>
             <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
             <button className={styles.buttonPostPrivates}>Privates Posts</button>
         </div>

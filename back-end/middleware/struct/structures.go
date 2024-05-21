@@ -31,8 +31,9 @@ type User struct {
 }
 
 type Data struct {
-	Posts []Post
-	Users []User
+	Posts  []Post
+	Users  []User
+	Events []Post
 }
 
 type Chat struct {
