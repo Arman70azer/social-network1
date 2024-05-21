@@ -225,6 +225,9 @@ export default function Page(){
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
                 </button>
+                <div>
+                    {wsConnect && ``}
+                </div>
             </div>
             <div className={styles.Content}>
                 {data.Posts && data.Posts.map((post, index) => (
