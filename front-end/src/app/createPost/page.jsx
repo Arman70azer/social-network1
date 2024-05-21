@@ -31,6 +31,7 @@ export default function Page(){
         typePost: 'Public',
         file: null,
         users: [],
+        type: '[Choose event or post]'
     });
 
     const handleAddUser = (event) => {
@@ -150,7 +151,7 @@ export default function Page(){
             <DashboardTop/>
             <div className={styles.center}>
                 <form className={styles.menuNewPost}>
-                    Write New Post :
+                    Write New {formData.type} : <select name="type" id="type" value={formData.type} onChange={handleChange}></select>
                     <input type="file" className={styles.file} name="file" onChange={handleFile}/>
                     {!fileValid && <span id="errorTypeFile" className={styles.error}>This file is not a image</span>}
                     <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>
