@@ -378,3 +378,46 @@
 .dateComment {
     margin-left: 80%; /* Supprime la marge à gauche */
 }
+
+.infoEvents {
+    background-color: #f5f5f5; /* Light grey background */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 10px; /* Rounded corners */
+    padding: 15px; /* Inner padding */
+    margin: 10px 0; /* Vertical margin */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: transform 0.2s; /* Smooth transition for hover effect */
+    color: #000;
+}
+
+.infoEvents:hover {
+    transform: translateY(-5px); /* Slight lift on hover */
+}
+
+.infoEventContent {
+    font-size: 16px; /* Text size for event content */
+    color: #333; /* Darker text color */
+    margin: 10px 0; /* Space around content */
+}
+
+.infoUserEvent {
+    font-size: 14px; /* Smaller text size for author info */
+    color: #666; /* Lighter text color */
+    text-align: right; /* Right-aligned author info */
+    margin-top: 10px; /* Space above author info */
+}
+
+.infoEvents > div:first-child {
+    font-size: 18px; /* Slightly larger text for the header */
+    font-weight: bold; /* Bold header */
+    color: #000; /* Black header text */
+    margin-bottom: 10px; /* Space below header */
+}
+
+.imageEvent {
+    margin-top: 20px;
+    border: 1px solid black;
+    padding: 5px;
+    max-width: 100%; /* Limite la largeur de l'image à la largeur du conteneur */
+    height: auto; /* Ajuste automatiquement la hauteur pour maintenir les proportions de l'image */
+}

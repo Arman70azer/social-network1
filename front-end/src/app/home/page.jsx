@@ -106,7 +106,10 @@ export default function Page(){
                     console.log("Message reçu du serveur WebSocket:", receivedMessage);
                     console.log(data, "hhhhhhh")
                     // Filtrer les posts pour trouver celui qui correspond au post reçu
-                    const postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
+                    let postTarget;
+                    if (data.Posts){
+                        postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
+                    }
                     if (postTarget) {
                         if (receivedMessage.Nature === "New-comment" ) {
                             if (!postTarget.Commentaries) {

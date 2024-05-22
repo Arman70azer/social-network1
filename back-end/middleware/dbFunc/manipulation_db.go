@@ -358,7 +358,7 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 	var result []structures.Post
 
 	// p. représente les colonnes de Posts tandis que u. représente les colonnes de Users
-	query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS AuthorNickname, p.Date, p.Image, u.ImageName AS AuthorImageName, u.ID AS AuthorID, p.Type FROM Events p JOIN Users u ON p.Author = u.ID"
+	query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS AuthorNickname, p.Date, p.Image, u.ImageName AS AuthorImageName, u.ID AS AuthorID, p.Type, p.EventDate FROM Events p JOIN Users u ON p.Author = u.ID"
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -369,7 +369,7 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 
 	for rows.Next() {
 		var post structures.Post
-		if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author.Nickname, &post.Date, &post.ImageName, &post.Author.ImageName, &post.Author.ID, &post.Type); err != nil {
+		if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author.Nickname, &post.Date, &post.ImageName, &post.Author.ImageName, &post.Author.ID, &post.Type, &post.EventDate); err != nil {
 			log.Println("Erreur lors du scan des lignes:", err)
 			continue // Continuer à la prochaine ligne en cas d'erreur de scan
 		}
@@ -379,7 +379,16 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 		if post.ImageName == "nothing" {
 			post.ImageName = ""
 		}
-		result = append(result, post)
+
+		layout := "02/01/2006 15:04" // Format de la date reçue
+
+		eventDate, err := time.Parse(layout, post.EventDate)
+
+		fmt.Println(eventDate, err)
+
+		if time.Now().Before(eventDate) {
+			result = append(result, post)
+		}
 	}
 	if err := rows.Err(); err != nil {
 		log.Println("Erreur lors du parcours des lignes:", err)
@@ -398,7 +407,7 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 
 func PushInEvents_db(event structures.Post, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouveau post
-	stmt, err := db.Prepare("INSERT INTO Events(Titre, Content, Author, Date, Image, Type, PrivateViewers) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Events(Titre, Content, Author, Date, Image, Type, PrivateViewers, EventDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
@@ -420,7 +429,7 @@ func PushInEvents_db(event structures.Post, db *sql.DB) {
 	}
 
 	// Exécuter la requête SQL pour insérer le nouveau post
-	_, err = stmt.Exec(event.Titre, event.Content, authorID, event.Date, event.ImageName, event.Type, allPrivateviewers)
+	_, err = stmt.Exec(event.Titre, event.Content, authorID, event.Date, event.ImageName, event.Type, allPrivateviewers, event.EventDate)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)

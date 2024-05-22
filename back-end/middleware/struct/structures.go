@@ -13,6 +13,7 @@ type Post struct {
 	Commentaries   []Commentary
 	Likes          []LikeOrDislike
 	Dislikes       []LikeOrDislike
+	EventDate      string
 }
 
 type User struct {

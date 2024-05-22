@@ -32,7 +32,8 @@ export default function Page(){
         file: null,
         users: [],
         nature: 'Post',
-        title:''
+        title:'',
+        eventDate:''
     });
 
     const handleAddUser = (event) => {
@@ -85,6 +86,8 @@ export default function Page(){
                 formDataToSend.append('user', "Arman")
                 formDataToSend.append('nature', formData.nature)
                 formDataToSend.append('title', formData.title)
+                formDataToSend.append('eventDate', formData.eventDate)
+
                 if (formData.file) {
                     formDataToSend.append('file', formData.file); // Ajouter le fichier
                 }
@@ -160,16 +163,27 @@ export default function Page(){
                         <option value="Event">Event</option>
                     </select>
                     {formData.nature === 'Event' && (
-                        <input
-                            type="text"
-                            id="title"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
-                            style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
-                            placeholder="Title"
-                        />
+                        <div>
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleChange}
+                                style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
+                                placeholder="Title"
+                            />
+                            <input 
+                                type="datetime-local"
+                                id="eventDate"
+                                name="eventDate"
+                                value={formData.eventDate}
+                                onChange={handleChange}
+                                style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
+                            />
+                        </div>
                     )}
+
                     <input type="file" className={styles.file} name="file" onChange={handleFile}/>
                     {!fileValid && <span id="errorTypeFile" className={styles.error}>This file is not a image</span>}
                     <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>

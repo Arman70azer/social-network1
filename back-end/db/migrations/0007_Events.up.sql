@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS Events (
     Image TEXT,
     Type TEXT,
     PrivateViewers TEXT,
+    EventDate TEXT,
     FOREIGN KEY (Author) REFERENCES Users(ID)
 );

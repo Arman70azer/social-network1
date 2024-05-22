@@ -30,19 +30,22 @@ function DashboardTop({ events = [] }) {
             <Link href="/home" className={styles.titleHome}>Social-Network</Link>
             <Link href="/message" className={styles.buttonConversations}>Conversations</Link>
             <div className={styles.eventContainer} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                <button className={styles.buttonNotif}>Event ({events.length})</button>
+            <button className={styles.buttonNotif}>{events && events.length>0 ? "Event("+events.length+")" : "Event"}</button>
                 {showExtraButtons && (
                     <div className={styles.extraButtons}>
-                        <div className={styles.extraButtonDesc}>Events Available:</div>
+                        <div className={styles.extraButtonDesc}>{events && events.length>0 ? "Events Availables:" : "No Events"}</div>
                         {events.map((event, index) => (
                             <div key={index}>
                                 <button className={styles.extraButton} onClick={() => handleEventContent(index)}>
                                     - {event.Titre}
                                 </button>
                                 {showContentEvent.index === index && showContentEvent.show && (
-                                    <div>
-                                        <div>{event.Content}</div>
-                                        <div>{event.Author.Nickname}</div>
+                                    <div className={styles.infoEvents}>
+                                        <div>Info Event:</div>
+                                        <div>{event.EventDate}</div>
+                                        {event.ImageName && <img className={styles.imageEvent} src={`${event.UrlImage}`} alt="Avatar" />}
+                                        <div className={styles.infoEventContent}>{event.Content}</div>
+                                        <div className={styles.infoUserEvent}>By {event.Author.Nickname}</div>
                                     </div>
                                 )}
                             </div>

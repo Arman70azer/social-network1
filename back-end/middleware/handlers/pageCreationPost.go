@@ -99,15 +99,18 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 				request.Nature = "New-post"
 				BroadcastMessageToAllClients(request)
 			} else if nature == "Event" && eventNotExist(post, dbOpen) && titleEvent != "" && regexTestSecu(titleEvent) {
+				post.EventDate = conversionEventDate(r.FormValue("eventDate"))
 				post.Titre = titleEvent
-				dbFunc.PushInEvents_db(post, dbOpen)
-				var request structures.Request
-				request.Accept = true
-				request.Post = titleEvent
-				request.User = post.Author.Nickname
-				request.Date = formatDate
-				request.Nature = "New-event"
-				BroadcastMessageToAllClients(request)
+				if post.EventDate != "conversion impossible" {
+					dbFunc.PushInEvents_db(post, dbOpen)
+					var request structures.Request
+					request.Accept = true
+					request.Post = titleEvent
+					request.User = post.Author.Nickname
+					request.Date = formatDate
+					request.Nature = "New-event"
+					BroadcastMessageToAllClients(request)
+				}
 			}
 		} else {
 			fmt.Println("Un post ou un event n'est pas autoriser")
@@ -155,4 +158,18 @@ func regexTestSecu(str string) bool {
 	re := regexp.MustCompile(`^\s|^\s*$|<script.*?>.*?</script.*?>`)
 
 	return !re.MatchString(str)
+}
+
+func conversionEventDate(date string) string {
+	layout := "2006-01-02T15:04"
+
+	eventDate, err := time.Parse(layout, date)
+	if err != nil {
+		return "conversion impossible"
+	}
+
+	formattedDate := eventDate.Format("02/01/2006 15:04")
+
+	return formattedDate
+
 }
