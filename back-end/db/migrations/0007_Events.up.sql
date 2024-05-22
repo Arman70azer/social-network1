@@ -8,5 +8,7 @@ CREATE TABLE IF NOT EXISTS Events (
     Type TEXT,
     PrivateViewers TEXT,
     EventDate TEXT,
+    Followers TEXT,
+    NoFollowers TEXT,
     FOREIGN KEY (Author) REFERENCES Users(ID)
 );

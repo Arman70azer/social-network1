@@ -421,3 +421,37 @@
     max-width: 100%; /* Limite la largeur de l'image à la largeur du conteneur */
     height: auto; /* Ajuste automatiquement la hauteur pour maintenir les proportions de l'image */
 }
+
+.buttonsEvents {
+    display: flex;
+    margin-top: 60px; /* Marge en haut */
+    justify-content: center; /* Centre horizontalement */
+    align-items: center; /* Centre verticalement */
+}
+
+
+.buttonGoEvent,
+.buttonNotGoingEvent {
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.buttonGoEvent {
+    background-color: #4caf50; /* Couleur verte */
+    color: white;
+}
+
+.buttonNotGoingEvent {
+    background-color: #f44336; /* Couleur rouge */
+    color: white;
+}
+
+.buttonGoEvent:hover {
+    background-color: #388e3c; /* Légère modification de couleur au survol */
+}
+
+.buttonNotGoingEvent:hover {
+    background-color: #b7291f; /* Légère modification de couleur au survol */
+}

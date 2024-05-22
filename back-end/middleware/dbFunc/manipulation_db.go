@@ -382,9 +382,7 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 
 		layout := "02/01/2006 15:04" // Format de la date reçue
 
-		eventDate, err := time.Parse(layout, post.EventDate)
-
-		fmt.Println(eventDate, err)
+		eventDate, _ := time.Parse(layout, post.EventDate)
 
 		if time.Now().Before(eventDate) {
 			result = append(result, post)

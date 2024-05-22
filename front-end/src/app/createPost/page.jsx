@@ -154,7 +154,7 @@ export default function Page(){
 
     return (
         <div>
-           {data.Events ? <DashboardTop events={data.Events} /> : <DashboardTop />}
+           {data.Events ? <DashboardTop events={data.Events} ws={wsConnect}/> : <DashboardTop />}
             <div className={styles.center}>
                 <form className={styles.menuNewPost}>
                     <label htmlFor="nature">Write New {formData.nature}:</label>

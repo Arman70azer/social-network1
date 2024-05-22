@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS Users (
     Age INTEGER,
     ImageName TEXT,
     AboutMe TEXT,
-    UUID TEXT
+    UUID TEXT,
+    Followers TEXT
 );

@@ -223,7 +223,7 @@ export default function Page(){
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>
-            {data.Events ? <DashboardTop events={data.Events} /> : <DashboardTop />}
+            {data.Events ? <DashboardTop events={data.Events} ws={wsConnect} /> : <DashboardTop />}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}

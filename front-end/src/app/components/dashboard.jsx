@@ -5,7 +5,7 @@ import ContentEvent from '../components/contentEvent'
 
 
 //TODO Mettre les href une fois les pages finit !!!!!
-function DashboardTop({ events = [] }) {
+function DashboardTop({ events = [], ws = null }) {
     const [showExtraButtons, setShowExtraButtons] = useState(false);
     const [showContentEvent, setShowContent] = useState({ index: null, show: false });
 
@@ -25,27 +25,45 @@ function DashboardTop({ events = [] }) {
         }
     };
 
+    const handleEventYes=()=>{
+        if (ws != null){
+
+        }
+    }
+    const handleEventNo= ()=>{
+        if (ws != null){
+            
+        }
+
+    }
+
     return (
         <div className={styles.dashboardTopPage}>
             <Link href="/home" className={styles.titleHome}>Social-Network</Link>
             <Link href="/message" className={styles.buttonConversations}>Conversations</Link>
             <div className={styles.eventContainer} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            <button className={styles.buttonNotif}>{events && events.length>0 ? "Event("+events.length+")" : "Event"}</button>
+            <button className={styles.buttonNotif}>{events.length>0 ? "Events("+events.length+")" : "Events"}</button>
                 {showExtraButtons && (
                     <div className={styles.extraButtons}>
-                        <div className={styles.extraButtonDesc}>{events && events.length>0 ? "Events Availables:" : "No Events"}</div>
+                        <div className={styles.extraButtonDesc}>{events.length>0 ? "Events Availables:" : "No Events"}</div>
                         {events.map((event, index) => (
                             <div key={index}>
                                 <button className={styles.extraButton} onClick={() => handleEventContent(index)}>
                                     - {event.Titre}
                                 </button>
                                 {showContentEvent.index === index && showContentEvent.show && (
-                                    <div className={styles.infoEvents}>
-                                        <div>Info Event:</div>
-                                        <div>{event.EventDate}</div>
-                                        {event.ImageName && <img className={styles.imageEvent} src={`${event.UrlImage}`} alt="Avatar" />}
-                                        <div className={styles.infoEventContent}>{event.Content}</div>
-                                        <div className={styles.infoUserEvent}>By {event.Author.Nickname}</div>
+                                    <div>
+                                        <div className={styles.infoEvents}>
+                                            <div>Info Event:</div>
+                                            <div>{event.EventDate}</div>
+                                            {event.ImageName && <img className={styles.imageEvent} src={`${event.UrlImage}`} alt="Avatar" />}
+                                            <div className={styles.infoEventContent}>{event.Content}</div>
+                                            <div className={styles.infoUserEvent}>By {event.Author.Nickname}</div>
+                                        </div>
+                                        <div className={styles.buttonsEnvents}>
+                                            <button onClick={handleEventYes} className={styles.buttonGoEvent}>Go!!!</button>
+                                            <button onClick={handleEventNo} className={styles.buttonNotGoingEvent}>No...</button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
