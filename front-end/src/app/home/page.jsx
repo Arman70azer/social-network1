@@ -9,7 +9,7 @@ import sendFormToHome from '../lib/sendFormToHome'
 import sendRequestToWebsocket from '../lib/wsSendMessage'
 import { Content } from "next/font/google";
 
-let wsConnect;//Notre ws est stocké ici
+let wsConnect = null;//Notre ws est stocké ici
 export default function Page(){
     const [data, setData] = useState([]);
     const [allData, setAllData]=useState([])
@@ -223,14 +223,11 @@ export default function Page(){
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>
-            {data.Events ? <DashboardTop events={data.Events} ws={wsConnect} /> : <DashboardTop />}
+           {data.Events && wsConnect!= null ? <DashboardTop events={data.Events} ws={wsConnect} /> : <DashboardTop />}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
                 </button>
-                <div>
-                    {wsConnect && ``}
-                </div>
             </div>
             <div className={styles.Content}>
                 {data.Posts && data.Posts.map((post, index) => (

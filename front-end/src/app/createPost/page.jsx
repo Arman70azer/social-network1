@@ -4,9 +4,12 @@ import styles from "../styles/createPost.module.css"
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import fetchUsersAndPosts from "../lib/fetPosts"
+import openWebSocketConnexion from "../lib/websocket";
+import sendRequestToWebsocket from "../lib/wsSendMessage"
 
 //permet de retourner sur la page d'acceuil
 
+let wsConnect;
 export default function Page(){
 
     const [data, setPosts] = useState([]);
@@ -22,6 +25,12 @@ export default function Page(){
         };
 
         fetchData();
+        if (!wsConnect){
+            wsConnect = openWebSocketConnexion()
+            setTimeout(() => {
+                sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "enterToCreationPost", User:"Arman" });
+            }, 200);
+        }
           // Mettre à jour les suggestions une seule fois
     }, []);
     

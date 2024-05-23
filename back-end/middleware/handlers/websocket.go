@@ -44,6 +44,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
 	// Create a new client instance
 	client := &Client{conn: ws, User: messageInit.User}
+	fmt.Println(messageInit.Nature)
 
 	// Add the client to the map of clients
 	clients[ws] = client
