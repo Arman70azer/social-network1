@@ -21,24 +21,50 @@ type Client struct {
 	Origin string
 }
 
-var Upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+var (
+	clients  = make(map[*websocket.Conn]*Client)
+	mu       sync.Mutex
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+)
+
+// clientAlreadyRegister_WS checks if a client is already registered
+func clientAlreadyRegister_WS(user string) bool {
+	mu.Lock()
+	defer mu.Unlock()
+	for _, client := range clients {
+		if client.User == user {
+			return true
+		}
+	}
+	return false
 }
 
-// Define a map to store connected clients
-var clients = make(map[*websocket.Conn]*Client)
-var mu sync.Mutex // To ensure thread-safety
+// deleteClient deletes a client from the map
+func deleteClient(user string) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	for conn, client := range clients {
+		if client.User == user {
+			log.Printf("client -" + user + " exits page to other")
+			conn.Close()
+			delete(clients, conn)
+			fmt.Println("nb clients: " + strconv.Itoa(len(clients)))
+			return
+		}
+	}
+	log.Printf("client -" + user + " not found")
+}
 
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
-
-	log.Println("Quelqu'un c'est connecté sur le ws")
-
 	// Upgrade initial GET request to a websocket
-	ws, err := Upgrader.Upgrade(w, r, nil)
+	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,7 +81,9 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 	client := &Client{conn: ws, User: messageInit.User, Origin: messageInit.Origin}
 
 	// Add the client to the map of clients
+	mu.Lock()
 	clients[ws] = client
+	mu.Unlock()
 
 	// Send a welcome message
 	var welcomeRequest structures.Request
@@ -71,7 +99,9 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 		_, message, err := ws.ReadMessage()
 		if err != nil {
 			log.Printf("Client disconnected: %v", err)
+			mu.Lock()
 			delete(clients, ws) // Remove the client from the map when disconnected
+			mu.Unlock()
 			break
 		}
 		if message != nil {
@@ -84,9 +114,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 			// Accéder aux champs de la structure Request
 			fmt.Println("Origin:", data)
 			fmt.Println(clients[ws].User)
-
 		}
-
 	}
 }
 
@@ -169,33 +197,4 @@ func readMessage(ws *websocket.Conn) structures.Request {
 
 	}
 	return data
-}
-
-// Check if client is already registered
-func clientAlreadyRegister_WS(user string) bool {
-	mu.Lock()
-	defer mu.Unlock()
-	for _, client := range clients {
-		if client.User == user {
-			return true
-		}
-	}
-	return false
-}
-
-// Function to delete a client
-func deleteClient(user string) {
-	mu.Lock()
-	defer mu.Unlock()
-
-	for conn, client := range clients {
-		if client.User == user {
-			log.Printf("client -" + user + " exits page to other")
-			conn.Close()          // Close the WebSocket connection
-			delete(clients, conn) // Delete the client from the map
-			fmt.Println("nb clients: " + strconv.Itoa(len(clients)))
-			return
-		}
-	}
-	log.Printf("client -" + user + " not found")
 }

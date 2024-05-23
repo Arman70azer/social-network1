@@ -9,7 +9,7 @@ import sendFormToHome from '../lib/sendFormToHome'
 import sendRequestToWebsocket from '../lib/wsSendMessage'
 import { Content } from "next/font/google";
 
-let wsConnect = null;//Notre ws est stocké ici
+let wsConnect;//Notre ws est stocké ici
 export default function Page(){
     const [data, setData] = useState([]);
     const [allData, setAllData]=useState([])
