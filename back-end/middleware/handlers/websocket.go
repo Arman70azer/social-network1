@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -14,8 +16,9 @@ import (
 
 // Define a struct to store client information
 type Client struct {
-	conn *websocket.Conn
-	User string
+	conn   *websocket.Conn
+	User   string
+	Origin string
 }
 
 var Upgrader = websocket.Upgrader{
@@ -28,6 +31,7 @@ var Upgrader = websocket.Upgrader{
 
 // Define a map to store connected clients
 var clients = make(map[*websocket.Conn]*Client)
+var mu sync.Mutex // To ensure thread-safety
 
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
@@ -42,9 +46,13 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 
 	messageInit := readMessage(ws)
 
+	if clientAlreadyRegister_WS(messageInit.User) && strings.Contains(messageInit.Nature, "enter") {
+		log.Printf("client -" + messageInit.User + "exit page to: " + messageInit.Origin)
+		deleteClient(messageInit.User)
+	}
+
 	// Create a new client instance
-	client := &Client{conn: ws, User: messageInit.User}
-	fmt.Println(messageInit.Nature)
+	client := &Client{conn: ws, User: messageInit.User, Origin: messageInit.Origin}
 
 	// Add the client to the map of clients
 	clients[ws] = client
@@ -161,4 +169,33 @@ func readMessage(ws *websocket.Conn) structures.Request {
 
 	}
 	return data
+}
+
+// Check if client is already registered
+func clientAlreadyRegister_WS(user string) bool {
+	mu.Lock()
+	defer mu.Unlock()
+	for _, client := range clients {
+		if client.User == user {
+			return true
+		}
+	}
+	return false
+}
+
+// Function to delete a client
+func deleteClient(user string) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	for conn, client := range clients {
+		if client.User == user {
+			log.Printf("client -" + user + " exits page to other")
+			conn.Close()          // Close the WebSocket connection
+			delete(clients, conn) // Delete the client from the map
+			fmt.Println("nb clients: " + strconv.Itoa(len(clients)))
+			return
+		}
+	}
+	log.Printf("client -" + user + " not found")
 }

@@ -56,12 +56,11 @@ export default function Page(){
 
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchData();
-        if (!wsConnect){
-            wsConnect = openWebSocketConnexion()
-            setTimeout(() => {
-                sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "enterToHome", User:"Arman" });
-            }, 200);
-        }
+        wsConnect = openWebSocketConnexion()
+        setTimeout(() => {
+            sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "enterToHome", User:"Arman" });
+        }, 200);
+        
 
     }, []);
 

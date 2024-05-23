@@ -25,12 +25,12 @@ export default function Page(){
         };
 
         fetchData();
-        if (!wsConnect){
-            wsConnect = openWebSocketConnexion()
-            setTimeout(() => {
-                sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "enterToCreationPost", User:"Arman" });
-            }, 200);
-        }
+
+        wsConnect = openWebSocketConnexion()
+        setTimeout(() => {
+            sendRequestToWebsocket(wsConnect, { Origin: "creationPost", Nature: "enterToCreationPost", User:"Arman" });
+        }, 200);
+     
           // Mettre à jour les suggestions une seule fois
     }, []);
     
