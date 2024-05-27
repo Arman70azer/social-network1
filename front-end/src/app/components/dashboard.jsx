@@ -1,7 +1,7 @@
 import styles from '../styles/home.module.css'; // Utilisez des guillemets simples ou doubles pour l'importation
 import Link from 'next/link';
 import { useState } from 'react';
-import ContentEvent from '../components/contentEvent'
+import sendFormToHome from '../lib/sendFormToHome';
 
 
 //TODO Mettre les href une fois les pages finit !!!!!
@@ -25,9 +25,15 @@ function DashboardTop({ events = [], ws = null }) {
         }
     };
 
-    const handleEventYes=()=>{
+    const handleEventYes=(titre)=>{
         if (ws != null){
+            const formEventPost = new FormData();
+            formEventPost.append("event", titre)
+            formEventPost.append("user", "Arman")
+            formEventPost.append("nature", "yes")
+            formEventPost.append("origin", "home")
 
+            sendFormToHome(formEventPost) 
         }
     }
     const handleEventNo= ()=>{
@@ -36,13 +42,14 @@ function DashboardTop({ events = [], ws = null }) {
         }
 
     }
+    
 
     return (
         <div className={styles.dashboardTopPage}>
             <Link href="/home" className={styles.titleHome}>Social-Network</Link>
             <Link href="/message" className={styles.buttonConversations}>Conversations</Link>
             <div className={styles.eventContainer} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            <button className={styles.buttonNotif}>{events.length>0 ? "Events("+events.length+")" : "Events"}</button>
+                <button className={styles.buttonNotif}>{events.length>0 ? "Events("+events.length+")" : "Events"}</button>
                 {showExtraButtons && (
                     <div className={styles.extraButtons}>
                         <div className={styles.extraButtonDesc}>{events.length>0 ? "Events Availables:" : "No Events"}</div>
@@ -61,8 +68,8 @@ function DashboardTop({ events = [], ws = null }) {
                                             <div className={styles.infoUserEvent}>By {event.Author.Nickname}</div>
                                         </div>
                                         <div className={styles.buttonsEnvents}>
-                                            <button onClick={handleEventYes} className={styles.buttonGoEvent}>Go!!!</button>
-                                            <button onClick={handleEventNo} className={styles.buttonNotGoingEvent}>No...</button>
+                                            <button onClick={() => handleEventYes(event.Titre)} className={styles.buttonGoEvent}>Go!!!</button>
+                                            <button onClick={() => handleEventNo(event.Titre)} className={styles.buttonNotGoingEvent}>No...</button>
                                         </div>
                                     </div>
                                 )}

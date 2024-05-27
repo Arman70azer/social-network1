@@ -14,6 +14,9 @@ type Post struct {
 	Likes          []LikeOrDislike
 	Dislikes       []LikeOrDislike
 	EventDate      string
+	Followers       []string
+	NoFollowers    []string
+	Error          string
 }
 
 type User struct {
@@ -29,6 +32,7 @@ type User struct {
 	UrlImage  string
 	AboutMe   string
 	UUID      string
+	Followers []string
 }
 
 type Data struct {

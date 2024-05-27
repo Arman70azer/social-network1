@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import sendFormToHome from '../lib/sendFormToHome'
 import sendRequestToWebsocket from '../lib/wsSendMessage'
-import { Content } from "next/font/google";
 
 let wsConnect;//Notre ws est stocké ici
 export default function Page(){
@@ -228,6 +227,7 @@ export default function Page(){
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
                 </button>
             </div>
+            {!wsConnect && (<span style={{ color: 'red', display: "flex", alignItems: "center", justifyContent: "center" }}>You need to reload page to connect to server!!!</span>)}
             <div className={styles.Content}>
                 {data.Posts && data.Posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
