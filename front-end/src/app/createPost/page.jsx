@@ -16,6 +16,7 @@ export default function Page(){
 
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
+    const [correctForm, setCorrectForm] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -84,6 +85,7 @@ export default function Page(){
 
     const handleSubmit = async (event) => {
         event.preventDefault(); // Empêcher le comportement par défaut du formulaire
+        let correct = true
 
         if (formData.content){
             if (fileValid){
@@ -97,6 +99,15 @@ export default function Page(){
                 formDataToSend.append('title', formData.title)
                 formDataToSend.append('eventDate', formData.eventDate)
 
+                if (formData.nature === "Event"){
+                    if (formData.title !== "" && formData.eventDate !== ""){
+                        console.log(formData, formData.eventDate)
+                        correct = true
+                    }else{
+                        correct = false
+                    }
+                }
+
                 if (formData.file) {
                     formDataToSend.append('file', formData.file); // Ajouter le fichier
                 }
@@ -106,25 +117,32 @@ export default function Page(){
                 }
 
                 // Envoyer les données du formulaire à l'URL souhaitée
-                try {
-                    const response = await fetch('http://localhost:8000/createPost', {
-                        method: 'POST',
-                        body: formDataToSend
-                    });
+                if (correct){
+                    try {
+                        const response = await fetch('http://localhost:8000/createPost', {
+                            method: 'POST',
+                            body: formDataToSend
+                        });
 
-                    // Vérifiez si la réponse est réussie (statut 200)
-                    if (response.ok) {
-                        // Rediriger l'utilisateur vers la page d'accueil
-                        router.push('/home');
-                    } else {
-                        console.error('Erreur lors de l\'envoi du formulaire:', response.statusText);
+                        // Vérifiez si la réponse est réussie (statut 200)
+                        if (response.ok) {
+                            // Rediriger l'utilisateur vers la page d'accueil
+                            router.push('/home');
+                        } else {
+                            console.error('Erreur lors de l\'envoi du formulaire:', response.statusText);
+                        }
+                    } catch (error) {
+                        console.error('Error submitting form:', error);
                     }
-                } catch (error) {
-                    console.error('Error submitting form:', error);
                 }
             }
         }else{
             setPresentContent(false)
+        }
+        if (!correct){
+            setCorrectForm(false)
+        }else{
+            setCorrectForm(true)
         }
     };
 
@@ -233,6 +251,7 @@ export default function Page(){
 
                     <button className={styles.buttonForm} type="submit" onClick={handleSubmit}>Publish</button>
                     {!contentPresent && <span id="errorTypeFile" className={styles.error}>No content</span>}
+                    {!correctForm && <span id="errorForm" className={styles.error}>Bad information or formulaire not complete {formData.eventDate}</span>}
                 </form>
             </div>
         </div>
