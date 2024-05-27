@@ -51,7 +51,17 @@ function DashboardTop({ events = [], ws = null }) {
         }
 
     }
+
+    const onMessageWS = () => {
+        if (ws != null) {
+            ws.onmessage = (event) => {
+                const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
+                console.log(receivedMessage)
+            }
+        }
+    }
     
+    onMessageWS()
 
     return (
         <div className={styles.dashboardTopPage}>
@@ -76,6 +86,7 @@ function DashboardTop({ events = [], ws = null }) {
                                             <div className={styles.infoEventContent}>{event.Content}</div>
                                             <div className={styles.infoUserEvent}>By {event.Author.Nickname}</div>
                                         </div>
+                                        <div>Follow by: {event.Followers}</div>
                                         <div className={styles.buttonsEnvents}>
                                             <button onClick={() => handleEventYes(event.Titre)} className={styles.buttonGoEvent}>Go!!!</button>
                                             <button onClick={() => handleEventNo(event.Titre)} className={styles.buttonNotGoingEvent}>No...</button>

@@ -4,6 +4,7 @@ import (
 	structures "back-end/middleware/struct"
 	"io"
 	"os"
+	"regexp"
 )
 
 func SelectImageDatabase(name string) []byte {
@@ -48,4 +49,11 @@ func Contains(str string, array []string) bool {
 		}
 	}
 	return false
+}
+
+// Vérifie que str ne contient pas de script et n'est pas vide
+func RegexSpaceAndScript(str string) bool {
+	re := regexp.MustCompile(`^\s|^\s*$|<script.*?>.*?</script.*?>`)
+
+	return !re.MatchString(str)
 }

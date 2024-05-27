@@ -14,7 +14,7 @@ type Post struct {
 	Likes          []LikeOrDislike
 	Dislikes       []LikeOrDislike
 	EventDate      string
-	Followers       []string
+	Followers      []string
 	NoFollowers    []string
 	Error          string
 }
@@ -63,6 +63,7 @@ type Request struct {
 	Accept           bool   `json:"Accept"`
 	Date             string `json:"Date"`
 	OtherLikeDislike bool   `json:"OtherLikeDislike"`
+	Event            string `json:"Event"`
 }
 
 type LikeOrDislike struct {

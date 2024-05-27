@@ -214,32 +214,50 @@ func event(r *http.Request) {
 
 		var column string
 
+		var request structures.Request
+		request.Event = titre
+		request.User = userName
+		request.Origin = "home"
+
 		switch r.FormValue("nature") {
 		case "yes":
 			column = "Followers"
+			request.Nature = "New-followEvent"
 			if middleware.Contains(userName, eventTarget.Followers) {
 				dbFunc.DeleteYesOrNoEvent_db(db, column, titre, userName)
+				request.ObjetcOfRequest = "unfollowEvent"
 			} else {
 				if middleware.Contains(userName, eventTarget.NoFollowers) {
 					dbFunc.DeleteYesOrNoEvent_db(db, "NoFollowers", titre, userName)
 				}
 				dbFunc.AddYesOrNoEvent_db(db, column, titre, userName)
+				request.ObjetcOfRequest = "followEvent"
 			}
+
+			request.Accept = true
 
 		case "no":
 			column = "NoFollowers"
+			request.Nature = "New-unfollowEvent"
 			if middleware.Contains(userName, eventTarget.NoFollowers) {
 				dbFunc.DeleteYesOrNoEvent_db(db, column, titre, userName)
+				request.ObjetcOfRequest = "unfollowEvent"
 			} else {
 				if middleware.Contains(userName, eventTarget.Followers) {
 					dbFunc.DeleteYesOrNoEvent_db(db, "Followers", titre, userName)
 				}
 				dbFunc.AddYesOrNoEvent_db(db, column, titre, userName)
+				request.ObjetcOfRequest = "followEvent"
 			}
+
+			request.Accept = true
 
 		default:
 			fmt.Println("func event ----->error cause the nature of request is: ", r.FormValue("nature"))
-
+			request.Accept = false
 		}
+
+		BroadcastMessageToAllClients(request)
+		fmt.Println("ggg: ", request)
 	}
 }

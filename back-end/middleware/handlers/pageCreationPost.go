@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"back-end/middleware"
 	"back-end/middleware/dbFunc"
 	structures "back-end/middleware/struct"
 	"database/sql"
@@ -8,7 +9,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"regexp"
 	"time"
 )
 
@@ -87,7 +87,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println(post)
 
-		if post.Content != "" && regexTestSecu(post.Content) {
+		if post.Content != "" && middleware.RegexSpaceAndScript(post.Content) {
 			if postNotExist(post, dbOpen) && nature == "Post" {
 				post.Titre = user.Nickname + "-" + formatDate
 				dbFunc.PushInPosts_db(post, dbOpen)
@@ -98,7 +98,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 				request.Date = formatDate
 				request.Nature = "New-post"
 				BroadcastMessageToAllClients(request)
-			} else if nature == "Event" && eventNotExist(post, dbOpen) && titleEvent != "" && regexTestSecu(titleEvent) {
+			} else if nature == "Event" && eventNotExist(post, dbOpen) && titleEvent != "" && middleware.RegexSpaceAndScript(titleEvent) {
 				post.EventDate = conversionEventDate(r.FormValue("eventDate"))
 				post.Titre = titleEvent
 				if post.EventDate != "conversion impossible" {
@@ -152,12 +152,6 @@ func eventNotExist(event structures.Post, db *sql.DB) bool {
 	}
 
 	return true
-}
-
-func regexTestSecu(str string) bool {
-	re := regexp.MustCompile(`^\s|^\s*$|<script.*?>.*?</script.*?>`)
-
-	return !re.MatchString(str)
 }
 
 func conversionEventDate(date string) string {

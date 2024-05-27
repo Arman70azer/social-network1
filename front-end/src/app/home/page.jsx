@@ -99,7 +99,7 @@ export default function Page(){
             // Gérer les messages reçus du serveur WebSocket
             wsConnect.onmessage = (event) => {
                 const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
-                if (receivedMessage.Accept) {
+                if (receivedMessage.Accept && receivedMessage.Post) {
 
                     console.log("Message reçu du serveur WebSocket:", receivedMessage);
                     console.log(data, "hhhhhhh")
