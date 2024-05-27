@@ -56,7 +56,7 @@ const HomePage = () => {
             Login
           </button>
           <button type="submit" className="button-register">
-            Register
+            Registedsfdfsfdfsdfsdfdsdsfdsfsdfdfdfsd
           </button>
         </form>
       </div>

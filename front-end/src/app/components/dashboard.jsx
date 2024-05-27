@@ -6,6 +6,9 @@ import sendFormToHome from '../lib/sendFormToHome';
 
 //TODO Mettre les href une fois les pages finit !!!!!
 function DashboardTop({ events = [], ws = null }) {
+    const user= "Arman";
+    const origin= "home";
+
     const [showExtraButtons, setShowExtraButtons] = useState(false);
     const [showContentEvent, setShowContent] = useState({ index: null, show: false });
 
@@ -29,16 +32,22 @@ function DashboardTop({ events = [], ws = null }) {
         if (ws != null){
             const formEventPost = new FormData();
             formEventPost.append("event", titre)
-            formEventPost.append("user", "Arman")
+            formEventPost.append("user", user)
             formEventPost.append("nature", "yes")
-            formEventPost.append("origin", "home")
+            formEventPost.append("origin", origin)
 
             sendFormToHome(formEventPost) 
         }
     }
-    const handleEventNo= ()=>{
+    const handleEventNo= (titre)=>{
         if (ws != null){
-            
+            const formEventPost = new FormData();
+            formEventPost.append("event", titre)
+            formEventPost.append("user", user)
+            formEventPost.append("nature", "no")
+            formEventPost.append("origin", origin)
+
+            sendFormToHome(formEventPost)
         }
 
     }

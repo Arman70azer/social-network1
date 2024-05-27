@@ -212,24 +212,31 @@ func event(r *http.Request) {
 	if middleware.UserRegister(userName, allUser) && middleware.EventExist(titre, allEvent) {
 		eventTarget := dbFunc.SelectEventByTitle_db(db, titre)
 
+		var column string
+
 		switch r.FormValue("nature") {
 		case "yes":
+			column = "Followers"
 			if middleware.Contains(userName, eventTarget.Followers) {
-				dbFunc.DeleteFollow_db(db, titre, userName)
+				dbFunc.DeleteYesOrNoEvent_db(db, column, titre, userName)
 			} else {
-				dbFunc.AddFollow_db(db, titre, userName)
+				if middleware.Contains(userName, eventTarget.NoFollowers) {
+					dbFunc.DeleteYesOrNoEvent_db(db, "NoFollowers", titre, userName)
+				}
+				dbFunc.AddYesOrNoEvent_db(db, column, titre, userName)
 			}
 
-			/*
-				case "no":
-					event.NoFollowers = append(event.NoFollowers, r.FormValue("user"))
-					if eventExist && userAlreadyNoFollow {
-						dbFunc.DeleteNoFollow_db(db, event)
-					} else {
-						dbFunc.PushNoFollowEvent_db(db, event)
-					}
+		case "no":
+			column = "NoFollowers"
+			if middleware.Contains(userName, eventTarget.NoFollowers) {
+				dbFunc.DeleteYesOrNoEvent_db(db, column, titre, userName)
+			} else {
+				if middleware.Contains(userName, eventTarget.Followers) {
+					dbFunc.DeleteYesOrNoEvent_db(db, "Followers", titre, userName)
+				}
+				dbFunc.AddYesOrNoEvent_db(db, column, titre, userName)
+			}
 
-			*/
 		default:
 			fmt.Println("func event ----->error cause the nature of request is: ", r.FormValue("nature"))
 

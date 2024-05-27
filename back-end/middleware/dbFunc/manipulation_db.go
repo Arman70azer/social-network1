@@ -459,9 +459,13 @@ func PushInEvents_db(event structures.Post, db *sql.DB) {
 	fmt.Println("L'event a été inséré avec succès.")
 }
 
-func AddFollow_db(db *sql.DB, eventTitle, userToAdd string) {
-	// Préparer la requête SQL pour récupérer les followers actuels
-	stmt, err := db.Prepare("SELECT Followers FROM Events WHERE Titre = ?")
+// Ajoute l'user dans la colum sélèctionner ("Followers" ou "NoFollowers") dans la tab Events
+func AddYesOrNoEvent_db(db *sql.DB, column, eventTitle, userToAdd string) {
+	// Construire la requête SQL en incluant le nom de la colonne
+	query := fmt.Sprintf("SELECT %s FROM Events WHERE Titre = ?", column)
+
+	// Préparer la requête SQL
+	stmt, err := db.Prepare(query)
 	if err != nil {
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL:", err)
 		return
@@ -475,8 +479,6 @@ func AddFollow_db(db *sql.DB, eventTitle, userToAdd string) {
 		return
 	}
 
-	fmt.Println("récupère : ", followers)
-
 	var splitFollow []string
 	if followers != "" {
 		splitFollow = strings.Split(followers, " ")
@@ -487,14 +489,13 @@ func AddFollow_db(db *sql.DB, eventTitle, userToAdd string) {
 	updatedFollowers := strings.Join(splitFollow, " ")
 
 	// Préparer la requête SQL pour mettre à jour les followers
-	stmt2, err := db.Prepare("UPDATE Events SET Followers = ? WHERE Titre = ?")
+	query = fmt.Sprintf("UPDATE Events SET %s = ? WHERE Titre = ?", column)
+	stmt2, err := db.Prepare(query)
 	if err != nil {
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL:", err)
 		return
 	}
 	defer stmt2.Close()
-
-	fmt.Println("update : ", updatedFollowers)
 
 	// Exécuter la mise à jour
 	_, err = stmt2.Exec(updatedFollowers, eventTitle)
@@ -505,9 +506,11 @@ func AddFollow_db(db *sql.DB, eventTitle, userToAdd string) {
 
 }
 
-func DeleteFollow_db(db *sql.DB, eventTitle, userToDelete string) {
+// Supprime l'user dans la colum sélèctionner ("Followers" ou "NoFollowers") dans la tab Events
+func DeleteYesOrNoEvent_db(db *sql.DB, column, eventTitle, userToDelete string) {
 	// Préparer la requête SQL pour récupérer les followers actuels
-	stmt, err := db.Prepare("SELECT Followers FROM Events WHERE Titre = ?")
+	query := fmt.Sprintf("SELECT %s FROM Events WHERE Titre = ?", column)
+	stmt, err := db.Prepare(query)
 	if err != nil {
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL:", err)
 		return
@@ -536,7 +539,8 @@ func DeleteFollow_db(db *sql.DB, eventTitle, userToDelete string) {
 	updatedFollowers := strings.Join(newFollowers, " ")
 
 	// Préparer la requête SQL pour mettre à jour les followers
-	stmt2, err := db.Prepare("UPDATE Events SET Followers = ? WHERE Titre = ?")
+	query = fmt.Sprintf("UPDATE Events SET %s = ? WHERE Titre = ?", column)
+	stmt2, err := db.Prepare(query)
 	if err != nil {
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL:", err)
 		return
