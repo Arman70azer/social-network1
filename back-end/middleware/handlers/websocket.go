@@ -1,29 +1,25 @@
 package handlers
 
 import (
+	"back-end/middleware"
 	structures "back-end/middleware/struct"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
 
-// Define a struct to store client information
-type Client struct {
-	conn   *websocket.Conn
-	User   string
-	Origin string
+// Clients stores connections and names
+type Clients struct {
+	connections map[string]*websocket.Conn
 }
 
 var (
-	clients  = make(map[*websocket.Conn]*Client)
-	mu       sync.Mutex
+	clients = &Clients{
+		connections: make(map[string]*websocket.Conn),
+	}
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -33,168 +29,115 @@ var (
 	}
 )
 
-// clientAlreadyRegister_WS checks if a client is already registered
-func clientAlreadyRegister_WS(user string) bool {
-	mu.Lock()
-	defer mu.Unlock()
-	for _, client := range clients {
-		if client.User == user {
-			return true
-		}
-	}
-	return false
-}
-
-// deleteClient deletes a client from the map
-func deleteClient(user string) {
-	mu.Lock()
-	defer mu.Unlock()
-
-	for conn, client := range clients {
-		if client.User == user {
-			log.Printf("client -" + user + " exits page to other")
-			conn.Close()
-			delete(clients, conn)
-			fmt.Println("nb clients: " + strconv.Itoa(len(clients)))
-			return
-		}
-	}
-	log.Printf("client -" + user + " not found")
-}
-
+// Le main de la page websocket
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
-	// Upgrade initial GET request to a websocket
-	ws, err := upgrader.Upgrade(w, r, nil)
+	// Upgrade HTTP connection to WebSocket
+	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("WebSocket upgrade error:", err)
+		return
 	}
-	defer ws.Close()
+	defer conn.Close()
 
-	messageInit := readMessage(ws)
+	// Handle WebSocket connection
+	handleWebSocket(conn)
+}
 
-	if clientAlreadyRegister_WS(messageInit.User) && strings.Contains(messageInit.Nature, "enter") {
-		log.Printf("client -" + messageInit.User + "exit page to: " + messageInit.Origin)
-		deleteClient(messageInit.User)
+// S'occupe de gèrer les clients en les enregistrant et en lisant leur messages
+func handleWebSocket(conn *websocket.Conn) {
+	// Read name and other data from the client
+	_, data, err := conn.ReadMessage()
+	if err != nil {
+		log.Println("Read message error:", err)
+		return
 	}
 
-	// Create a new client instance
-	client := &Client{conn: ws, User: messageInit.User, Origin: messageInit.Origin}
+	var clientMsg structures.Request
+	err = json.Unmarshal(data, &clientMsg)
+	if err != nil {
+		log.Println("JSON decoding error:", err)
+		return
+	}
 
-	// Add the client to the map of clients
-	mu.Lock()
-	clients[ws] = client
-	mu.Unlock()
+	fmt.Println(clientMsg)
 
-	// Send a welcome message
-	var welcomeRequest structures.Request
-	welcomeRequest.Nature = "Welcome " + messageInit.User
-	welcomeRequest.Origin = "websocket"
-	welcomeRequest.Date = time.Now().Format("02/01/2006 15:04:05")
-	welcomeRequest.User = messageInit.User
+	// Extract user name from clientMsg
+	userName := clientMsg.User
 
-	BroadcastMessageOneClient(welcomeRequest)
+	// If this is the first time client is connecting
+	if _, exists := clients.connections[userName]; !exists {
+		// Associate user name with WebSocket connection
 
-	// Example: Listen for messages from this client
+		clients.connections[userName] = conn
+
+		fmt.Println("New user connected:", userName)
+		fmt.Println("nbr totale d'users: ", len(clients.connections))
+	} else {
+
+		clients.connections[userName] = conn
+		fmt.Println("User reconnected:", userName)
+	}
+
+	// Send welcome message or perform other actions if needed
+	var response structures.Request
+	response.ObjetcOfRequest = "Welcome, " + userName + "!"
+	response.Accept = true
+	response.User = userName
+
+	BroadcastToOneClient(userName, response)
+
+	// Handle messages from the client
 	for {
-		_, message, err := ws.ReadMessage()
+		_, msgBytes, err := conn.ReadMessage()
 		if err != nil {
-			log.Printf("Client disconnected: %v", err)
-			mu.Lock()
-			delete(clients, ws) // Remove the client from the map when disconnected
-			mu.Unlock()
+			log.Println("(boucle for) Read message error:", err)
 			break
 		}
-		if message != nil {
-			var data structures.Request
-			if err := json.Unmarshal(message, &data); err != nil {
-				log.Printf("Erreur lors de la conversion en JSON : %v", err)
-				continue
-			}
-
-			// Accéder aux champs de la structure Request
-			fmt.Println("Origin:", data)
-			fmt.Println(clients[ws].User)
-		}
-	}
-}
-
-// Sert à savoir si les utilisateurs sont toujours connecter. S'active toutes les 10 secondes
-func BroadcastMessages() {
-	for {
-		// Example: Send a message to all connected clients every 10 seconds
-		for conn, _ := range clients {
-			err := conn.WriteMessage(websocket.TextMessage, []byte("Hello from the server! Are you here?"))
-			if err != nil {
-				log.Printf("Error sending message to client: %v", err)
-				conn.Close()
-				delete(clients, conn) // Remove the client from the map if unable to send message
-			} else {
-				fmt.Println("Il y a " + strconv.Itoa(len(clients)) + " de connecter: " + conn.Subprotocol())
-			}
-			// You can access client data here if needed
-		}
-
-		// Sleep for 10 seconds
-		time.Sleep(10 * time.Second)
-	}
-}
-
-// Envoie le message au client souhaiter pour répondre à une requête précise.
-// Pense aussi à rajouter l'user pour savoir à qui envoyer le message!!!
-func BroadcastMessageOneClient(request structures.Request) {
-	// Envoyer le message au client spécifié
-	jsonData, err := json.Marshal(request)
-	if err != nil {
-		fmt.Println("Erreur lors de la conversion en JSON:", err)
-	}
-
-	for conn, client := range clients {
-		if client.User == request.User {
-			err := conn.WriteMessage(websocket.TextMessage, jsonData)
-			if err != nil {
-				log.Printf("Error sending message to client: %v", err)
-				conn.Close()
-				delete(clients, conn) // Remove the client from the map if unable to send message
-			} else {
-				fmt.Println("le message à été envoyé")
-			}
-		}
-	}
-}
-
-// Envoie un message à tout les users connectés qui sont stockés dans clients
-func BroadcastMessageToAllClients(request structures.Request) {
-	// Envoyer le message au client spécifié
-	jsonData, err := json.Marshal(request)
-	if err != nil {
-		fmt.Println("Erreur lors de la conversion en JSON:", err)
-	}
-
-	for conn, _ := range clients {
-		err := conn.WriteMessage(websocket.TextMessage, jsonData)
+		// Décoder le message JSON dans une structure de données
+		var clientMsg structures.Request
+		err = json.Unmarshal(msgBytes, &clientMsg)
 		if err != nil {
-			log.Printf("Error sending message to client: %v", err)
-			conn.Close()
-			delete(clients, conn) // Remove the client from the map if unable to send message
-		} else {
-			fmt.Println("le message à été envoyé")
+			log.Println("JSON decoding error:", err)
+			continue // Ignorer les messages mal formés
+		}
+
+		fmt.Println("Message: ", clientMsg)
+	}
+
+	// Remove the connection from the map of clients
+	delete(clients.connections, userName)
+}
+
+func BroadcastToOneClient(client string, msg structures.Request) {
+
+	jsonMessage := middleware.ConvertToJson(msg)
+
+	// Parcourir les connexions clients
+	for userName, conn := range clients.connections {
+		if userName == client {
+			// Envoyer le message JSON à la connexion correspondante
+			err := conn.WriteMessage(websocket.TextMessage, jsonMessage)
+			if err != nil {
+				log.Println("Write message error:", err)
+				conn.Close()
+				delete(clients.connections, userName)
+			}
+
+			fmt.Println("message envoyé")
 		}
 	}
 }
 
-// Lit les messages envoyées sous la forme de la struct "Requete" (ne pas oublier!!!)
-func readMessage(ws *websocket.Conn) structures.Request {
-	var data structures.Request
-	_, message, err := ws.ReadMessage()
-	if err != nil {
-		log.Printf("Client disconnected: %v", err)
-		delete(clients, ws) // Remove the client from the map when disconnected
-	}
-	if message != nil {
-		if err := json.Unmarshal(message, &data); err != nil {
-			log.Printf("Erreur lors de la conversion en JSON : %v", err)
-		}
+func Broadcast(msg structures.Request) {
 
+	jsonMessage := middleware.ConvertToJson(msg)
+
+	for userName, conn := range clients.connections {
+		err := conn.WriteMessage(websocket.TextMessage, jsonMessage)
+		if err != nil {
+			log.Println("Write message error:", err)
+			conn.Close()
+			delete(clients.connections, userName)
+		}
 	}
-	return data
 }

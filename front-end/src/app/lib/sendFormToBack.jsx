@@ -9,10 +9,14 @@ export default async function sendFormToBack(page, formData) {
         if (!response.ok) {
             // Si la réponse n'est pas un succès (statut HTTP 200-299)
             const errorMessage = await response.text();
-            console.log(`Error submitting form: ${response.status} - ${errorMessage}`);
+            setTimeout(() => {
+                console.log(`Error submitting form: ${response.status} - ${errorMessage}`);
+            }, 3000); // Attendre 3 secondes avant d'afficher l'erreur
         }
 
     } catch (error) {
-        console.error('Error submitting form:', error);
+        setTimeout(() => {
+            console.error('Error submitting form:', error);
+        }, 3000); // Attendre 3 secondes avant d'afficher l'erreur
     }
 }

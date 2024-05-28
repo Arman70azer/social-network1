@@ -120,6 +120,7 @@ export default function Page(){
                 // Envoyer les données du formulaire à l'URL souhaitée
                 if (correct){
                    sendFormToBack("/createPost", formDataToSend)
+                   window.location.href = '/home'
                 }
             }
         }else{

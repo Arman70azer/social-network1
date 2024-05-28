@@ -1,7 +1,7 @@
 import styles from '../styles/home.module.css'; // Utilisez des guillemets simples ou doubles pour l'importation
 import Link from 'next/link';
 import { useState } from 'react';
-import sendFormToHome from '../lib/sendFormToBack';
+import sendFormToBack from '../lib/sendFormToBack';
 
 
 //TODO Mettre les href une fois les pages finit !!!!!
@@ -36,7 +36,7 @@ function DashboardTop({ events = [], ws = null }) {
             formEventPost.append("nature", "yes")
             formEventPost.append("origin", origin)
 
-            sendFormToHome(formEventPost) 
+            sendFormToBack("/api/home",formEventPost)
         }
     }
     const handleEventNo= (titre)=>{
@@ -47,21 +47,10 @@ function DashboardTop({ events = [], ws = null }) {
             formEventPost.append("nature", "no")
             formEventPost.append("origin", origin)
 
-            sendFormToHome(formEventPost)
-        }
-
-    }
-
-    const onMessageWS = () => {
-        if (ws != null) {
-            ws.onmessage = (event) => {
-                const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
-                console.log(receivedMessage)
-            }
+            sendFormToBack("/api/home", formEventPost)
         }
     }
-    
-    onMessageWS()
+
 
     return (
         <div className={styles.dashboardTopPage}>

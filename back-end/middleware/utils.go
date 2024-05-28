@@ -2,7 +2,9 @@ package middleware
 
 import (
 	structures "back-end/middleware/struct"
+	"encoding/json"
 	"io"
+	"log"
 	"os"
 	"regexp"
 )
@@ -56,4 +58,15 @@ func RegexSpaceAndScript(str string) bool {
 	re := regexp.MustCompile(`^\s|^\s*$|<script.*?>.*?</script.*?>`)
 
 	return !re.MatchString(str)
+}
+
+func ConvertToJson(msg any) []byte {
+	// Convertir la structure Request en JSON
+	jsonMessage, err := json.Marshal(msg)
+	if err != nil {
+		log.Println("JSON encoding error:", err)
+		return jsonMessage
+	}
+
+	return jsonMessage
 }

@@ -1,12 +1,27 @@
+export default function openWebSocketConnexion(user) {
+    const ws = new WebSocket('ws://localhost:8000/websocket');
 
-export default function openWebSocketConnexion() {
-  const ws = new WebSocket('ws://localhost:8000/websocket');
-
-  // Gérer les erreurs de connexion WebSocket
-  ws.onerror = (error) => {
+    ws.onerror = (error) => {
     console.error('WebSocket error:', error);
-    // Gérez les erreurs de connexion ici
-  };
+    };
 
-  return ws
-}
+    ws.onopen = () => {
+    // Envoyer le nom d'utilisateur au serveur
+    const data = JSON.stringify({ User: user });
+    ws.send(data);
+    console.log('WebSocket connection opened.', data);
+    };
+
+    ws.onclose = (event) => {
+    console.log('WebSocket connection closed. Reconnecting...', event);
+    setTimeout(() => {
+        createWebSocket();
+    }, 1000); // Reconnect after 1 second
+    };
+
+    ws.onmessage =(event)=>{
+    console.log('Message received from server:', event.data);
+    }
+
+    return ws;
+};

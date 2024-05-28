@@ -7,6 +7,7 @@ export default function sendMessageToWebsocket(ws, message) {
 
     try {
         ws.send(JSON.stringify(message));
+        console.log("envoyer to back")
     } catch (error) {
         console.error("Erreur lors de l'envoi du message:", error);
     }

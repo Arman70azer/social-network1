@@ -6,15 +6,18 @@ import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import sendFormToBack from '../lib/sendFormToBack'
-import sendRequestToWebsocket from '../lib/wsSendMessage'
+import eventUpdate from '../utils/eventUpdate'
 
-let wsConnect;//Notre ws est stocké ici
+let wssocket;
+let wssocketDashboard;
 export default function Page(){
     const [data, setData] = useState([]);
     const [allData, setAllData]=useState([])
     const [seeThisPostCommentaries, setCommentaries] = useState("")
     const [enterComment, setEnterComment] = useState("")
     const [newPosts, setNewPosts] = useState([])
+    const user = "Arman"
+
 
     const onlyPublicPosts = () => {
         if (data.Posts) {
@@ -55,14 +58,12 @@ export default function Page(){
 
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchData();
-        wsConnect = openWebSocketConnexion()
-        setTimeout(() => {
-            sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "enterToHome", User:"Arman" });
-        }, 200);
+
         
-
+        wssocket = openWebSocketConnexion(user);
+        wssocketDashboard=wssocket
     }, []);
-
+       
     const seeCommentaries = (postName)=>{
         if (seeThisPostCommentaries!="" && seeThisPostCommentaries===postName){
             setCommentaries("")
@@ -84,10 +85,8 @@ export default function Page(){
                 formNewCommentary.append("content", enterComment)
                 formNewCommentary.append("origin", "home")
                 formNewCommentary.append("nature", "comment")
-
                 sendFormToBack("/api/home", formNewCommentary)
                 
-                sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "newComment", User:"Arman", ObjetcOfRequest: seeThisPostCommentaries });
             }
         }
     }
@@ -95,14 +94,13 @@ export default function Page(){
     //Cette function va push dans data les ajouts de commentaires et autres... dans la base de données 
     //qui ont été valider par celle-ci  
     const onMessageWS = () => {
-        if (data && wsConnect) {
+        if (data && wssocket!= null) {
             // Gérer les messages reçus du serveur WebSocket
-            wsConnect.onmessage = (event) => {
+            wssocket.onmessage = (event) => {
                 const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
                 if (receivedMessage.Accept && receivedMessage.Post) {
 
                     console.log("Message reçu du serveur WebSocket:", receivedMessage);
-                    console.log(data, "hhhhhhh")
                     // Filtrer les posts pour trouver celui qui correspond au post reçu
                     let postTarget;
                     if (data.Posts){
@@ -184,6 +182,8 @@ export default function Page(){
                     } else {
                         console.log("Aucune donnée des posts trouvée.");
                     }
+                }else if (receivedMessage.Accept && receivedMessage.Event){
+                    eventUpdate(data.Events, receivedMessage)
                 }
             };
         }
@@ -221,13 +221,13 @@ export default function Page(){
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>
-           {data.Events && wsConnect!= null ? <DashboardTop events={data.Events} ws={wsConnect} /> : <DashboardTop />}
+           {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocketDashboard} /> : <DashboardTop />}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
                 </button>
             </div>
-            {!wsConnect && (<span style={{ color: 'red', display: "flex", alignItems: "center", justifyContent: "center" }}>You need to reload page to connect to server!!!</span>)}
+            {!wssocket && (<span style={{ color: 'red', display: "flex", alignItems: "center", justifyContent: "center" }}>You need to reload page to connect to server!!!</span>)}
             <div className={styles.Content}>
                 {data.Posts && data.Posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>

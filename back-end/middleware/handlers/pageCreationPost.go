@@ -97,7 +97,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 				request.User = post.Author.Nickname
 				request.Date = formatDate
 				request.Nature = "New-post"
-				BroadcastMessageToAllClients(request)
+				Broadcast(request)
 			} else if nature == "Event" && eventNotExist(post, dbOpen) && titleEvent != "" && middleware.RegexSpaceAndScript(titleEvent) {
 				post.EventDate = conversionEventDate(r.FormValue("eventDate"))
 				post.Titre = titleEvent
@@ -109,7 +109,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 					request.User = post.Author.Nickname
 					request.Date = formatDate
 					request.Nature = "New-event"
-					BroadcastMessageToAllClients(request)
+					Broadcast(request)
 				}
 			}
 		} else {

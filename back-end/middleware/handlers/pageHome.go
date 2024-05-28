@@ -171,7 +171,7 @@ func likeDislike(r *http.Request) {
 		request.ObjetcOfRequest = "add"
 		fmt.Println("like add")
 	}
-	BroadcastMessageToAllClients(request)
+	BroadcastToOneClient(request.User, request)
 }
 
 func comment(r *http.Request) {
@@ -191,7 +191,7 @@ func comment(r *http.Request) {
 		request.ObjetcOfRequest = commentary.Content
 		request.Accept = true
 		request.Date = commentary.Date
-		BroadcastMessageToAllClients(request)
+		BroadcastToOneClient(request.User, request)
 	} else {
 		fmt.Println("Error dans la func verifieNewComment dans AllPost.go")
 	}
@@ -257,7 +257,7 @@ func event(r *http.Request) {
 			request.Accept = false
 		}
 
-		BroadcastMessageToAllClients(request)
+		BroadcastToOneClient(request.User, request)
 		fmt.Println("ggg: ", request)
 	}
 }
