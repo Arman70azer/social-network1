@@ -5,7 +5,7 @@ import (
 	"html/template"
 	"net/http"
 )
-func handlerRegister(w http.ResponseWriter, r *http.Request) {
+func HandlerRegister(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("../social-network/front-end/htmls/page_register.html")
 	if err != nil {
 		fmt.Println("Error loading template:", err)

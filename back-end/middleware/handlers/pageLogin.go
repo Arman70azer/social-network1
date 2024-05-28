@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 )
+
 func HandlerLogin(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("../social-network/front-end/htmls/page_login.html")
 	if err != nil {

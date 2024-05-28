@@ -1,11 +1,11 @@
 :root {
-    --primary: #6B43FF;
+    --primary: #000000;
     --primary-light: #6667B0;
     --violet-light: #B492FD;
     --secondary: #1D1D1D;
     --white: #F4F1FF;
     --text: #323760;
-    --info-side-background: #ad4ef5;
+    --info-side-background: #39f1c3;
 }
 
 body {
@@ -15,14 +15,14 @@ body {
 }
 
 * {
-    margin: 0;
-    padding: 0;
+    margin: 50;
+    padding: 50;
     box-sizing: border-box;
 }
 
 .socials-row {
     display: flex;
-    gap: 16px;
+    gap: 50px;
 }
 
 .socials-row img {
@@ -36,7 +36,7 @@ body {
     width: 100%;
     min-height: 30px;
     display: flex;
-    gap: 12px;
+    gap: 70px;
     justify-content: center;
     align-items: center;
     text-decoration: none;
@@ -63,9 +63,9 @@ body {
 
 .divider-line {
     width: 100%;
-    height: 1px;
+    height: 10px;
     background-color: var(--secondary);
-    opacity: .2;
+    opacity: .20;
 }
 
 .form-wrapper {
@@ -87,7 +87,7 @@ body {
 .info-side {
     height: 100vh;
     padding: 248px 12px 8px 12px;
-    color: #401B3D;
+    color: #ac61a5;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -104,7 +104,7 @@ body {
 }
 
 .welcome-message {
-    max-width: 360px;
+    max-width: 400px;
 }
 
 .logo {
@@ -127,8 +127,8 @@ body {
     padding: 48px 32px;
     height: fit-content;
     box-shadow: 
-        rgba(100, 100, 111, 0.2)
-        0px 7px 29px 0px;
+        rgba(0, 0, 0, 0.2)
+        10px 10px 49px 0px;
 }
 
 .form-welcome {

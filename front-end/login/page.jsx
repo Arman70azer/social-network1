@@ -1,30 +1,27 @@
-import Image from "next/image";
-//pour lancez mon front end il faut faire npm run dev
+"use client"
 
-export default function Page() {
-  return (
-    <>
-      <div>
-        <Image src="/assets/google.jpgg" width={50} height={50} alt="Google" />
-        <div className="form-wrapper">
-          <div className="form-side">
-            
-            <form className="my-form">
+import googleimg from "./img/google.jpg"
+import githubimg from "./img/github.jpg"
+import Image from "next/image";
+
+export default function Form(){
+return (
+<form className="my-form" onSubmit={handleSubmit}>
               <div className="form-welcome-row">
                 <h1>Fais ton Compte &#x1F44F;</h1>
               </div>
               <div className="socials-row">
                 <a href="#" title="Use Google">
-                  <Image src="/assets/google.jpg" width={24} height={24} alt="Google" />
+                  <Image src={googleimg} width={24} height={24} alt="Google" />
                   Goggle
                 </a>
-                <a href="#" title="Use Apple">
-                  <Image src="/assets/apple.png" width={24} height={24} alt="Apple" />
-                   Apple
+                <a href="#" title="Use Github">
+                  <Image src={githubimg} width={24} height={24} alt="Github" />
+                   Github
                 </a>
               </div>
               <div className="divider">
-                <div className="divider-line"></div> Or <div className="divider-line"></div>
+                <div className="divider-line"></div> ou <div className="divider-line"></div>
               </div>
               <div className="text-field">
                 <label htmlFor="email">Email:
@@ -51,7 +48,7 @@ export default function Page() {
                   />
                 </label>
               </div>
-              <button type="submit" className="my-form__button">Login</button>
+              <button type="submit" className="my-form__button">Viens connecte toi</button>
               <div className="my-form__actions">
                 <a href="#" title="Reset Password">
                   Reset Password
@@ -61,13 +58,32 @@ export default function Page() {
                 </a>
               </div>
             </form>
-          </div>
-          <div className="info-side">
-            <Image src="/assets/mock.png" width={300} height={200} alt="Mock" className="mockup" />
-          </div>
-        </div>
-      </div>
-      <script src="script.js"></script>
-    </>
-  );
+            )
 }
+
+
+const handleSubmit = async (event) => {
+    console.log("APPUYEEE")
+    event.preventDefault();
+    
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log('Connexion réussie', data);
+        // Gérer la logique post-connexion ici, comme rediriger l'utilisateur
+      } else {
+        console.error('Échec de la connexion', data.message);
+        // Afficher un message d'erreur
+      }
+    } catch (error) {
+      console.error('Erreur de connexion', error);
+    }
+  };
