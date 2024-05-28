@@ -5,7 +5,7 @@ import fetchUsersAndPosts from "../lib/fetPosts";
 import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import sendFormToHome from '../lib/sendFormToHome'
+import sendFormToBack from '../lib/sendFormToBack'
 import sendRequestToWebsocket from '../lib/wsSendMessage'
 
 let wsConnect;//Notre ws est stocké ici
@@ -85,7 +85,7 @@ export default function Page(){
                 formNewCommentary.append("origin", "home")
                 formNewCommentary.append("nature", "comment")
 
-                sendFormToHome(formNewCommentary)
+                sendFormToBack("/api/home", formNewCommentary)
                 
                 sendRequestToWebsocket(wsConnect, { Origin: "home", Nature: "newComment", User:"Arman", ObjetcOfRequest: seeThisPostCommentaries });
             }
@@ -204,7 +204,7 @@ export default function Page(){
         formLikePost.append("nature", "like")
         formLikePost.append("origin", "home")
 
-        sendFormToHome(formLikePost)
+        sendFormToBack("/api/home",formLikePost)
     }
 
     const dislike = (titrePost)=>{
@@ -214,7 +214,7 @@ export default function Page(){
         formDislikePost.append("nature", "dislike")
         formDislikePost.append("origin", "home")
 
-        sendFormToHome(formDislikePost)
+        sendFormToBack("/api/home",formDislikePost)
     } 
     
     onMessageWS()

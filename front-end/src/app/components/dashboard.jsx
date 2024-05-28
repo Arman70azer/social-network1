@@ -1,7 +1,7 @@
 import styles from '../styles/home.module.css'; // Utilisez des guillemets simples ou doubles pour l'importation
 import Link from 'next/link';
 import { useState } from 'react';
-import sendFormToHome from '../lib/sendFormToHome';
+import sendFormToHome from '../lib/sendFormToBack';
 
 
 //TODO Mettre les href une fois les pages finit !!!!!

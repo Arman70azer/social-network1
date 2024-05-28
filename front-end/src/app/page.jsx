@@ -1,17 +1,38 @@
 
 //pour lancez mon front end il faut faire npm run dev
-
-//import { useState } from "react";
+"use client"
+import { useState } from "react";
+import sendFormToBack from "./lib/sendFormToBack";
 
 export default function Page() {
 
-  /*
   const [form, setForm] = useState({
-    username : "",
+    email : "",
     password : ""
   })
-  */
 
+  const [error, setError] = useState(false)
+
+  const handleChange = (event) => {
+      const { name, value } = event.target;
+      setForm({
+          ...form,
+          [name]: value
+      });
+  };
+
+  const sendForm = (event) =>{
+    event.preventDefault()
+
+    if (form.email != "" && form.password != ""){
+      const formToSend = new FormData
+      formToSend.append("user", form.email)
+      formToSend.append("password", form.password)
+      sendFormToBack("/login", formToSend)
+    }else{
+      setError(true)
+    }
+  }
 
 
   return (
@@ -45,6 +66,7 @@ export default function Page() {
                     id="email"
                     name="email"
                     autoComplete="off"
+                    onChange={handleChange}
                     placeholder="Ton Email"
                     required
                   />
@@ -57,13 +79,16 @@ export default function Page() {
                     type="password"
                     name="password"
                     placeholder="Ton Password"
+                    onChange={handleChange}
                     title="Minimum 6 characters with at least 1 Alphabet and 1 Number"
                     pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$"
                     required
                   />
                 </label>
               </div>
-              <button type="submit" className="my-form__button">Login</button>
+              {form.email && form.password && (<div>{form.password}-{form.email}</div>)}
+              <button type="submit" className="my-form__button" onClick={sendForm}>Login</button>
+              {error && <div>You need to give username/email and password</div>}
               <div className="my-form__actions">
                 <a href="#" title="Reset Password">
                   Reset Password

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import fetchUsersAndPosts from "../lib/fetPosts"
 import openWebSocketConnexion from "../lib/websocket";
 import sendRequestToWebsocket from "../lib/wsSendMessage"
+import sendFormToBack from "../lib/sendFormToBack";
 
 //permet de retourner sur la page d'acceuil
 
@@ -118,22 +119,7 @@ export default function Page(){
 
                 // Envoyer les données du formulaire à l'URL souhaitée
                 if (correct){
-                    try {
-                        const response = await fetch('http://localhost:8000/createPost', {
-                            method: 'POST',
-                            body: formDataToSend
-                        });
-
-                        // Vérifiez si la réponse est réussie (statut 200)
-                        if (response.ok) {
-                            // Rediriger l'utilisateur vers la page d'accueil
-                            router.push('/home');
-                        } else {
-                            console.error('Erreur lors de l\'envoi du formulaire:', response.statusText);
-                        }
-                    } catch (error) {
-                        console.error('Error submitting form:', error);
-                    }
+                   sendFormToBack("/createPost", formDataToSend)
                 }
             }
         }else{
