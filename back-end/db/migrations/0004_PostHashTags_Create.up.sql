@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS PostHashtags (
+    PostID INTEGER,
+    HashtagID INTEGER,
+    FOREIGN KEY (PostID) REFERENCES Posts(ID),
+    FOREIGN KEY (HashtagID) REFERENCES Hashtags(ID)
+);

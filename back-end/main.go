@@ -1,12 +1,16 @@
 package main
 
 import (
-	handlers "back-end/middleware/handlers"
+	db "back-end/db"
+	"back-end/middleware/handlers"
 	"fmt"
 	"net/http"
 )
 
+
+
 func main() {
+	db.Create_db()
 	http.HandleFunc("/login", handlers.HandlerLogin)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
@@ -14,3 +18,4 @@ func main() {
 	}
 	fmt.Println("Server is running at http://localhost:8080/login")
 }
+
