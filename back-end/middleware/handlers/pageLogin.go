@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"back-end/middleware/dbFunc"
 	"fmt"
 	"net/http"
 )
@@ -11,8 +12,17 @@ func HandlerLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method == "POST" {
-		fmt.Println("username: ", r.FormValue("user"))
-		fmt.Println("password: ", r.FormValue("password"))
+		user := r.FormValue("user")
+		password := r.FormValue("password")
+
+		db := dbFunc.Open_db()
+
+		if dbFunc.UserExist_db(db, user, password) {
+			fmt.Println("valid")
+		} else {
+			fmt.Println("nop")
+		}
+
 		w.WriteHeader(http.StatusOK)
 	}
 }

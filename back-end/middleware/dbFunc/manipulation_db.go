@@ -624,3 +624,32 @@ func SelectEventByTitle_db(db *sql.DB, titre string) structures.Post {
 
 	return event
 }
+
+// Renvoie un boolean qui vérifie si l'user existe et que son mot de passe l'est aussi
+func UserExist_db(db *sql.DB, user string, password string) bool {
+	stmt, err := db.Prepare("SELECT Password FROM Users WHERE Nickname = ? OR Email = ?")
+	if err != nil {
+		// Gérer l'erreur
+		log.Println("Erreur lors de la préparation de l'instruction SQL:", err)
+		return false
+	}
+	defer stmt.Close()
+
+	var hashedPassword string
+	err = stmt.QueryRow(user, user).Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// L'utilisateur n'existe pas
+			return false
+		}
+		// Gérer l'erreur
+		log.Println("Erreur lors de l'exécution de la requête SQL:", err)
+		return false
+	}
+
+	if password == hashedPassword {
+		return true
+	} else {
+		return false
+	}
+}
