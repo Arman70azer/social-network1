@@ -165,10 +165,10 @@ func likeDislike(r *http.Request) {
 
 	request.OtherLikeDislike = otherTypeLikeExist
 	if likeAlready {
-		request.ObjetcOfRequest = "remove"
+		request.ObjectOfRequest = "remove"
 		fmt.Println("like remove")
 	} else {
-		request.ObjetcOfRequest = "add"
+		request.ObjectOfRequest = "add"
 		fmt.Println("like add")
 	}
 	BroadcastToOneClient(request.User, request)
@@ -188,7 +188,7 @@ func comment(r *http.Request) {
 		request.Nature = "New-comment"
 		request.User = commentary.Author.Nickname
 		request.Post = commentary.Post.Titre
-		request.ObjetcOfRequest = commentary.Content
+		request.ObjectOfRequest = commentary.Content
 		request.Accept = true
 		request.Date = commentary.Date
 		BroadcastToOneClient(request.User, request)
@@ -225,13 +225,13 @@ func event(r *http.Request) {
 			request.Nature = "New-followEvent"
 			if middleware.Contains(userName, eventTarget.Followers) {
 				dbFunc.DeleteYesOrNoEvent_db(db, column, titre, userName)
-				request.ObjetcOfRequest = "unfollowEvent"
+				request.ObjectOfRequest = "unfollowEvent"
 			} else {
 				if middleware.Contains(userName, eventTarget.NoFollowers) {
 					dbFunc.DeleteYesOrNoEvent_db(db, "NoFollowers", titre, userName)
 				}
 				dbFunc.AddYesOrNoEvent_db(db, column, titre, userName)
-				request.ObjetcOfRequest = "followEvent"
+				request.ObjectOfRequest = "followEvent"
 			}
 
 			request.Accept = true
@@ -241,13 +241,13 @@ func event(r *http.Request) {
 			request.Nature = "New-unfollowEvent"
 			if middleware.Contains(userName, eventTarget.NoFollowers) {
 				dbFunc.DeleteYesOrNoEvent_db(db, column, titre, userName)
-				request.ObjetcOfRequest = "unfollowEvent"
+				request.ObjectOfRequest = "unfollowEvent"
 			} else {
 				if middleware.Contains(userName, eventTarget.Followers) {
 					dbFunc.DeleteYesOrNoEvent_db(db, "Followers", titre, userName)
 				}
 				dbFunc.AddYesOrNoEvent_db(db, column, titre, userName)
-				request.ObjetcOfRequest = "followEvent"
+				request.ObjectOfRequest = "followEvent"
 			}
 
 			request.Accept = true
@@ -258,6 +258,5 @@ func event(r *http.Request) {
 		}
 
 		BroadcastToOneClient(request.User, request)
-		fmt.Println("ggg: ", request)
 	}
 }

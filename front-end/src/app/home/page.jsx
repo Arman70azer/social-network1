@@ -183,7 +183,19 @@ export default function Page(){
                         console.log("Aucune donnée des posts trouvée.");
                     }
                 }else if (receivedMessage.Accept && receivedMessage.Event){
-                    eventUpdate(data.Events, receivedMessage)
+                    const eventTarget = eventUpdate(data.Events, receivedMessage)
+                    setAllData(prevData => {
+                        const updateEvents = prevData.Events.map(event => {
+                            if (event.Titre === eventTarget.Titre) {
+                                return eventTarget;
+                            } else {
+                                return event;
+                            }
+                        });
+                        return { ...prevData, Events: updateEvents };
+                    });
+                    setData(allData)
+                    console.log(data.Events[0].Followers)
                 }
             };
         }

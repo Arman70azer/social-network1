@@ -64,7 +64,7 @@ function DashboardTop({ events = [], ws = null }) {
                         {events.map((event, index) => (
                             <div key={index}>
                                 <button className={styles.extraButton} onClick={() => handleEventContent(index)}>
-                                    - {event.Titre}
+                                    {event.Titre}
                                 </button>
                                 {showContentEvent.index === index && showContentEvent.show && (
                                     <div>
@@ -75,8 +75,21 @@ function DashboardTop({ events = [], ws = null }) {
                                             <div className={styles.infoEventContent}>{event.Content}</div>
                                             <div className={styles.infoUserEvent}>By {event.Author.Nickname}</div>
                                         </div>
-                                        <div>Follow by: {event.Followers}</div>
-                                        <div className={styles.buttonsEnvents}>
+                                        <div className={styles.followers_container}>
+                                        {event.Followers && event.Followers.length > 0 ? (
+                                            <span>Follow by: {event.Followers.join(', ')}</span>
+                                        ) : (
+                                            <span>Follow by:</span>
+                                        )}
+                                        </div>
+                                        <div className={styles.followers_container}>
+                                        {event.NoFollowers && event.NoFollowers.length > 0 ? (
+                                            <span>Unfollow by: {event.NoFollowers.join(', ')}</span>
+                                        ) : (
+                                            <span>Unfollow by:</span>
+                                        )}
+                                        </div>
+                                        <div className={styles.buttonsEvents}>
                                             <button onClick={() => handleEventYes(event.Titre)} className={styles.buttonGoEvent}>Go!!!</button>
                                             <button onClick={() => handleEventNo(event.Titre)} className={styles.buttonNotGoingEvent}>No...</button>
                                         </div>

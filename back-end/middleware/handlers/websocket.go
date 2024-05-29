@@ -59,8 +59,6 @@ func handleWebSocket(conn *websocket.Conn) {
 		return
 	}
 
-	fmt.Println(clientMsg)
-
 	// Extract user name from clientMsg
 	userName := clientMsg.User
 
@@ -71,7 +69,6 @@ func handleWebSocket(conn *websocket.Conn) {
 		clients.connections[userName] = conn
 
 		fmt.Println("New user connected:", userName)
-		fmt.Println("nbr totale d'users: ", len(clients.connections))
 	} else {
 
 		clients.connections[userName] = conn
@@ -80,7 +77,7 @@ func handleWebSocket(conn *websocket.Conn) {
 
 	// Send welcome message or perform other actions if needed
 	var response structures.Request
-	response.ObjetcOfRequest = "Welcome, " + userName + "!"
+	response.ObjectOfRequest = "Welcome, " + userName + "!"
 	response.Accept = true
 	response.User = userName
 
@@ -122,8 +119,6 @@ func BroadcastToOneClient(client string, msg structures.Request) {
 				conn.Close()
 				delete(clients.connections, userName)
 			}
-
-			fmt.Println("message envoyé")
 		}
 	}
 }

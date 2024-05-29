@@ -554,7 +554,6 @@ func DeleteYesOrNoEvent_db(db *sql.DB, column, eventTitle, userToDelete string) 
 		return
 	}
 
-	fmt.Println("Followers mis à jour avec succès")
 }
 
 func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {

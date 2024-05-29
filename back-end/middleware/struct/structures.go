@@ -58,7 +58,7 @@ type Request struct {
 	Origin           string `json:"Origin"`
 	Nature           string `json:"Nature"`
 	User             string `json:"User"`
-	ObjetcOfRequest  string `json:"ObjectOfRequest"`
+	ObjectOfRequest  string `json:"ObjectOfRequest"`
 	Post             string `json:"Post"`
 	Accept           bool   `json:"Accept"`
 	Date             string `json:"Date"`

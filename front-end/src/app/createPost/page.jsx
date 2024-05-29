@@ -36,7 +36,6 @@ export default function Page(){
           // Mettre à jour les suggestions une seule fois
     }, []);
     
-    const router = useRouter();
     const [formData, setFormData] = useState({
         content: '',
         type: 'Public',
@@ -119,7 +118,7 @@ export default function Page(){
 
                 // Envoyer les données du formulaire à l'URL souhaitée
                 if (correct){
-                   sendFormToBack("/createPost", formDataToSend)
+                   await sendFormToBack("/createPost", formDataToSend)
                    window.location.href = '/home'
                 }
             }
