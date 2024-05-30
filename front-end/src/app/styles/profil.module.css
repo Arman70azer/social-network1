@@ -2,11 +2,26 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 180px;
-    margin-bottom: 100px;
-    overflow-y: auto;
+    margin-top: 125px;
+    overflow-y: auto; /* Permettre le défilement vertical si le contenu dépasse la hauteur */
     flex-direction: column;
+    min-height: 100vh; /* Utiliser min-height à la place de height */
+    max-height: 150vh; /* Optionnel : définir une hauteur maximale */
+    border: 1px solid #ddd; /* Optionnel : ajout d'une bordure pour mieux voir les limites du conteneur */
+    padding: 20px; /* Optionnel : ajout de padding pour un espacement interne */
 }
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100%;
+    background-color: #e3e3e3;
+    overflow: auto; /* Permettre le défilement du contenu si celui-ci dépasse la taille du conteneur */
+    overflow-y: auto;
+}
+
 
 .overlay {
     position: fixed;
@@ -19,7 +34,6 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index: 9999;
 }
 
 .loader {
@@ -36,3 +50,117 @@
     100% { transform: rotate(360deg); }
 }
 
+.publicPart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+    background: #f9f9f9; /* Couleur de fond douce */
+    border-radius: 10px; /* Coins arrondis */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre subtile */
+    width: 100%;
+    max-width: 500px; /* Limiter la largeur */
+    margin: 20px auto; /* Centrer et espacer */
+}
+
+.publicPart .nickname {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333; /* Couleur de texte foncée */
+}
+
+.publicPart .bio {
+    font-size: 16px;
+    color: #666; /* Couleur de texte douce */
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 10px; /* Espacement intérieur */
+    border: 1px solid #ddd; /* Bordure douce */
+    border-radius: 5px; /* Coins légèrement arrondis */
+    background: #fff; /* Fond blanc pour contraster avec le reste */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Petite ombre pour l'encadré */
+}
+
+.publicPart .avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    object-fit: cover; /* Assurer le bon affichage des images */
+    border: 2px solid #ddd; /* Bordure légère */
+}
+
+.publicPart .details {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    color: #333;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.statProfil {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f9f9f9; /* Fond doux */
+    border: 1px solid #ddd; /* Bordure légère */
+    border-radius: 10px; /* Coins arrondis */
+    padding: 20px; /* Espacement intérieur */
+    width: 100%;
+    max-width: 400px; /* Limiter la largeur */
+    margin: 20px auto; /* Centrer et espacer */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre subtile */
+}
+
+.statProfil span {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    color: #333; /* Couleur de texte foncée */
+    margin-bottom: 10px; /* Espacement entre les lignes */
+}
+
+.statProfil span:last-child {
+    margin-bottom: 0; /* Supprimer l'espacement après le dernier élément */
+}
+
+.statProfil span i {
+    margin-right: 8px; /* Espacement entre l'icône et le texte */
+    color: #555; /* Couleur des icônes */
+}
+
+.post_details {
+    background-color: #fdfdfd; /* Fond léger pour les posts */
+    border: 1px solid #ddd; /* Bordure légère */
+    border-radius: 8px; /* Coins arrondis */
+    padding: 15px; /* Espacement interne */
+    margin: 10px 0; /* Espacement externe */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Légère ombre pour la profondeur */
+    transition: transform 0.2s; /* Transition pour effet de survol */
+}
+
+.post_details:hover {
+    transform: scale(1.02); /* Légère mise à l'échelle au survol */
+}
+
+.post_date {
+    font-size: 14px; /* Taille de police pour la date */
+    color: #888; /* Couleur de texte douce pour la date */
+    margin-bottom: 8px; /* Espacement sous la date */
+    font-weight: bold; /* Mettre en gras la date */
+}
+
+.post_image{
+    margin-bottom: 10px;
+}
+
+
+.post_content{
+    font-size: 14px; /* Taille de police pour la date */
+    color: #414040; /* Couleur de texte douce pour la date */
+    margin-bottom: 8px; /* Espacement sous la date */
+    font-weight: bold; /* Mettre en gras la date */
+}
