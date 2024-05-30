@@ -3,7 +3,7 @@ import DashboardTop from "../components/dashboard"
 import styles from "../styles/createPost.module.css"
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import fetchUsersAndPosts from "../lib/fetPosts"
+import fetchUsersAndPosts from "../lib/fetchDataHome"
 import openWebSocketConnexion from "../lib/websocket";
 import sendRequestToWebsocket from "../lib/wsSendMessage"
 import sendFormToBack from "../lib/sendFormToBack";

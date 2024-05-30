@@ -1,7 +1,7 @@
 "use client"
 import DashboardTop from "../components/dashboard";
 import openWebSocketConnexion from "../lib/websocket"
-import fetchUsersAndPosts from "../lib/fetPosts";
+import fetchUsersAndPosts from "../lib/fetchDataHome";
 import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -9,7 +9,6 @@ import sendFormToBack from '../lib/sendFormToBack'
 import eventUpdate from '../utils/eventUpdate'
 
 let wssocket;
-let wssocketDashboard;
 export default function Page(){
     const [data, setData] = useState([]);
     const [allData, setAllData]=useState([])
@@ -17,6 +16,7 @@ export default function Page(){
     const [enterComment, setEnterComment] = useState("")
     const [newPosts, setNewPosts] = useState([])
     const user = "Arman"
+    const [isLoading, setLoading]=useState(true)
 
 
     const onlyPublicPosts = () => {
@@ -61,7 +61,10 @@ export default function Page(){
 
         
         wssocket = openWebSocketConnexion(user);
-        wssocketDashboard=wssocket
+
+        setTimeout(()=>{
+            setLoading(false)
+        }, 500)
     }, []);
        
     const seeCommentaries = (postName)=>{
@@ -233,14 +236,14 @@ export default function Page(){
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div>
-           {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocketDashboard} /> : <DashboardTop />}
+           {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} /> : <DashboardTop />}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
                 </button>
             </div>
-            {!wssocket && (<span style={{ color: 'red', display: "flex", alignItems: "center", justifyContent: "center" }}>You need to reload page to connect to server!!!</span>)}
-            <div className={styles.Content}>
+            {!wssocket && !isLoading && (<span style={{ color: 'red', display: "flex", alignItems: "center", justifyContent: "center" }}>You need to reload page to connect to server!!!</span>)}
+            {data && !isLoading ? <div className={styles.Content}>
                 {data.Posts && data.Posts.map((post, index) => (
                     <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
                         <div className={styles.alineProfilPost}>
@@ -311,6 +314,14 @@ export default function Page(){
                     </div>
                 ))}
             </div>
+             :
+             <div>
+                <div className={styles.overlay}>
+                    <div className={styles.loader}></div>
+                    <p>Load of profile data...</p>
+                </div>
+             </div>
+             }
             <div className={styles.dashboardBottomPage}>
                 <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
                 <button className={styles.buttonPostPrivates} onClick={onlyPrivatePosts}>Privates Posts</button>
