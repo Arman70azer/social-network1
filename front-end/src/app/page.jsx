@@ -31,7 +31,10 @@ export default function Page() {
           setMessage(data.message)
           setError(!data.success)
           if (typeof window !== 'undefined') {
-            Cookies.set('token', data.token, { expires: 1 }); // expire dans 7 jours
+            if (!Cookies.get('token') || Cookies.get('token')!==data.token){
+              Cookies.set('token', data.token, { expires: 1 }); // expire dans 1 jour
+            }
+            window.location.href = '/home'
           }
         }else{
           setError(true);
