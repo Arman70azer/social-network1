@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/form3tech-oss/jwt-go"
 )
 
 // Ouvre la db et permet par la suite de la manipuler
@@ -652,4 +654,59 @@ func UserExist_db(db *sql.DB, user string, password string) bool {
 	} else {
 		return false
 	}
+}
+
+var jwtKey = []byte("your_secret_key")
+
+type Claims struct {
+	UserID int    `json:"user_id"`
+	Email  string `json:"email"`
+	jwt.StandardClaims
+}
+
+// Vérifie les informations de connexion de l'utilisateur et stocke le token JWT dans la colonne uuid
+func CheckUserCredentials(db *sql.DB, emailOrNickname, password string) (bool, string, error) {
+	var userID int
+	var storedPassword string
+	query := `SELECT ID, Password FROM Users WHERE Email = ? OR Nickname = ?`
+	err := db.QueryRow(query, emailOrNickname, emailOrNickname).Scan(&userID, &storedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			fmt.Println("Aucun utilisateur trouvé avec l'email ou le pseudo fourni")
+			return false, "", nil
+		}
+		fmt.Println("Erreur lors de la vérification des informations de connexion :", err)
+		return false, "", err
+	}
+	fmt.Printf("Mot de passe récupéré de la base de données pour l'utilisateur %s: %s\n", emailOrNickname, storedPassword)
+	if storedPassword != password {
+		fmt.Println("Le mot de passe ne correspond pas")
+		return false, "", nil
+	}
+	// Générer le token JWT avec l'ID utilisateur, l'email, et un horodatage unique
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
+		UserID: userID,
+		Email:  emailOrNickname,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+			IssuedAt:  time.Now().Unix(), // Ajouter un horodatage unique
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		fmt.Println("Erreur lors de la génération du token :", err)
+		return false, "", err
+	}
+	fmt.Printf("Token généré pour l'utilisateur %s: %s\n", emailOrNickname, tokenString)
+	// Stocker le token dans la colonne uuid
+	updateQuery := `UPDATE Users SET uuid = ? WHERE ID = ?`
+	_, err = db.Exec(updateQuery, tokenString, userID)
+	if err != nil {
+		fmt.Println("Erreur lors de la mise à jour du token dans la base de données :", err)
+		return false, "", err
+	}
+	fmt.Printf("Token mis à jour dans la base de données pour l'utilisateur %s\n", emailOrNickname)
+	return true, tokenString, nil
 }

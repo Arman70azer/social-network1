@@ -1,110 +1,102 @@
-
-//pour lancez mon front end il faut faire npm run dev
-"use client"
+"use client";
 import { useState } from "react";
-import sendFormToBack from "./lib/sendFormToBack";
+import sendFormAndReceiveData from "./lib/sendForm&ReceiveData";
+import Cookies from "js-cookie";
 
 export default function Page() {
-
   const [form, setForm] = useState({
-    email : "",
-    password : ""
-  })
-
-  const [error, setError] = useState(false)
-
+    emailOrNickname: "",
+    password: ""
+  });
+  const [error, setError] = useState(false);
+  const [message, setMessage] = useState("");
   const handleChange = (event) => {
-      const { name, value } = event.target;
-      setForm({
-          ...form,
-          [name]: value
-      });
+    const { name, value } = event.target;
+    setForm({
+      ...form,
+      [name]: value
+    });
   };
-
-  const sendForm = (event) =>{
-    event.preventDefault()
-
-    if (form.email != "" && form.password != ""){
-      const formToSend = new FormData
-      formToSend.append("user", form.email)
-      formToSend.append("password", form.password)
-      sendFormToBack("/login", formToSend)
-    }else{
-      setError(true)
+  const sendForm = async (event) => {
+    event.preventDefault();
+    if (form.emailOrNickname !== "" && form.password !== "") {
+        const formToSend = new FormData();
+        formToSend.append("user", form.emailOrNickname);
+        formToSend.append("password", form.password);
+        const data = await sendFormAndReceiveData("/api/login", formToSend)
+        if (!data.success){
+          setMessage(data.message)
+          setError(true)
+        }else if(data.success){
+          setMessage(data.message)
+          setError(!data.success)
+          if (typeof window !== 'undefined') {
+            Cookies.set('token', data.token, { expires: 1 }); // expire dans 7 jours
+          }
+        }else{
+          setError(true);
+          setMessage("Erreur lors de la connexion");
+          console.error("Erreur lors de la connexion :", error);
+        }
+    } else {
+      setError(true);
+      setMessage("Vous devez entrer un email/pseudo et un mot de passe");
     }
-  }
-
-
+  };
   return (
-    <>
-      <div>
-        <img src="/assets/google.jpgg" width={50} height={50} alt="Google" />
-        <div className="form-wrapper">
-          <div className="form-side">
-            
-            <form className="my-form">
-              <div className="form-welcome-row">
-                <h1>Fais ton Compte &#x1F44F;</h1>
-              </div>
-              <div className="socials-row">
-                <a href="#" title="Use Google">
-                  <img src="/assets/google.jpg" width={24} height={24} alt="Google" />
-                  Goggle
-                </a>
-                <a href="#" title="Use Apple">
-                  <img src="/assets/apple.png" width={24} height={24} alt="Apple" />
-                   Apple
-                </a>
-              </div>
-              <div className="divider">
-                <div className="divider-line"></div> Or <div className="divider-line"></div>
-              </div>
-              <div className="text-field">
-                <label htmlFor="email">Email:
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    autoComplete="off"
-                    onChange={handleChange}
-                    placeholder="Ton Email"
-                    required
-                  />
-                </label>
-              </div>
-              <div className="text-field">
-                <label htmlFor="password">Password:
-                  <input
-                    id="password"
-                    type="password"
-                    name="password"
-                    placeholder="Ton Password"
-                    onChange={handleChange}
-                    title="Minimum 6 characters with at least 1 Alphabet and 1 Number"
-                    pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$"
-                    required
-                  />
-                </label>
-              </div>
-              {form.email && form.password && (<div>{form.password}-{form.email}</div>)}
-              <button type="submit" className="my-form__button" onClick={sendForm}>Login</button>
-              {error && <div>You need to give username/email and password</div>}
-              <div className="my-form__actions">
-                <a href="#" title="Reset Password">
-                  Reset Password
-                </a>
-                <a href="#" title="Create Account">
-                  Already have an account?
-                </a>
-              </div>
-            </form>
-          </div>
-          <div className="info-side">
-            <img src="/assets/mock.png" width={300} height={200} alt="Mock" className="mockup" />
-          </div>
+    <div>
+      <div className="form-wrapper">
+        <div className="form-side">
+          <form className="my-form" onSubmit={sendForm}>
+            <div className="form-welcome-row">
+              <h1>Connexion</h1>
+            </div>
+            <div className="text-field">
+              <label htmlFor="emailOrNickname">
+                Email or Nickname:
+                <input
+                  type="text"
+                  id="emailOrNickname"
+                  name="emailOrNickname"
+                  autoComplete="off"
+                  onChange={handleChange}
+                  placeholder="Email or Nickname"
+                  required
+                />
+              </label>
+            </div>
+            <div className="text-field">
+              <label htmlFor="password">
+                Password:
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  placeholder="Password"
+                  onChange={handleChange}
+                  required
+                />
+              </label>
+            </div>
+            {form.emailOrNickname && form.password && (
+              <div>{form.password}-{form.emailOrNickname}</div>
+            )}
+            <button type="submit" className="my-form__button">Login</button>
+            {message && <div className={error ? "error" : "success"}>{message}</div>}
+            <div className="my-form__actions">
+              <a href="#" title="Reset Password">
+                Reset Password
+              </a>
+              <a href="/register" title="Create Account">
+                Create Account
+              </a>
+            </div>
+          </form>
+        </div>
+        <div className="info-side">
+          <img src="/assets/mock.png" width={300} height={200} alt="Mock" className="mockup" />
         </div>
       </div>
-      <script src="script.js"></script>
-    </>
+    </div>
   );
 }

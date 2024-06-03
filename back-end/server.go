@@ -12,7 +12,7 @@ func main() {
 	db.Create_db()
 	fmt.Println("Server is running at http://localhost:8000")
 
-	http.HandleFunc("/login", handlers.HandlerLogin)
+	http.HandleFunc("/api/login", handlers.HandlerLogin)
 	http.HandleFunc("/api/home", handlers.HandlerInfoPostsAndUser)
 	http.HandleFunc("/createPost", handlers.CreationPost)
 	http.HandleFunc("/websocket", handlers.HandleConnections)
