@@ -19,13 +19,19 @@ export default function Register() {
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const { name, value, files } = e.target;
+    if (name === "imagename") {
+      setFormData({
+        ...formData,
+        [name]: files[0], // Si c'est une image, utilisez files[0]
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form Data:", formData);

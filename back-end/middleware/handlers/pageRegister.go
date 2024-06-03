@@ -45,11 +45,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
     // Extract the form values
 	
     user := s.User{
-        Nickname:  r.FormValue("nickname"),
+        Nickname:  r.FormValue("nickname"), //option
         FirstName: r.FormValue("firstname"),
         LastName:  r.FormValue("lastname"),
         Birthday:  r.FormValue("birthday"),
-        AboutMe:   r.FormValue("aboutme"),
+        ImageName: r.FormValue("imagename"),//option
+        AboutMe:   r.FormValue("aboutme"),//option
         Email:     r.FormValue("email"),
         Password:  r.FormValue("password"),
     }

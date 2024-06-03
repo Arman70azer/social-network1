@@ -10,6 +10,7 @@ import (
 
 
 func main() {
+	
 	db.Create_db()
 	http.HandleFunc("/login", handlers.HandlerLogin)
 	http.HandleFunc("/register", handlers.RegisterHandler)
