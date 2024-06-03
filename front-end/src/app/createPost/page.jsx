@@ -2,11 +2,12 @@
 import DashboardTop from "../components/dashboard"
 import styles from "../styles/createPost.module.css"
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Cookies from "js-cookie"
 import fetchUsersAndPosts from "../lib/fetchDataHome"
 import openWebSocketConnexion from "../lib/websocket";
 import sendRequestToWebsocket from "../lib/wsSendMessage"
 import sendFormToBack from "../lib/sendFormToBack";
+import cookieExist from "../utils/cookieUserExist";
 
 //permet de retourner sur la page d'acceuil
 
@@ -18,8 +19,11 @@ export default function Page(){
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [correctForm, setCorrectForm] = useState(true);
+    const [user, setUser] = useState("")
 
     useEffect(() => {
+        const userCookie = cookieExist()
+        setUser(userCookie)
         const fetchData = async () => {
             // Récupérer les données des posts
             const datafetch = await fetchUsersAndPosts();
@@ -30,7 +34,7 @@ export default function Page(){
 
         wsConnect = openWebSocketConnexion()
         setTimeout(() => {
-            sendRequestToWebsocket(wsConnect, { Origin: "creationPost", Nature: "enterToCreationPost", User:"Arman" });
+            sendRequestToWebsocket(wsConnect, { Origin: "creationPost", Nature: "enterToCreationPost", User:user });
         }, 200);
      
           // Mettre à jour les suggestions une seule fois
@@ -94,7 +98,7 @@ export default function Page(){
                 const formDataToSend = new FormData();
                 formDataToSend.append('content', formData.content);
                 formDataToSend.append('type', formData.type);
-                formDataToSend.append('user', "Arman")
+                formDataToSend.append('user', user)
                 formDataToSend.append('nature', formData.nature)
                 formDataToSend.append('title', formData.title)
                 formDataToSend.append('eventDate', formData.eventDate)
@@ -166,7 +170,7 @@ export default function Page(){
     };
 
     return (
-        <div>
+        <div className={styles.background}>
            {data.Events ? <DashboardTop events={data.Events} ws={wsConnect}/> : <DashboardTop />}
             <div className={styles.center}>
                 <form className={styles.menuNewPost}>

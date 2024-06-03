@@ -33,6 +33,7 @@ export default function Page() {
           if (typeof window !== 'undefined') {
             if (!Cookies.get('token') || Cookies.get('token')!==data.token){
               Cookies.set('token', data.token, { expires: 1 }); // expire dans 1 jour
+              Cookies.set('user', data.user, { expires: 1 }); // expire dans 1 jour
             }
             window.location.href = '/home'
           }

@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import sendFormToBack from '../lib/sendFormToBack'
 import eventUpdate from '../utils/eventUpdate'
+import cookieExist from '../utils/cookieUserExist'
 
 let wssocket;
 export default function Page(){
@@ -15,7 +16,7 @@ export default function Page(){
     const [seeThisPostCommentaries, setCommentaries] = useState("")
     const [enterComment, setEnterComment] = useState("")
     const [newPosts, setNewPosts] = useState([])
-    const user = "Arman"
+    const [user, setUser] = useState("")
     const [isLoading, setLoading]=useState(true)
 
 
@@ -48,6 +49,9 @@ export default function Page(){
     };
     
     useEffect(() => {
+
+        const userCookie = cookieExist()
+        setUser(userCookie)
        
         const fetchData = async () => {
             // Récupérer les données des posts
@@ -60,7 +64,7 @@ export default function Page(){
         fetchData();
 
         
-        wssocket = openWebSocketConnexion(user);
+        wssocket = openWebSocketConnexion(userCookie);
 
         setTimeout(()=>{
             setLoading(false)
@@ -83,7 +87,7 @@ export default function Page(){
             //Envoie du commentaire dans le back
             if (enterComment!="" && seeThisPostCommentaries!=""){
                 const formNewCommentary = new FormData();
-                formNewCommentary.append("user", "Arman")
+                formNewCommentary.append("user", user)
                 formNewCommentary.append("post", seeThisPostCommentaries)
                 formNewCommentary.append("content", enterComment)
                 formNewCommentary.append("origin", "home")
@@ -215,7 +219,7 @@ export default function Page(){
     const like = (titrePost)=>{
         const formLikePost = new FormData();
         formLikePost.append("post", titrePost)
-        formLikePost.append("user", "Arman")
+        formLikePost.append("user", user)
         formLikePost.append("nature", "like")
         formLikePost.append("origin", "home")
 
@@ -225,7 +229,7 @@ export default function Page(){
     const dislike = (titrePost)=>{
         const formDislikePost = new FormData();
         formDislikePost.append("post", titrePost)
-        formDislikePost.append("user", "Arman")
+        formDislikePost.append("user", user)
         formDislikePost.append("nature", "dislike")
         formDislikePost.append("origin", "home")
 
@@ -235,7 +239,7 @@ export default function Page(){
     onMessageWS()
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
-        <div>
+        <div className={styles.background}>
            {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} /> : <DashboardTop />}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
@@ -250,9 +254,9 @@ export default function Page(){
                             <div className={styles.avatarProfil}>
                                 <img className={styles.avatarPost} src={`${post.Author.UrlImage}`} alt="Avatar" />
                             </div>
-                            <button className={styles.authorPost}>
+                            <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }} className={styles.authorPost}>
                                 {post.Author.Nickname}
-                            </button>
+                            </Link>
                             <div className={styles.typePost}>
                                 {post.Type} Post
                             </div>
@@ -270,7 +274,7 @@ export default function Page(){
                             <div className={styles.buttonLike}>
                                 <button
                                     onClick={() => like(post.Titre)}
-                                    style={{ color: post.Likes && post.Likes.some(likeOrDislike => likeOrDislike.User === "Arman") ? "blue" : "white" }}
+                                    style={{ color: post.Likes && post.Likes.some(likeOrDislike => likeOrDislike.User === user) ? "blue" : "white" }}
                                 >
                                     {post.Likes && post.Likes.length> 0 ? `Like (${post.Likes.length})` : "Like"}
                                 </button>
@@ -278,7 +282,7 @@ export default function Page(){
                             <div className={styles.buttonDislike}>
                                 <button onClick={()=>dislike(post.Titre)} 
                                 className={styles.marginLeft}
-                                style={{ color: post.Dislikes && post.Dislikes.some(likeOrDislike => likeOrDislike.User === "Arman") ? "red" : "white" }}
+                                style={{ color: post.Dislikes && post.Dislikes.some(likeOrDislike => likeOrDislike.User === user) ? "red" : "white" }}
                                 >
                                    {post.Dislikes && post.Dislikes.length > 0 ? `Dislikes (${post.Dislikes.length})` : "Dislikes"}
                                 </button>
@@ -303,7 +307,7 @@ export default function Page(){
 
                                 {post.Commentaries && post.Commentaries.map((comment, index)=>(
                                     <div className={styles.commentsContent} key={index}>
-                                         <Link href={`/profil/`+comment.Author.Nickname}>{comment.Author.Nickname}: </Link>
+                                         <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }}>{comment.Author.Nickname}: </Link>
                                          {comment.Content}
                                          <div className={styles.dateComment}>{comment.Date}</div>
                                     </div>

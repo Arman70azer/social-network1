@@ -14,10 +14,15 @@
     z-index: 999; /* Assurez-vous que le tableau de bord s'affiche au-dessus du contenu de la page */
 }
 
-
-
-.dashboardTopPage > * {
-    margin-left: 20px; /* Ajustez cette valeur selon vos besoins */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100%;
+    background-color: #e3e3e3;
+    overflow: auto; /* Permettre le défilement du contenu si celui-ci dépasse la taille du conteneur */
+    overflow-y: auto;
 }
 
 .eventContainer {

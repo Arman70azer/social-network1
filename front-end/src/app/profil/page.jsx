@@ -5,11 +5,12 @@ import fetchDataHome from "../lib/fetchDataHome";
 import openWebSocketConnexion from "../lib/websocket"
 import styles from "../styles/profil.module.css"
 import eventUpdate from "../utils/eventUpdate"
+import cookieExist from "../utils/cookieUserExist";
 
 let wssocket;
 export default function page(){
     const [data, setData] = useState([])
-    const user = "Arman"
+    const [user, setUser] = useState("")
     const [isLoading, setLoading] = useState(true)
     const [userInfo, setUserInfo] = useState({
         ID:0,
@@ -29,25 +30,35 @@ export default function page(){
     const [postsUser, setPostsUser] = useState([])
 
     useEffect(() => {
-       
+        const cookieUser = cookieExist()
+        setUser(cookieUser)
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const userParam = urlParams.get('user');
+    
+        // Déplacer le reste de la logique à l'intérieur de la fonction de rappel de setUser
         const fetchData = async () => {
             // Récupérer les données des posts
             const datafetch = await fetchDataHome();
             setData(datafetch);
-            setUserInfo(datafetch.Users[0])
-            setPostsUser(datafetch.Posts.filter((post)=> post.Author.Nickname === user))
-            console.log(datafetch.Users[0])
+            setUserInfo(datafetch.Users.filter((client) => client.Nickname === userParam)[0]);
+            if (datafetch.Posts){
+                setPostsUser(datafetch.Posts.filter((post) => post.Author.Nickname === userParam));
+            }
+            console.log("posts: ", datafetch)
+            console.log(datafetch.Users[0]);
         };
-
+    
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchData();
-        
-        wssocket = openWebSocketConnexion(user);
-
-        setTimeout(()=>{
-            setLoading(false)
-        },500)
+    
+        wssocket = openWebSocketConnexion(userParam);
+    
+        setTimeout(() => {
+            setLoading(false);
+        }, 500);
     }, []);
+    
 
     const onMessageWS = () => {
         if (data && wssocket!= null) {
@@ -76,8 +87,8 @@ export default function page(){
 
     return(
         <div>
+            {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} /> : <DashboardTop />}
             <div className={styles.background}>
-                {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} /> : <DashboardTop />}
                 {userInfo.Nickname != "" && !isLoading ? 
                 <div className={styles.Content}>
                     <div className={styles.publicPart}>

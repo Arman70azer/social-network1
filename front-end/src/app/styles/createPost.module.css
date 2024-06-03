@@ -5,6 +5,18 @@
     justify-content: center;
     border: 2px solid rgb(23, 24, 29); /* Bordure de 2 pixels solide de couleur whitesmoke */
     flex-direction: column;
+    background: #f9f9f9; /* Couleur de fond douce */
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100%;
+    background-color: #e3e3e3;
+    overflow: auto; /* Permettre le défilement du contenu si celui-ci dépasse la taille du conteneur */
+    overflow-y: auto;
 }
 
 .center{

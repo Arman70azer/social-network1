@@ -9,9 +9,10 @@ import (
 )
 
 type LoginResponse struct {
-	Token   string `json:"token"`
-	Message string `json:"message"`
-	Success bool   `json:"success"`
+	Token    string `json:"token"`
+	Message  string `json:"message"`
+	Success  bool   `json:"success"`
+	UserName string `json:"user"`
 }
 
 func HandlerLogin(w http.ResponseWriter, r *http.Request) {
@@ -38,9 +39,10 @@ func HandlerLogin(w http.ResponseWriter, r *http.Request) {
 		response := LoginResponse{}
 		if valid {
 			response = LoginResponse{
-				Token:   token,
-				Message: "Connexion réussie",
-				Success: true,
+				Token:    token,
+				Message:  "Connexion réussie",
+				Success:  true,
+				UserName: dbFunc.SelectUserByNickname_db(db, user).Nickname,
 			}
 			fmt.Printf("Connexion réussie pour l'utilisateur: %s\n", user)
 		} else {

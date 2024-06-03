@@ -1,16 +1,32 @@
 import styles from '../styles/home.module.css'; // Utilisez des guillemets simples ou doubles pour l'importation
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import sendFormToBack from '../lib/sendFormToBack';
+import Cookies from "js-cookie"
 
 
 //TODO Mettre les href une fois les pages finit !!!!!
 function DashboardTop({ events = [], ws = null }) {
-    const user= "Arman";
     const origin= "home";
 
     const [showExtraButtons, setShowExtraButtons] = useState(false);
     const [showContentEvent, setShowContent] = useState({ index: null, show: false });
+
+    const [user, setUser] = useState("");
+    useEffect(() => {
+        const userFromCookie = Cookies.get("user");
+        if (userFromCookie) {
+            setUser(userFromCookie);
+        }
+    }, []);
+
+    const logout = () => {
+        // Supprimer les cookies de l'utilisateur
+        Cookies.remove("user");
+        Cookies.remove("token");
+        // Rediriger vers la page d'accueil
+        window.location.href = '/'
+    };
 
     const handleMouseEnter = () => {
         setShowExtraButtons(true);
@@ -100,8 +116,8 @@ function DashboardTop({ events = [], ws = null }) {
                     </div>
                 )}
             </div>
-            <Link href="/profil" className={styles.buttonProfil}>Profil</Link>
-            <Link href="/login" className={styles.buttonLogout}>Logout</Link>
+            <Link href={{ pathname: "/profil", query: { user: user } }} className={styles.buttonProfil}>Profil</Link>
+            <Link href="/login" className={styles.buttonLogout} onClick={logout}>Logout</Link>
         </div>
     );
 }

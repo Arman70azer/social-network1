@@ -2,13 +2,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 125px;
-    overflow-y: auto; /* Permettre le défilement vertical si le contenu dépasse la hauteur */
+    overflow-y: auto;
     flex-direction: column;
-    min-height: 100vh; /* Utiliser min-height à la place de height */
+    min-height: calc(100vh - 130px); /* Utiliser min-height à la place de height */
     max-height: 150vh; /* Optionnel : définir une hauteur maximale */
     border: 1px solid #ddd; /* Optionnel : ajout d'une bordure pour mieux voir les limites du conteneur */
     padding: 20px; /* Optionnel : ajout de padding pour un espacement interne */
+    margin-top: 130px; /* Déplacer le contenu vers le bas pour compenser la hauteur de l'élément fixé */
 }
 
 .background {
