@@ -1,4 +1,5 @@
 package handlers
+
 import (
 	"back-end/middleware"
 	"back-end/middleware/dbFunc"
@@ -6,11 +7,13 @@ import (
 	"fmt"
 	"net/http"
 )
+
 type LoginResponse struct {
 	Token   string `json:"token"`
 	Message string `json:"message"`
 	Success bool   `json:"success"`
 }
+
 func HandlerLogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type") // Autoriser l'en-tête Content-Type

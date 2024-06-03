@@ -10,5 +10,6 @@ CREATE TABLE IF NOT EXISTS Users (
     ImageName TEXT,
     AboutMe TEXT,
     UUID TEXT,
-    Followers TEXT
+    Followers TEXT,
+    Profil TEXT
 );
