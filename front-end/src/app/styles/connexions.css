@@ -1,58 +1,56 @@
 :root {
-    --primary: #6B43FF;
-    --primary-light: #6667B0;
-    --violet-light: #B492FD;
-    --secondary: #1D1D1D;
+    --primary: #0f0101;
+    --primary-light: #4e90af;
+    --violet-light: #26626d;
+    --secondary: #070101;
     --white: #F4F1FF;
-    --text: #323760;
-    --info-side-background: #ad4ef5;
+    --text: #000000;
+    --info-side-background: #254650;
 }
-
 body {
-    font-size: 16px;
+    font-size: 2px;
     background: var(--info-side-background);
     font-family: Mulish, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
-
 .socials-row {
     display: flex;
-    gap: 16px;
+    gap: 24px;
 }
-
 .socials-row img {
-    width: 24px;
+    width: 36px;
     height: 24px;
 }
-
 .socials-row > a {
     padding: 8px;
     border-radius: 8px;
     width: 100%;
     min-height: 30px;
     display: flex;
-    gap: 12px;
+    gap: 16px;
     justify-content: center;
     align-items: center;
     text-decoration: none;
     white-space: nowrap;
     font-size: 1rem;
     color: var(--text);
-    padding: 8px;
-    border: 1px solid var(--primary-light);
-    font-weight: 700;
+    border: 2.3px solid var(--primary-light);
+    font-weight: 620;
 }
-
 .socials-row > a:hover {
     color: var(--primary);
     border: 1px solid var(--primary);
 }
-
 .divider {
     display: flex;
     flex-direction: row;
@@ -60,34 +58,29 @@ body {
     gap: 16px;
     align-items: center;
 }
-
 .divider-line {
     width: 100%;
-    height: 1px;
+    height: 2px;
     background-color: var(--secondary);
-    opacity: .2;
+    opacity: .20;
 }
-
 .form-wrapper {
-    position: relative;
-    display: grid;
-    grid-template-columns: 3fr 2fr;
+    display: flex;
     max-width: 1200px;
+    width: 100%;
 }
-
-
 .form-side {
-    padding: 186px 32px 48px 32px;
+    padding: 32px;
     display: flex;
     justify-content: center;
     align-items: start;
-    background-color: white;
+    background-color: rgb(252, 252, 252);
+    flex: 1;
 }
-
 .info-side {
-    height: 100vh;
-    padding: 248px 12px 8px 12px;
-    color: #401B3D;
+    height: 100%;
+    padding: 32px;
+    color: #050000;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -97,24 +90,13 @@ body {
         var(--violet-light) 30.13%, 
         var(--info-side-background) 95.43%);
 }
-
 .info-side img {
     max-width: 360px;
     z-index: 1;
 }
-
 .welcome-message {
-    max-width: 360px;
+    max-width: 400px;
 }
-
-.logo {
-    display: block;
-    height: 40px;
-    position: absolute;
-    top: 20px;
-    left: 20px;
-}
-
 .my-form {
     display: flex;
     flex-direction: column;
@@ -126,18 +108,8 @@ body {
     width: 100%;
     padding: 48px 32px;
     height: fit-content;
-    box-shadow: 
-        rgba(100, 100, 111, 0.2)
-        0px 7px 29px 0px;
+    box-shadow: rgba(160, 50, 50, 0.2) 10px 10px 49px 0px;
 }
-
-.form-welcome {
-    height: 80px;
-    width: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
 .form-welcome-row {
     display: flex;
     width: 100%;
@@ -145,14 +117,12 @@ body {
     gap: 8px;
     margin-bottom: 8px;
 }
-
 .form-welcome-row h1 {
     font-size: 1.6rem;
 }
-
 .my-form__button {
     background-color: var(--primary);
-    color: white;
+    color: rgb(248, 248, 248);
     white-space: nowrap;
     border: none;
     display: flex;
@@ -173,58 +143,47 @@ body {
     transition: all .3s ease;
     -webkit-transition: all .3s ease;
 }
-
 .my-form__actions {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     color: var(--secondary);
-    gap: 16px;
+    gap: 19px;
     margin-top: 8px;
     font-size: smaller;
 }
-
 .my-form__actions a {
     color: var(--primary);
     font-weight: 600;
     font-size: 1rem;
     text-decoration: none;
 }
-
 .my-form__actions a:first-child {
     text-align: left;
 }
-
-
 .my-form__actions a:last-child {
     text-align: right;
 }
-
 .my-form__actions a:hover {
     text-decoration: underline;
 }
-
 .my-form__row {
     display: flex;
     justify-content: space-between;
 }
-
 .my-form__signup {
     display: flex;
     justify-content: center;
 }
-
 .my-form__signup a {
     color: var(--primary);
     font-weight: 800;
     text-decoration: none;
     font-size: 18px;
 }
-
 .my-form__signup a:hover {
     text-decoration: underline;
 }
-
 .text-field input {
     color: var(--secondary);
     font-size: 16px;
@@ -241,34 +200,27 @@ body {
     text-indent: 20px;
     margin-top: 4px;
 }
-
-.text-field label:focus-within  {
+.text-field label:focus-within {
     color: var(--primary);
 }
-
 .text-field {
     position: relative;
 }
-
 .text-field svg {
     position: absolute;
     right: -2px;
     bottom: -4px;
     width: 30px;
     height: 30px;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     transform-origin: center;
 }
-
 .text-field input:focus {
     border: 1px solid var(--primary);
 }
-
-
 .text-field input:focus + svg {
     stroke: var(--primary);
-} 
-
+}
 .text-field label {
     color: var(--secondary);
     font-size: 14px;
@@ -276,10 +228,9 @@ body {
     letter-spacing: .03rem;
     z-index: 10;
 }
-
 @media (max-width: 840px) {
     .form-wrapper {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         height: 100vh;
     }
     

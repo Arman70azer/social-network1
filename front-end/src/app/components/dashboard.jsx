@@ -117,7 +117,7 @@ function DashboardTop({ events = [], ws = null }) {
                 )}
             </div>
             <Link href={{ pathname: "/profil", query: { user: user } }} className={styles.buttonProfil}>Profil</Link>
-            <Link href="/login" className={styles.buttonLogout} onClick={logout}>Logout</Link>
+            <Link href="/" className={styles.buttonLogout} onClick={logout}>Logout</Link>
         </div>
     );
 }

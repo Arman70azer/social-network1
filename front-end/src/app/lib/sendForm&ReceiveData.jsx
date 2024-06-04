@@ -14,8 +14,6 @@ export default async function sendFormToBack(page, formData) {
             return data
         }
     } catch (error) {
-        setError(true);
-        setMessage("Erreur lors de la connexion");
         console.error("Erreur lors de la connexion :", error);
     }
 }
