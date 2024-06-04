@@ -14,7 +14,7 @@ export default function Page(){
     const [data, setData] = useState([]);
     const [allData, setAllData]=useState([])
     const [seeThisPostCommentaries, setCommentaries] = useState("")
-    const [enterComment, setEnterComment] = useState("")
+    const [enterComment1A, setEnterComment] = useState("")
     const [newPosts, setNewPosts] = useState([])
 
     const onlyPublicPosts = () => {

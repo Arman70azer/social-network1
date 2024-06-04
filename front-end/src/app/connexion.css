@@ -1,32 +1,38 @@
 :root {
-    --primary: #000000;
-    --primary-light: #6667B0;
-    --violet-light: #B492FD;
-    --secondary: #1D1D1D;
+    --primary: #0f0101;
+    --primary-light: #4e90af;
+    --violet-light: #26626d;
+    --secondary: #070101;
     --white: #F4F1FF;
-    --text: #323760;
-    --info-side-background: #39f1c3;
+    --text: #000000;
+    --info-side-background: #254650;
 }
 
 body {
-    font-size: 16px;
+    font-size: 2px;
     background: var(--info-side-background);
     font-family: Mulish, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 * {
-    margin: 50;
-    padding: 50;
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
 .socials-row {
     display: flex;
-    gap: 50px;
+    gap: 24px;
 }
 
 .socials-row img {
-    width: 24px;
+    width: 36px;
     height: 24px;
 }
 
@@ -36,16 +42,15 @@ body {
     width: 100%;
     min-height: 30px;
     display: flex;
-    gap: 70px;
+    gap: 16px;
     justify-content: center;
     align-items: center;
     text-decoration: none;
     white-space: nowrap;
     font-size: 1rem;
     color: var(--text);
-    padding: 8px;
-    border: 1px solid var(--primary-light);
-    font-weight: 700;
+    border: 2.3px solid var(--primary-light);
+    font-weight: 620;
 }
 
 .socials-row > a:hover {
@@ -63,31 +68,30 @@ body {
 
 .divider-line {
     width: 100%;
-    height: 10px;
+    height: 2px;
     background-color: var(--secondary);
     opacity: .20;
 }
 
 .form-wrapper {
-    position: relative;
-    display: grid;
-    grid-template-columns: 3fr 2fr;
+    display: flex;
     max-width: 1200px;
+    width: 100%;
 }
 
-
 .form-side {
-    padding: 186px 32px 48px 32px;
+    padding: 32px;
     display: flex;
     justify-content: center;
     align-items: start;
-    background-color: white;
+    background-color: rgb(252, 252, 252);
+    flex: 1;
 }
 
 .info-side {
-    height: 100vh;
-    padding: 248px 12px 8px 12px;
-    color: #ac61a5;
+    height: 100%;
+    padding: 32px;
+    color: #050000;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -107,13 +111,6 @@ body {
     max-width: 400px;
 }
 
-.logo {
-    display: block;
-    height: 40px;
-    position: absolute;
-    top: 20px;
-    left: 20px;
-}
 
 .my-form {
     display: flex;
@@ -126,16 +123,7 @@ body {
     width: 100%;
     padding: 48px 32px;
     height: fit-content;
-    box-shadow: 
-        rgba(0, 0, 0, 0.2)
-        10px 10px 49px 0px;
-}
-
-.form-welcome {
-    height: 80px;
-    width: 80px;
-    border-radius: 50%;
-    object-fit: cover;
+    box-shadow: rgba(160, 50, 50, 0.2) 10px 10px 49px 0px;
 }
 
 .form-welcome-row {
@@ -152,7 +140,7 @@ body {
 
 .my-form__button {
     background-color: var(--primary);
-    color: white;
+    color: rgb(248, 248, 248);
     white-space: nowrap;
     border: none;
     display: flex;
@@ -179,7 +167,7 @@ body {
     flex-direction: row;
     justify-content: space-between;
     color: var(--secondary);
-    gap: 16px;
+    gap: 19px;
     margin-top: 8px;
     font-size: smaller;
 }
@@ -194,7 +182,6 @@ body {
 .my-form__actions a:first-child {
     text-align: left;
 }
-
 
 .my-form__actions a:last-child {
     text-align: right;
@@ -242,7 +229,7 @@ body {
     margin-top: 4px;
 }
 
-.text-field label:focus-within  {
+.text-field label:focus-within {
     color: var(--primary);
 }
 
@@ -256,7 +243,7 @@ body {
     bottom: -4px;
     width: 30px;
     height: 30px;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     transform-origin: center;
 }
 
@@ -264,10 +251,9 @@ body {
     border: 1px solid var(--primary);
 }
 
-
 .text-field input:focus + svg {
     stroke: var(--primary);
-} 
+}
 
 .text-field label {
     color: var(--secondary);
@@ -279,7 +265,7 @@ body {
 
 @media (max-width: 840px) {
     .form-wrapper {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         height: 100vh;
     }
     

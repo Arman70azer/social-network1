@@ -75,7 +75,7 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 func BroadcastMessages() {
 	for {
 		// Example: Send a message to all connected clients every 10 seconds
-		for conn, _ := range clients {
+		for conn := range clients {
 			err := conn.WriteMessage(websocket.TextMessage, []byte("Hello from the server! Are you here?"))
 			if err != nil {
 				log.Printf("Error sending message to client: %v", err)
@@ -120,7 +120,7 @@ func BroadcastMessageToAllClients(request structures.Request) {
 	if err != nil {
 		fmt.Println("Erreur lors de la conversion en JSON:", err)
 	}
-	for conn, _ := range clients {
+	for conn := range clients {
 		err := conn.WriteMessage(websocket.TextMessage, jsonData)
 		if err != nil {
 			log.Printf("Error sending message to client: %v", err)
