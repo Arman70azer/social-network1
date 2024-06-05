@@ -15,9 +15,9 @@ export default function openWebSocketConnexion() {
 
     ws.onclose = (event) => {
     console.log('WebSocket connection closed. Reconnecting...', event);
-    setTimeout(() => {
-        createWebSocket();
-    }, 1000); // Reconnect after 1 second
+        setTimeout(() => {
+            openWebSocketConnexion();
+        }, 1000); // Reconnect after 1 second
     };
 
     ws.onmessage =(event)=>{
