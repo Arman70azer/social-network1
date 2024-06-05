@@ -16,7 +16,8 @@ func main() {
 	http.HandleFunc("/api/home", handlers.HandlerInfoPostsAndUser)
 	http.HandleFunc("/createPost", handlers.CreationPost)
 	http.HandleFunc("/websocket", handlers.HandleConnections)
-	//go handlers.BroadcastMessages()
+	http.HandleFunc("/api/checkFollow", handlers.HandlerCheckFollow)
+	http.HandleFunc("/api/follow", handlers.HandlerFollow)
 	http.HandleFunc("/images/", handlers.ServeImage)
 	http.HandleFunc("/api/profil", handlers.HandlerProfil)
 

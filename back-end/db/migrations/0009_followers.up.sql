@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS Follow (
+    IDFollow INTEGER PRIMARY KEY AUTOINCREMENT,
+    UserID_Following INTEGER NOT NULL,
+    UserID_Follower INTEGER NOT NULL,
+    Date TEXT,
+    FOREIGN KEY (UserID_Following) REFERENCES Users(ID),
+    FOREIGN KEY (UserID_Follower) REFERENCES Users(ID)
+    
+);

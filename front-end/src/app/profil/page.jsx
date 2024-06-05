@@ -28,6 +28,7 @@ export default function page(){
         Followers: []
     })
     const [postsUser, setPostsUser] = useState([])
+    const [isFollowing, setIsFollowing] = useState(false);
 
     useEffect(() => {
         const cookieUser = cookieExist()
@@ -47,6 +48,17 @@ export default function page(){
             }
             console.log("posts: ", datafetch)
             console.log(datafetch.Users[0]);
+            checkIfFollowing(datafetch.Users.filter((client) => client.Nickname === userParam)[0].ID);
+        };
+
+        const checkIfFollowing = async (userID) => {
+            try {
+                const response = await fetch(`/api/checkFollow?follower=${user}&following=${userParam}`);
+                const result = await response.json();
+                setIsFollowing(result.isFollowing);
+            } catch (error) {
+                console.error("Erreur lors de la vérification du suivi", error);
+            }
         };
     
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
@@ -83,6 +95,34 @@ export default function page(){
         }
     }
 
+    const handleFollow = async () => {
+        if (!isFollowing) {
+            try {
+                const response = await fetch("/api/follow", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        UserID_Following: userInfo.ID,
+                        UserID_Follower: user.ID,
+                    }),
+                });
+                const result = await response.json();
+                if (result.success) {
+                    setIsFollowing(true);
+                    alert(result.message);
+                } else {
+                    console.error("Erreur lors de l'abonnement");
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'abonnement", error);
+            }
+        } else {
+            console.error("Vous suivez déjà cet utilisateur");
+        }
+    };
+
     onMessageWS()
 
     return(
@@ -96,6 +136,9 @@ export default function page(){
                         <div className={styles.nickname}>
                             {userInfo.Nickname}
                         </div>
+                        <button onClick={handleFollow} className={styles.followButton}>
+                            {isFollowing ? "Abonné" : "S'abonner"}
+                        </button>
                         <div className={styles.statProfil}>
                             <span>
                                 <i className="fas fa-birthday-cake"></i>
