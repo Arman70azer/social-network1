@@ -8,6 +8,7 @@ import Link from 'next/link';
 import sendFormToBack from '../lib/sendFormToBack'
 import eventUpdate from '../utils/eventUpdate'
 import cookieExist from '../utils/cookieUserExist'
+import Cookies from 'js-cookie'
 
 let wssocket;
 export default function Page(){
@@ -64,7 +65,7 @@ export default function Page(){
         fetchData();
 
         
-        wssocket = openWebSocketConnexion(userCookie);
+        wssocket = openWebSocketConnexion();
 
         setTimeout(()=>{
             setLoading(false)
@@ -87,7 +88,7 @@ export default function Page(){
             //Envoie du commentaire dans le back
             if (enterComment!="" && seeThisPostCommentaries!=""){
                 const formNewCommentary = new FormData();
-                formNewCommentary.append("user", user)
+                formNewCommentary.append("token", user)
                 formNewCommentary.append("post", seeThisPostCommentaries)
                 formNewCommentary.append("content", enterComment)
                 formNewCommentary.append("origin", "home")
@@ -219,7 +220,7 @@ export default function Page(){
     const like = (titrePost)=>{
         const formLikePost = new FormData();
         formLikePost.append("post", titrePost)
-        formLikePost.append("user", user)
+        formLikePost.append("token", user)
         formLikePost.append("nature", "like")
         formLikePost.append("origin", "home")
 
@@ -229,7 +230,7 @@ export default function Page(){
     const dislike = (titrePost)=>{
         const formDislikePost = new FormData();
         formDislikePost.append("post", titrePost)
-        formDislikePost.append("user", user)
+        formDislikePost.append("token", user)
         formDislikePost.append("nature", "dislike")
         formDislikePost.append("origin", "home")
 

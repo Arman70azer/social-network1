@@ -18,6 +18,7 @@ func main() {
 	http.HandleFunc("/websocket", handlers.HandleConnections)
 	//go handlers.BroadcastMessages()
 	http.HandleFunc("/images/", handlers.ServeImage)
+	http.HandleFunc("/api/profil", handlers.HandlerProfil)
 
 	err := http.ListenAndServe(":8000", nil)
 	if err != nil {

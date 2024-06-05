@@ -21,11 +21,9 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		content := r.FormValue("content")
 		typePost := r.FormValue("type")
-		author := r.FormValue("user")
+		author := dbFunc.SelectUserByToken(dbFunc.Open_db(), r.FormValue("user"))
 		nature := r.FormValue("nature")
 		titleEvent := r.FormValue("title")
-
-		fmt.Println("ici ca marche")
 
 		var privateUsers []structures.User
 		if typePost == "Private" {
@@ -52,7 +50,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 				out, err := os.Create("./db/images/" + fileName)
 				if err != nil {
 					http.Error(w, "Erreur lors de la création du fichier sur le serveur", http.StatusInternalServerError)
-					fmt.Println("1 erreur lors de la création du fichier pour le post de " + author)
+					fmt.Println("1 erreur lors de la création du fichier pour le post de " + author.Nickname)
 					return
 				}
 				defer out.Close()
@@ -60,7 +58,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 				_, err = io.Copy(out, file)
 				if err != nil {
 					http.Error(w, "Erreur lors de la copie du fichier sur le serveur", http.StatusInternalServerError)
-					fmt.Println("2 erreur lors de la création du fichier pour le post de " + author)
+					fmt.Println("2 erreur lors de la création du fichier pour le post de " + author.Nickname)
 					return
 				}
 			}
@@ -68,11 +66,6 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		dbOpen := dbFunc.Open_db()
-
-		// Créer un objet Post avec les données du formulaire
-		var user structures.User
-		user.Nickname = author
-		user.ID = dbFunc.SelectIdReferenceUser_db(author, dbOpen)
 
 		// Obtenir la date actuelle
 		currentDate := time.Now()
@@ -82,16 +75,14 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 			Content:        content,
 			Type:           typePost,
 			ImageName:      fileName,
-			Author:         user,
+			Author:         author,
 			PrivateViewers: privateUsers,
 			Date:           formatDate,
 		}
 
-		fmt.Println(post)
-
 		if post.Content != "" && middleware.RegexSpaceAndScript(post.Content) {
 			if postNotExist(post, dbOpen) && nature == "Post" {
-				post.Titre = user.Nickname + "-" + formatDate
+				post.Titre = author.Nickname + "-" + formatDate
 				dbFunc.PushInPosts_db(post, dbOpen)
 				var request structures.Request
 				request.Accept = true

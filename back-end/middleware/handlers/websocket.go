@@ -110,14 +110,14 @@ func BroadcastToOneClient(client string, msg structures.Request) {
 	jsonMessage := middleware.ConvertToJson(msg)
 
 	// Parcourir les connexions clients
-	for userName, conn := range clients.connections {
-		if userName == client {
+	for uuid, conn := range clients.connections {
+		if uuid == client {
 			// Envoyer le message JSON à la connexion correspondante
 			err := conn.WriteMessage(websocket.TextMessage, jsonMessage)
 			if err != nil {
 				log.Println("Write message error:", err)
 				conn.Close()
-				delete(clients.connections, userName)
+				delete(clients.connections, uuid)
 			}
 		}
 	}

@@ -18,39 +18,43 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method == "POST" {
-		if r.FormValue("nature") == "comment" {
-			comment(r)
-		} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
-			likeDislike(r)
-		} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
-			event(r)
+		db := dbFunc.Open_db()
+		user := dbFunc.SelectUserByToken(db, r.FormValue("token"))
+		fmt.Println("ca marche", user.Nickname)
+		if user.Nickname != "" {
+			if r.FormValue("nature") == "comment" {
+				comment(r, user)
+			} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
+				likeDislike(r, user)
+			} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
+				event(db, r, user)
 
+			} else {
+
+				var data structures.Data
+
+				posts := dbFunc.SelectAllPosts_db(db)
+				events := dbFunc.SelectAllEvents_db(db)
+
+				data.Posts = commentAndLikeToPost(posts, db)
+				data.Users = dbFunc.SelectAllUsers_db(db)
+				data.Events = events
+
+				// Convertissez les données en JSON
+				jsonData, err := json.Marshal(data)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+
+				// Définissez le type de contenu de la réponse comme JSON
+				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("Access-Control-Allow-Origin", "*")
+				// Renvoyez les données JSON en réponse
+				w.Write(jsonData)
+			}
 		}
 	}
-
-	db := dbFunc.Open_db()
-
-	var data structures.Data
-
-	posts := dbFunc.SelectAllPosts_db(db)
-	events := dbFunc.SelectAllEvents_db(db)
-
-	data.Posts = commentAndLikeToPost(posts, db)
-	data.Users = dbFunc.SelectAllUsers_db(db)
-	data.Events = events
-
-	// Convertissez les données en JSON
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Définissez le type de contenu de la réponse comme JSON
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	// Renvoyez les données JSON en réponse
-	w.Write(jsonData)
 }
 
 // Sert à vérifier si toutes les données sont bonnes avant de push dans la db
@@ -146,16 +150,16 @@ func alreadyLike(like structures.LikeOrDislike) (bool, bool) {
 	}
 }
 
-func likeDislike(r *http.Request) {
+func likeDislike(r *http.Request, user structures.User) {
 	var like structures.LikeOrDislike
 
 	like.Post = r.FormValue("post")
 	like.Type = r.FormValue("nature")
-	like.User = r.FormValue("user")
+	like.User = user.Nickname
 	like.Date = time.Now().Format("02/01/2006 15:04:05")
 
 	var request structures.Request
-	request.User = like.User
+	request.User = user.Nickname
 	request.Post = like.Post
 	request.Accept = true
 	request.Origin = "home"
@@ -171,13 +175,13 @@ func likeDislike(r *http.Request) {
 		request.ObjectOfRequest = "add"
 		fmt.Println("like add")
 	}
-	BroadcastToOneClient(request.User, request)
+	BroadcastToOneClient(user.UUID, request)
 }
 
-func comment(r *http.Request) {
+func comment(r *http.Request, user structures.User) {
 	var commentary structures.Commentary
 	commentary.Post.Titre = r.FormValue("post")
-	commentary.Author.Nickname = r.FormValue("user")
+	commentary.Author = user
 	commentary.Content = r.FormValue("content")
 	commentary.Date = time.Now().Format("02/01/2006 15:04:05")
 
@@ -191,19 +195,16 @@ func comment(r *http.Request) {
 		request.ObjectOfRequest = commentary.Content
 		request.Accept = true
 		request.Date = commentary.Date
-		BroadcastToOneClient(request.User, request)
+		BroadcastToOneClient(user.UUID, request)
 	} else {
 		fmt.Println("Error dans la func verifieNewComment dans AllPost.go")
 	}
 }
 
 // Gère les requêtes concernant les events
-func event(r *http.Request) {
+func event(db *sql.DB, r *http.Request, user structures.User) {
 
-	db := dbFunc.Open_db()
-
-	userName := r.FormValue("user")
-
+	userName := user.Nickname
 	titre := r.FormValue("event")
 
 	allEvent := dbFunc.SelectAllEvents_db(db)
@@ -257,6 +258,6 @@ func event(r *http.Request) {
 			request.Accept = false
 		}
 
-		BroadcastToOneClient(request.User, request)
+		BroadcastToOneClient(user.UUID, request)
 	}
 }

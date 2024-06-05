@@ -2,7 +2,7 @@ import styles from '../styles/home.module.css'; // Utilisez des guillemets simpl
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import sendFormToBack from '../lib/sendFormToBack';
-import Cookies from "js-cookie"
+import cookieExist from '../utils/cookieUserExist';
 
 
 //TODO Mettre les href une fois les pages finit !!!!!
@@ -13,16 +13,20 @@ function DashboardTop({ events = [], ws = null }) {
     const [showContentEvent, setShowContent] = useState({ index: null, show: false });
 
     const [user, setUser] = useState("");
+    const [userInfo, setUserInfo] = useState("")
     useEffect(() => {
-        const userFromCookie = Cookies.get("user");
+        const userFromCookie = cookieExist()
         if (userFromCookie) {
             setUser(userFromCookie);
         }
+        const formToken = new FormData
+        formToken.append("token", userFromCookie)
+        const userInfo1 =  sendFormToBack("api/profil", formToken)
+        setUserInfo(userInfo1)
     }, []);
 
     const logout = () => {
         // Supprimer les cookies de l'utilisateur
-        Cookies.remove("user");
         Cookies.remove("token");
         // Rediriger vers la page d'accueil
         window.location.href = '/'
@@ -48,7 +52,7 @@ function DashboardTop({ events = [], ws = null }) {
         if (ws != null){
             const formEventPost = new FormData();
             formEventPost.append("event", titre)
-            formEventPost.append("user", user)
+            formEventPost.append("token", user)
             formEventPost.append("nature", "yes")
             formEventPost.append("origin", origin)
 
@@ -59,7 +63,7 @@ function DashboardTop({ events = [], ws = null }) {
         if (ws != null){
             const formEventPost = new FormData();
             formEventPost.append("event", titre)
-            formEventPost.append("user", user)
+            formEventPost.append("token", user)
             formEventPost.append("nature", "no")
             formEventPost.append("origin", origin)
 
@@ -116,7 +120,7 @@ function DashboardTop({ events = [], ws = null }) {
                     </div>
                 )}
             </div>
-            <Link href={{ pathname: "/profil", query: { user: user } }} className={styles.buttonProfil}>Profil</Link>
+            <Link href={{ pathname: "/profil", query: { user: userInfo.Nickname } }} className={styles.buttonProfil}>Profil</Link>
             <Link href="/" className={styles.buttonLogout} onClick={logout}>Logout</Link>
         </div>
     );

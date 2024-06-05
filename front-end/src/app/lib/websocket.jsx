@@ -1,4 +1,5 @@
-export default function openWebSocketConnexion(user) {
+import Cookies from "js-cookie"
+export default function openWebSocketConnexion() {
     const ws = new WebSocket('ws://localhost:8000/websocket');
 
     ws.onerror = (error) => {
@@ -7,7 +8,7 @@ export default function openWebSocketConnexion(user) {
 
     ws.onopen = () => {
     // Envoyer le nom d'utilisateur au serveur
-    const data = JSON.stringify({ User: user });
+    const data = JSON.stringify({ User: Cookies.get("token") });
     ws.send(data);
     console.log('WebSocket connection opened.', data);
     };
