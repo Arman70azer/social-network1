@@ -2,10 +2,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-y: auto;
+    overflow: auto; /* Permettre le défilement si le contenu dépasse */
     flex-direction: column;
     min-height: calc(100vh - 130px); /* Utiliser min-height à la place de height */
-    max-height: 150vh; /* Optionnel : définir une hauteur maximale */
     border: 1px solid #ddd; /* Optionnel : ajout d'une bordure pour mieux voir les limites du conteneur */
     padding: 20px; /* Optionnel : ajout de padding pour un espacement interne */
     margin-top: 130px; /* Déplacer le contenu vers le bas pour compenser la hauteur de l'élément fixé */
@@ -61,7 +60,7 @@
     border-radius: 10px; /* Coins arrondis */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre subtile */
     width: 100%;
-    max-width: 500px; /* Limiter la largeur */
+    max-width: 600px; /* Limiter la largeur */
     margin: 20px auto; /* Centrer et espacer */
 }
 
@@ -156,6 +155,9 @@
 
 .post_image{
     margin-bottom: 10px;
+    max-height: 400px;
+    max-width: 500px;
+
 }
 
 

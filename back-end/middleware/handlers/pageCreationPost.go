@@ -26,12 +26,12 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		titleEvent := r.FormValue("title")
 
 		var privateUsers []structures.User
-		if typePost == "Private" {
+		if typePost == "Private++" {
 			privateViewers := r.Form["users"]
 			for i := 0; i < len(privateViewers); i++ {
-				var user structures.User
-				user.Nickname = privateViewers[i]
-				privateUsers = append(privateUsers, user)
+				privateUser := dbFunc.SelectUserByNickname_db(dbFunc.Open_db(), privateViewers[i])
+
+				privateUsers = append(privateUsers, privateUser)
 			}
 		}
 		var fileName string

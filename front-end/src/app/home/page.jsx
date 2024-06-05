@@ -54,7 +54,7 @@ export default function Page(){
         if (data.Posts) {
             let newData = [];
             for (let i = 0; i < allData.Posts.length; i++) {
-                if (allData.Posts[i].Type === "Private") {
+                if (allData.Posts[i].Type === "Private" || allData.Posts[i].Type === "Private++") {
                     newData.push(allData.Posts[i]);
                 }
             }

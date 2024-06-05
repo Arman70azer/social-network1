@@ -6,11 +6,15 @@ import openWebSocketConnexion from "../lib/websocket"
 import styles from "../styles/profil.module.css"
 import eventUpdate from "../utils/eventUpdate"
 import cookieExist from "../utils/cookieUserExist";
+import sendAndReceiveData from "../lib/sendForm&ReceiveData"
 
 let wssocket;
 export default function page(){
     const [data, setData] = useState([])
-    const [user, setUser] = useState("")
+    const [user, setUser] = useState({
+        token: "",
+        name:"",
+    })
     const [isLoading, setLoading] = useState(true)
     const [userInfo, setUserInfo] = useState({
         ID:0,
@@ -24,15 +28,13 @@ export default function page(){
         ImageName: "",
         UrlImage: "",
         AboutMe: "",
-        UUID: "",
-        Followers: []
     })
     const [postsUser, setPostsUser] = useState([])
-    const [isFollowing, setIsFollowing] = useState(false);
+    const [isFollowing, setIsFollow] = useState(false)
 
     useEffect(() => {
         const cookieUser = cookieExist()
-        setUser(cookieUser)
+
         
         const urlParams = new URLSearchParams(window.location.search);
         const userParam = urlParams.get('user');
@@ -43,21 +45,18 @@ export default function page(){
             const datafetch = await fetchDataHome();
             setData(datafetch);
             setUserInfo(datafetch.Users.filter((client) => client.Nickname === userParam)[0]);
+
+            const form = new FormData
+            form.append("token", cookieUser)
+            const userInfo1 = await sendAndReceiveData("/api/profil", form)
+            setUser({ 
+                name: userInfo1.Users[0].Nickname, 
+                token: cookieUser 
+            });
+
+            console.log(user)
             if (datafetch.Posts){
                 setPostsUser(datafetch.Posts.filter((post) => post.Author.Nickname === userParam));
-            }
-            console.log("posts: ", datafetch)
-            console.log(datafetch.Users[0]);
-            checkIfFollowing(datafetch.Users.filter((client) => client.Nickname === userParam)[0].ID);
-        };
-
-        const checkIfFollowing = async (userID) => {
-            try {
-                const response = await fetch(`/api/checkFollow?follower=${user}&following=${userParam}`);
-                const result = await response.json();
-                setIsFollowing(result.isFollowing);
-            } catch (error) {
-                console.error("Erreur lors de la vérification du suivi", error);
             }
         };
     
@@ -95,34 +94,6 @@ export default function page(){
         }
     }
 
-    const handleFollow = async () => {
-        if (!isFollowing) {
-            try {
-                const response = await fetch("/api/follow", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        UserID_Following: userInfo.ID,
-                        UserID_Follower: user.ID,
-                    }),
-                });
-                const result = await response.json();
-                if (result.success) {
-                    setIsFollowing(true);
-                    alert(result.message);
-                } else {
-                    console.error("Erreur lors de l'abonnement");
-                }
-            } catch (error) {
-                console.error("Erreur lors de l'abonnement", error);
-            }
-        } else {
-            console.error("Vous suivez déjà cet utilisateur");
-        }
-    };
-
     onMessageWS()
 
     return(
@@ -136,9 +107,11 @@ export default function page(){
                         <div className={styles.nickname}>
                             {userInfo.Nickname}
                         </div>
-                        <button onClick={handleFollow} className={styles.followButton}>
-                            {isFollowing ? "Abonné" : "S'abonner"}
-                        </button>
+                        {user.name !== userInfo.Nickname && (
+                            <button className={styles.followButton}>
+                                {isFollowing ? "Abonné" : "S'abonner"}
+                            </button>
+                        )}
                         <div className={styles.statProfil}>
                             <span>
                                 <i className="fas fa-birthday-cake"></i>

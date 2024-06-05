@@ -98,7 +98,7 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 
 func PushInPosts_db(post structures.Post, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouveau post
-	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image, Type, PrivateViewers) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image, Type) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
@@ -109,26 +109,67 @@ func PushInPosts_db(post structures.Post, db *sql.DB) {
 	// Obtenir l'ID de référence de l'auteur du post
 	authorID := SelectIdReferenceUser_db(post.Author.Nickname, db)
 
-	allPrivateviewers := ""
-
-	for i := 0; i < len(post.PrivateViewers); i++ {
-		if allPrivateviewers != "" {
-			allPrivateviewers = allPrivateviewers + "-" + post.PrivateViewers[i].Nickname
-		} else {
-			allPrivateviewers = allPrivateviewers + post.PrivateViewers[i].Nickname
-		}
-	}
-
 	// Exécuter la requête SQL pour insérer le nouveau post
-	_, err = stmt.Exec(post.Titre, post.Content, authorID, post.Date, post.ImageName, post.Type, allPrivateviewers)
+	_, err = stmt.Exec(post.Titre, post.Content, authorID, post.Date, post.ImageName, post.Type)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
 		return
+	} else {
+		if post.Type == "Private++" {
+			pushInPrivateViewers(db, post)
+		}
 	}
 
 	// Le post a été inséré avec succès
 	fmt.Println("Le post a été inséré avec succès.")
+}
+
+func pushInPrivateViewers(db *sql.DB, post structures.Post) {
+	stmt, err := db.Prepare("INSERT INTO PrivatesViewers (Post, Author, Date, Type, Viewer) VALUES (?,?,?,?,?)")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+	defer stmt.Close()
+
+	// Exécuter la requête SQL pour insérer le nouveau post
+	for i := 0; i < len(post.PrivateViewers); i++ {
+		_, err = stmt.Exec(SelectIdReferencePost_db(post.Titre, db), post.Author.ID, post.Date, post.Type, post.PrivateViewers[i].ID)
+		if err != nil {
+			// Gérer l'erreur
+			fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
+			return
+		}
+	}
+}
+
+func SelectPrivateViewers(db *sql.DB, post structures.Post) []structures.PrivatesViewer {
+	var privatesViewers []structures.PrivatesViewer
+
+	query := "SELECT Post, Viewer, Author FROM PrivatesViewers WHERE Post = ?"
+	rows, err := db.Query(query, post.ID)
+	if err != nil {
+		log.Printf("Erreur lors de l'exécution de la requête SQL : %v", err)
+		return privatesViewers
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var privatesViewer structures.PrivatesViewer
+		if err := rows.Scan(&privatesViewer.Post, &privatesViewer.Viewer, &privatesViewer.Author); err != nil {
+			log.Printf("Erreur lors de la lecture des résultats : %v", err)
+			continue
+		}
+		privatesViewers = append(privatesViewers, privatesViewer)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Erreur lors de l'itération des résultats : %v", err)
+	}
+
+	return privatesViewers
 }
 
 func SelectIdReferenceUser_db(nickOrMail string, db *sql.DB) int {

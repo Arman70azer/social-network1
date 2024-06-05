@@ -20,7 +20,6 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		db := dbFunc.Open_db()
 		user := dbFunc.SelectUserByToken(db, r.FormValue("token"))
-		fmt.Println("ca marche", user.Nickname)
 		if user.Nickname != "" {
 			if r.FormValue("nature") == "comment" {
 				comment(r, user)
@@ -33,7 +32,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 
 				var data structures.Data
 
-				posts := dbFunc.SelectAllPosts_db(db)
+				posts := sortPrivatePlus(db, user, dbFunc.SelectAllPosts_db(db))
 				events := dbFunc.SelectAllEvents_db(db)
 
 				data.Posts = commentAndLikeToPost(posts, db)
@@ -46,6 +45,8 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
+
+				fmt.Println("data:", data)
 
 				// Définissez le type de contenu de la réponse comme JSON
 				w.Header().Set("Content-Type", "application/json")
@@ -260,4 +261,22 @@ func event(db *sql.DB, r *http.Request, user structures.User) {
 
 		BroadcastToOneClient(user.UUID, request)
 	}
+}
+
+func sortPrivatePlus(db *sql.DB, user structures.User, posts []structures.Post) []structures.Post {
+	var finalsPosts []structures.Post
+
+	for i := 0; i < len(posts); i++ {
+		if posts[i].Type == "Private++" {
+			privateViewers := dbFunc.SelectPrivateViewers(db, posts[i])
+			for a := 0; a < len(privateViewers); a++ {
+				if privateViewers[a].Viewer == user.ID || privateViewers[a].Author == user.ID {
+					finalsPosts = append(finalsPosts, posts[i])
+				}
+			}
+		} else {
+			finalsPosts = append(finalsPosts, posts[i])
+		}
+	}
+	return finalsPosts
 }

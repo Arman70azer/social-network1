@@ -85,3 +85,10 @@ type Followers struct {
 	Following string
 	Follower  string
 }
+
+type PrivatesViewer struct {
+	ID     int
+	Author int
+	Viewer int
+	Post   int
+}

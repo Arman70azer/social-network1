@@ -116,7 +116,7 @@ export default function Page(){
                     formDataToSend.append('file', formData.file); // Ajouter le fichier
                 }
 
-                if (formData.type === "Private"){
+                if (formData.type === "Private++"){
                     formDataToSend.append('users', formData.users)
                 }
 
@@ -208,25 +208,26 @@ export default function Page(){
                     <select name="type" id="type" value={formData.type} onChange={handleChange}>
                         <option value="Public">Public</option>
                         <option value="Private">Private (followers only)</option>
+                        <option value="Private++">Private++ (users of your choose)</option>
+                        
                     </select>
 
-                    {formData.type === 'Private' && (
+                    {formData.type === 'Private++' && (
                     <div className={styles.allUserForPrivate}>
                         <input
                         type="text"
-                        placeholder="No followers"
+                        placeholder="user"
                         id="searchPrivate"
                         value={searchTerm}
                         onChange={handleSearchChange}
                         />
                         <button onClick={(e) => handleAddUser(e)}>Add</button>
                         <label htmlFor="searchPrivate">
-                            
-                            {/* Afficher les suggestions filtrées */}
-                            {suggestions.map((user, index) => (
-                                <li key={index}>{user.Nickname}</li>
-                            ))}
-                            
+                            <ul>
+                                {suggestions.slice(0, 5).map((user, index) => (
+                                    <li key={index}>-{user.Nickname}</li>
+                                ))}
+                            </ul>
                         </label>
                         {formData.users && formData.users.map((user) => (
                         <div key={user} className={styles.margeCrossUser}>
