@@ -1,4 +1,3 @@
-
 import "../connexion.css"; 
 import "../style.css"; 
 import test from '../ui/img/toufik.png'; 
@@ -6,6 +5,8 @@ import t from '../ui/img/armand.jpg';
 import tt from '../ui/img/alex.jpg'; 
 import ttt from '../ui/img/brad.jpg'; 
 import tttt from '../ui/img/cypri.jpg'; 
+import googleLogo from '../ui/img/google.jpg';
+import githubLogo from '../ui/img/github.jpg';
 
 export default function Page() {
   const profiles = [
@@ -25,11 +26,11 @@ export default function Page() {
           </div>
           <div className="socials-row">
             <a href="https://www.google.com/intl/fr/gmail/about/" title="Use Google">
-              <img src="../ui/img/google.jpg" width={24} height={24}  />
+              <img src={googleLogo.src} width={24} height={24} alt="Google" />
               Google
             </a>
             <a href="https://github.com/dashboard" title="Use Github">
-              <img img ="../ui/img/github.jpg" width={24} height={24}  />
+              <img src={githubLogo.src} width={24} height={24} alt="GitHub" />
               Github
             </a>
           </div>
