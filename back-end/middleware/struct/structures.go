@@ -36,9 +36,9 @@ type User struct {
 }
 
 type Data struct {
-	Posts  []Post
-	Users  []User
-	Events []Post
+	Posts  []Post `json:"Posts"`
+	Users  []User `json:"Users"`
+	Events []Post `json:"Events"`
 }
 
 type Chat struct {

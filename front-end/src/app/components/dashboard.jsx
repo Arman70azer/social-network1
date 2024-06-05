@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import sendFormToBack from '../lib/sendFormToBack';
 import cookieExist from '../utils/cookieUserExist';
+import sendAndReceiveData from "../lib/sendForm&ReceiveData"
 
 
 //TODO Mettre les href une fois les pages finit !!!!!
@@ -19,10 +20,15 @@ function DashboardTop({ events = [], ws = null }) {
         if (userFromCookie) {
             setUser(userFromCookie);
         }
-        const formToken = new FormData
-        formToken.append("token", userFromCookie)
-        const userInfo1 =  sendFormToBack("api/profil", formToken)
-        setUserInfo(userInfo1)
+        const fetchData = async () => {
+            const formToken = new FormData
+            formToken.append("token", userFromCookie)
+        
+            const data = await sendAndReceiveData("/api/profil", formToken);
+
+            setUserInfo(data.Users[0].Nickname)
+        }
+        fetchData()
     }, []);
 
     const logout = () => {
@@ -120,7 +126,7 @@ function DashboardTop({ events = [], ws = null }) {
                     </div>
                 )}
             </div>
-            <Link href={{ pathname: "/profil", query: { user: userInfo.Nickname } }} className={styles.buttonProfil}>Profil</Link>
+            <Link href={{ pathname: "/profil", query: { user: userInfo } }} className={styles.buttonProfil}>Profil</Link>
             <Link href="/" className={styles.buttonLogout} onClick={logout}>Logout</Link>
         </div>
     );
