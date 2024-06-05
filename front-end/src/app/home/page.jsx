@@ -8,7 +8,7 @@ import Link from 'next/link';
 import sendFormToBack from '../lib/sendFormToBack'
 import eventUpdate from '../utils/eventUpdate'
 import cookieExist from '../utils/cookieUserExist'
-import Cookies from 'js-cookie'
+import sendAndReceiveData from "../lib/sendForm&ReceiveData"
 
 let wssocket;
 export default function Page(){
@@ -17,7 +17,20 @@ export default function Page(){
     const [seeThisPostCommentaries, setCommentaries] = useState("")
     const [enterComment, setEnterComment] = useState("")
     const [newPosts, setNewPosts] = useState([])
-    const [user, setUser] = useState("")
+    const [user, setUser] = useState({
+        ID:0,
+        Nickname:"",
+        Email: "",
+        Password:"",
+        FirstName: "",
+        LastName: "",
+        Birthday: "",
+        Age: 0,
+        ImageName: "",
+        UrlImage: "",
+        AboutMe: "",
+        UUID: "",
+    })
     const [isLoading, setLoading]=useState(true)
 
 
@@ -61,7 +74,17 @@ export default function Page(){
             setAllData(datafetch)
         };
 
+        const fetchUserInfo = async () => {
+            const formToken = new FormData
+            formToken.append("token", userCookie)
+        
+            const data = await sendAndReceiveData("/api/profil", formToken);
+
+            setUser(data.Users[0])
+        }
+
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
+        fetchUserInfo()
         fetchData();
 
         
@@ -88,7 +111,7 @@ export default function Page(){
             //Envoie du commentaire dans le back
             if (enterComment!="" && seeThisPostCommentaries!=""){
                 const formNewCommentary = new FormData();
-                formNewCommentary.append("token", user)
+                formNewCommentary.append("token", user.UUID)
                 formNewCommentary.append("post", seeThisPostCommentaries)
                 formNewCommentary.append("content", enterComment)
                 formNewCommentary.append("origin", "home")
@@ -220,7 +243,7 @@ export default function Page(){
     const like = (titrePost)=>{
         const formLikePost = new FormData();
         formLikePost.append("post", titrePost)
-        formLikePost.append("token", user)
+        formLikePost.append("token", user.UUID)
         formLikePost.append("nature", "like")
         formLikePost.append("origin", "home")
 
@@ -230,7 +253,7 @@ export default function Page(){
     const dislike = (titrePost)=>{
         const formDislikePost = new FormData();
         formDislikePost.append("post", titrePost)
-        formDislikePost.append("token", user)
+        formDislikePost.append("token", user.UUID)
         formDislikePost.append("nature", "dislike")
         formDislikePost.append("origin", "home")
 
@@ -275,7 +298,7 @@ export default function Page(){
                             <div className={styles.buttonLike}>
                                 <button
                                     onClick={() => like(post.Titre)}
-                                    style={{ color: post.Likes && post.Likes.some(likeOrDislike => likeOrDislike.User === user) ? "blue" : "white" }}
+                                    style={{ color: post.Likes && post.Likes.some(likeOrDislike => likeOrDislike.User === user.Nickname) ? "blue" : "white" }}
                                 >
                                     {post.Likes && post.Likes.length> 0 ? `Like (${post.Likes.length})` : "Like"}
                                 </button>
@@ -283,7 +306,7 @@ export default function Page(){
                             <div className={styles.buttonDislike}>
                                 <button onClick={()=>dislike(post.Titre)} 
                                 className={styles.marginLeft}
-                                style={{ color: post.Dislikes && post.Dislikes.some(likeOrDislike => likeOrDislike.User === user) ? "red" : "white" }}
+                                style={{ color: post.Dislikes && post.Dislikes.some(likeOrDislike => likeOrDislike.User === user.Nickname) ? "red" : "white" }}
                                 >
                                    {post.Dislikes && post.Dislikes.length > 0 ? `Dislikes (${post.Dislikes.length})` : "Dislikes"}
                                 </button>
