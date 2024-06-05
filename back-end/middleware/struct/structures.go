@@ -32,7 +32,7 @@ type User struct {
 	UrlImage  string
 	AboutMe   string
 	UUID      string
-	Followers []string
+	Followers []Followers
 }
 
 type Data struct {
@@ -78,4 +78,10 @@ type Migrations struct {
 	Type    string
 	Request string
 	ID      string
+}
+
+type Followers struct {
+	ID        int
+	Following string
+	Follower  string
 }

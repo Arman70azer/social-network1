@@ -561,7 +561,7 @@ func DeleteYesOrNoEvent_db(db *sql.DB, column, eventTitle, userToDelete string) 
 func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 	var user structures.User
 	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
-	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe, Followers FROM Users WHERE Nickname = ? OR Email = ?")
+	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe FROM Users WHERE Nickname = ? OR Email = ?")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for SelectUserByNickanme_db :", err)
@@ -570,16 +570,11 @@ func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 	defer stmt.Close()
 
 	// Exécuter la requête SQL avec le pseudo ou l'email fourni
-	var followers string
-	err = stmt.QueryRow(nickname, nickname).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &followers)
+	err = stmt.QueryRow(nickname, nickname).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de la requête SQL for SelectUserByNickanme_db :", err)
 		return user
-	}
-
-	if followers != "" {
-		user.Followers = strings.Split(followers, " ")
 	}
 
 	return user
