@@ -32,13 +32,13 @@ type User struct {
 	UrlImage  string
 	AboutMe   string
 	UUID      string
-	Followers []string
+	Followers []Followers
 }
 
 type Data struct {
-	Posts  []Post
-	Users  []User
-	Events []Post
+	Posts  []Post `json:"Posts"`
+	Users  []User `json:"Users"`
+	Events []Post `json:"Events"`
 }
 
 type Chat struct {
@@ -58,7 +58,7 @@ type Request struct {
 	Origin           string `json:"Origin"`
 	Nature           string `json:"Nature"`
 	User             string `json:"User"`
-	ObjetcOfRequest  string `json:"ObjectOfRequest"`
+	ObjectOfRequest  string `json:"ObjectOfRequest"`
 	Post             string `json:"Post"`
 	Accept           bool   `json:"Accept"`
 	Date             string `json:"Date"`
@@ -78,4 +78,17 @@ type Migrations struct {
 	Type    string
 	Request string
 	ID      string
+}
+
+type Followers struct {
+	ID        int
+	Following string
+	Follower  string
+}
+
+type PrivatesViewer struct {
+	ID     int
+	Author int
+	Viewer int
+	Post   int
 }

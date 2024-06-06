@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/form3tech-oss/jwt-go"
 )
 
 // Ouvre la db et permet par la suite de la manipuler
@@ -96,7 +98,7 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 
 func PushInPosts_db(post structures.Post, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouveau post
-	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image, Type, PrivateViewers) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Posts(Titre, Content, Author, Date, Image, Type) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
@@ -107,26 +109,67 @@ func PushInPosts_db(post structures.Post, db *sql.DB) {
 	// Obtenir l'ID de référence de l'auteur du post
 	authorID := SelectIdReferenceUser_db(post.Author.Nickname, db)
 
-	allPrivateviewers := ""
-
-	for i := 0; i < len(post.PrivateViewers); i++ {
-		if allPrivateviewers != "" {
-			allPrivateviewers = allPrivateviewers + "-" + post.PrivateViewers[i].Nickname
-		} else {
-			allPrivateviewers = allPrivateviewers + post.PrivateViewers[i].Nickname
-		}
-	}
-
 	// Exécuter la requête SQL pour insérer le nouveau post
-	_, err = stmt.Exec(post.Titre, post.Content, authorID, post.Date, post.ImageName, post.Type, allPrivateviewers)
+	_, err = stmt.Exec(post.Titre, post.Content, authorID, post.Date, post.ImageName, post.Type)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
 		return
+	} else {
+		if post.Type == "Private++" {
+			pushInPrivateViewers(db, post)
+		}
 	}
 
 	// Le post a été inséré avec succès
 	fmt.Println("Le post a été inséré avec succès.")
+}
+
+func pushInPrivateViewers(db *sql.DB, post structures.Post) {
+	stmt, err := db.Prepare("INSERT INTO PrivatesViewers (Post, Author, Date, Type, Viewer) VALUES (?,?,?,?,?)")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+	defer stmt.Close()
+
+	// Exécuter la requête SQL pour insérer le nouveau post
+	for i := 0; i < len(post.PrivateViewers); i++ {
+		_, err = stmt.Exec(SelectIdReferencePost_db(post.Titre, db), post.Author.ID, post.Date, post.Type, post.PrivateViewers[i].ID)
+		if err != nil {
+			// Gérer l'erreur
+			fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
+			return
+		}
+	}
+}
+
+func SelectPrivateViewers(db *sql.DB, post structures.Post) []structures.PrivatesViewer {
+	var privatesViewers []structures.PrivatesViewer
+
+	query := "SELECT Post, Viewer, Author FROM PrivatesViewers WHERE Post = ?"
+	rows, err := db.Query(query, post.ID)
+	if err != nil {
+		log.Printf("Erreur lors de l'exécution de la requête SQL : %v", err)
+		return privatesViewers
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var privatesViewer structures.PrivatesViewer
+		if err := rows.Scan(&privatesViewer.Post, &privatesViewer.Viewer, &privatesViewer.Author); err != nil {
+			log.Printf("Erreur lors de la lecture des résultats : %v", err)
+			continue
+		}
+		privatesViewers = append(privatesViewers, privatesViewer)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("Erreur lors de l'itération des résultats : %v", err)
+	}
+
+	return privatesViewers
 }
 
 func SelectIdReferenceUser_db(nickOrMail string, db *sql.DB) int {
@@ -554,13 +597,12 @@ func DeleteYesOrNoEvent_db(db *sql.DB, column, eventTitle, userToDelete string) 
 		return
 	}
 
-	fmt.Println("Followers mis à jour avec succès")
 }
 
 func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 	var user structures.User
 	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
-	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe, Followers FROM Events WHERE Nickname = ?")
+	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe FROM Users WHERE Nickname = ? OR Email = ?")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for SelectUserByNickanme_db :", err)
@@ -569,16 +611,11 @@ func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 	defer stmt.Close()
 
 	// Exécuter la requête SQL avec le pseudo ou l'email fourni
-	var followers string
-	err = stmt.QueryRow(nickname).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &followers)
+	err = stmt.QueryRow(nickname, nickname).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de la requête SQL for SelectUserByNickanme_db :", err)
 		return user
-	}
-
-	if followers != "" {
-		user.Followers = strings.Split(followers, " ")
 	}
 
 	return user
@@ -624,4 +661,117 @@ func SelectEventByTitle_db(db *sql.DB, titre string) structures.Post {
 	fmt.Println(event)
 
 	return event
+}
+
+// Renvoie un boolean qui vérifie si l'user existe et que son mot de passe l'est aussi
+func UserExist_db(db *sql.DB, user string, password string) bool {
+	stmt, err := db.Prepare("SELECT Password FROM Users WHERE Nickname = ? OR Email = ?")
+	if err != nil {
+		// Gérer l'erreur
+		log.Println("Erreur lors de la préparation de l'instruction SQL:", err)
+		return false
+	}
+	defer stmt.Close()
+
+	var hashedPassword string
+	err = stmt.QueryRow(user, user).Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// L'utilisateur n'existe pas
+			return false
+		}
+		// Gérer l'erreur
+		log.Println("Erreur lors de l'exécution de la requête SQL:", err)
+		return false
+	}
+
+	if password == hashedPassword {
+		return true
+	} else {
+		return false
+	}
+}
+
+var jwtKey = []byte("your_secret_key")
+
+type Claims struct {
+	UserID int    `json:"user_id"`
+	Email  string `json:"email"`
+	jwt.StandardClaims
+}
+
+// Vérifie les informations de connexion de l'utilisateur et stocke le token JWT dans la colonne uuid
+func CheckUserCredentials(db *sql.DB, emailOrNickname, password string) (bool, string, error) {
+	var userID int
+	var storedPassword string
+	query := `SELECT ID, Password FROM Users WHERE Email = ? OR Nickname = ?`
+	err := db.QueryRow(query, emailOrNickname, emailOrNickname).Scan(&userID, &storedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			fmt.Println("Aucun utilisateur trouvé avec l'email ou le pseudo fourni")
+			return false, "", nil
+		}
+		fmt.Println("Erreur lors de la vérification des informations de connexion :", err)
+		return false, "", err
+	}
+	fmt.Printf("Mot de passe récupéré de la base de données pour l'utilisateur %s: %s\n", emailOrNickname, storedPassword)
+	if storedPassword != password {
+		fmt.Println("Le mot de passe ne correspond pas")
+		return false, "", nil
+	}
+	// Générer le token JWT avec l'ID utilisateur, l'email, et un horodatage unique
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
+		UserID: userID,
+		Email:  emailOrNickname,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+			IssuedAt:  time.Now().Unix(), // Ajouter un horodatage unique
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		fmt.Println("Erreur lors de la génération du token :", err)
+		return false, "", err
+	}
+	fmt.Printf("Token généré pour l'utilisateur %s: %s\n", emailOrNickname, tokenString)
+	// Stocker le token dans la colonne uuid
+	updateQuery := `UPDATE Users SET uuid = ? WHERE ID = ?`
+	_, err = db.Exec(updateQuery, tokenString, userID)
+	if err != nil {
+		fmt.Println("Erreur lors de la mise à jour du token dans la base de données :", err)
+		return false, "", err
+	}
+	fmt.Printf("Token mis à jour dans la base de données pour l'utilisateur %s\n", emailOrNickname)
+	return true, tokenString, nil
+}
+
+func SelectUserByToken(db *sql.DB, token string) structures.User {
+	var user structures.User
+
+	// Prepare the SQL statement
+	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe, UUID FROM Users WHERE UUID = ?")
+	if err != nil {
+		// Log and return the error
+		log.Printf("Error preparing SQL statement in SelectUserByToken: %v", err)
+		return user
+	}
+	defer stmt.Close()
+
+	// Execute the SQL statement
+	fmt.Println("ici", token)
+	err = stmt.QueryRow(token).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &user.UUID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Handle no rows returned specifically
+			log.Printf("No user found with the provided token: %v", token)
+			return user
+		}
+		// Log and return the error
+		log.Printf("Error executing SQL query in SelectUserByToken: %v", err)
+		return user
+	}
+
+	return user
 }
