@@ -3,6 +3,7 @@ package middleware
 import (
 	structures "back-end/middleware/struct"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -51,6 +52,26 @@ func Contains(str string, array []string) bool {
 		}
 	}
 	return false
+}
+
+func ContainsID(id int, array []structures.PrivatesViewer) bool {
+	for i := 0; i < len(array); i++ {
+		if array[i].Viewer == id || array[i].Author == id {
+			return true
+		}
+	}
+	return false
+}
+
+// Retourne si les valeurs de follox et nofollow de l'user sur cette event
+func FollowEvent(id int, privatesViewers []structures.PrivatesViewer) (bool, bool) {
+	for i := 0; i < len(privatesViewers); i++ {
+		if privatesViewers[i].Viewer == id {
+			return privatesViewers[i].Follow, privatesViewers[i].NoFollow
+		}
+	}
+	fmt.Println("Erreur: utils.FollowEvent")
+	return true, true
 }
 
 // Vérifie que str ne contient pas de script et n'est pas vide

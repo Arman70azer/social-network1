@@ -33,7 +33,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 				var data structures.Data
 
 				posts := sortPrivatePlus(db, user, dbFunc.SelectAllPosts_db(db))
-				events := dbFunc.SelectAllEvents_db(db)
+				events := sortPrivatePlus(db, user, dbFunc.SelectAllEvents_db(db))
 
 				data.Posts = commentAndLikeToPost(posts, db)
 				data.Users = dbFunc.SelectAllUsers_db(db)
@@ -45,8 +45,6 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 					http.Error(w, err.Error(), http.StatusInternalServerError)
 					return
 				}
-
-				fmt.Println("data:", data)
 
 				// Définissez le type de contenu de la réponse comme JSON
 				w.Header().Set("Content-Type", "application/json")
@@ -205,50 +203,53 @@ func comment(r *http.Request, user structures.User) {
 // Gère les requêtes concernant les events
 func event(db *sql.DB, r *http.Request, user structures.User) {
 
-	userName := user.Nickname
 	titre := r.FormValue("event")
 
-	allEvent := dbFunc.SelectAllEvents_db(db)
-	allUser := dbFunc.SelectAllUsers_db(db)
+	eventTarget := dbFunc.SelectEventByTitle_db(db, titre)
+	privatesEventUsers := dbFunc.SelectPrivatesEvent(db, eventTarget)
 
-	if middleware.UserRegister(userName, allUser) && middleware.EventExist(titre, allEvent) {
-		eventTarget := dbFunc.SelectEventByTitle_db(db, titre)
+	if eventTarget.EventDate != "" && len(privatesEventUsers) > 0 && middleware.ContainsID(user.ID, privatesEventUsers) {
 
 		var column string
 
 		var request structures.Request
 		request.Event = titre
-		request.User = userName
+		request.User = user.Nickname
 		request.Origin = "home"
+
+		follow, noFollow := middleware.FollowEvent(user.ID, privatesEventUsers)
 
 		switch r.FormValue("nature") {
 		case "yes":
-			column = "Followers"
+			column = "Follow"
 			request.Nature = "New-followEvent"
-			if middleware.Contains(userName, eventTarget.Followers) {
-				dbFunc.DeleteYesOrNoEvent_db(db, column, titre, userName)
+			if follow {
+				dbFunc.ChangeYesOrNoEvent_db(db, column, eventTarget.ID, user.ID)
 				request.ObjectOfRequest = "unfollowEvent"
 			} else {
-				if middleware.Contains(userName, eventTarget.NoFollowers) {
-					dbFunc.DeleteYesOrNoEvent_db(db, "NoFollowers", titre, userName)
+				if noFollow {
+					dbFunc.ChangeYesOrNoEvent_db(db, "NoFollow", eventTarget.ID, user.ID)
+					fmt.Println("nofollow")
 				}
-				dbFunc.AddYesOrNoEvent_db(db, column, titre, userName)
+				dbFunc.ChangeYesOrNoEvent_db(db, column, eventTarget.ID, user.ID)
 				request.ObjectOfRequest = "followEvent"
 			}
+
+			fmt.Println(follow, noFollow)
 
 			request.Accept = true
 
 		case "no":
-			column = "NoFollowers"
+			column = "NoFollow"
 			request.Nature = "New-unfollowEvent"
-			if middleware.Contains(userName, eventTarget.NoFollowers) {
-				dbFunc.DeleteYesOrNoEvent_db(db, column, titre, userName)
+			if noFollow {
+				dbFunc.ChangeYesOrNoEvent_db(db, column, eventTarget.ID, user.ID)
 				request.ObjectOfRequest = "unfollowEvent"
 			} else {
-				if middleware.Contains(userName, eventTarget.Followers) {
-					dbFunc.DeleteYesOrNoEvent_db(db, "Followers", titre, userName)
+				if follow {
+					dbFunc.ChangeYesOrNoEvent_db(db, "Follow", eventTarget.ID, user.ID)
 				}
-				dbFunc.AddYesOrNoEvent_db(db, column, titre, userName)
+				dbFunc.ChangeYesOrNoEvent_db(db, column, eventTarget.ID, user.ID)
 				request.ObjectOfRequest = "followEvent"
 			}
 
@@ -265,12 +266,35 @@ func event(db *sql.DB, r *http.Request, user structures.User) {
 
 func sortPrivatePlus(db *sql.DB, user structures.User, posts []structures.Post) []structures.Post {
 	var finalsPosts []structures.Post
+	var postEvent bool
+
+	if len(posts) == 0 {
+		return finalsPosts
+	}
+
+	if posts[0].EventDate != "" {
+		postEvent = true
+	} else {
+		postEvent = false
+	}
 
 	for i := 0; i < len(posts); i++ {
 		if posts[i].Type == "Private++" {
-			privateViewers := dbFunc.SelectPrivateViewers(db, posts[i])
+			var privateViewers []structures.PrivatesViewer
+			if postEvent {
+				privateViewers = dbFunc.SelectPrivatesEvent(db, posts[i])
+			} else {
+				privateViewers = dbFunc.SelectPrivateViewers(db, posts[i])
+			}
 			for a := 0; a < len(privateViewers); a++ {
-				if privateViewers[a].Viewer == user.ID || privateViewers[a].Author == user.ID {
+				if privateViewers[a].Viewer == user.ID {
+					if postEvent {
+						follow, noFollow := selectFollowersEvents(db, privateViewers)
+						posts[i].Followers = follow
+						posts[i].NoFollowers = noFollow
+					} else {
+						posts[i].PrivateViewers = selectUserPrivatesPost(db, privateViewers)
+					}
 					finalsPosts = append(finalsPosts, posts[i])
 				}
 			}
@@ -279,4 +303,32 @@ func sortPrivatePlus(db *sql.DB, user structures.User, posts []structures.Post) 
 		}
 	}
 	return finalsPosts
+}
+
+func selectFollowersEvents(db *sql.DB, privatesUsers []structures.PrivatesViewer) ([]string, []string) {
+	var follow []string
+	var noFollow []string
+
+	for i := 0; i < len(privatesUsers); i++ {
+		if privatesUsers[i].Follow {
+			follow = append(follow, dbFunc.SelectUserByID_db(privatesUsers[i].Viewer, db).Nickname)
+		}
+		if privatesUsers[i].NoFollow {
+			noFollow = append(noFollow, dbFunc.SelectUserByID_db(privatesUsers[i].Viewer, db).Nickname)
+		}
+
+	}
+
+	return follow, noFollow
+}
+
+func selectUserPrivatesPost(db *sql.DB, privatesViewers []structures.PrivatesViewer) []structures.User {
+	var users []structures.User
+
+	for i := 0; i < len(privatesViewers); i++ {
+		user := dbFunc.SelectUserByID_db(privatesViewers[i].Viewer, db)
+		users = append(users, user)
+	}
+
+	return users
 }

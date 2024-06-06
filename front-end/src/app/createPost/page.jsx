@@ -2,7 +2,7 @@
 import DashboardTop from "../components/dashboard"
 import styles from "../styles/createPost.module.css"
 import { useState, useEffect } from 'react';
-import Cookies from "js-cookie"
+import eventUpdate from "../utils/eventUpdate";
 import fetchUsersAndPosts from "../lib/fetchDataHome"
 import openWebSocketConnexion from "../lib/websocket";
 import sendRequestToWebsocket from "../lib/wsSendMessage"
@@ -14,7 +14,7 @@ import cookieExist from "../utils/cookieUserExist";
 let wsConnect;
 export default function Page(){
 
-    const [data, setPosts] = useState([]);
+    const [data, setData] = useState([]);
 
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
@@ -27,7 +27,7 @@ export default function Page(){
         const fetchData = async () => {
             // Récupérer les données des posts
             const datafetch = await fetchUsersAndPosts();
-            setPosts(datafetch);
+            setData(datafetch);
         };
 
         fetchData();
@@ -97,7 +97,6 @@ export default function Page(){
                 // Créer un objet FormData pour envoyer le formulaire avec le fichier
                 const formDataToSend = new FormData();
                 formDataToSend.append('content', formData.content);
-                formDataToSend.append('type', formData.type);
                 formDataToSend.append('user', user)
                 formDataToSend.append('nature', formData.nature)
                 formDataToSend.append('title', formData.title)
@@ -110,6 +109,11 @@ export default function Page(){
                     }else{
                         correct = false
                     }
+                    formDataToSend.append('type', "Private++");
+                    formDataToSend.append('users', formData.users)
+
+                }else{
+                    formDataToSend.append('type', formData.type);
                 }
 
                 if (formData.file) {
@@ -169,6 +173,32 @@ export default function Page(){
         });
     };
 
+    const onMessageWS = () => {
+        if (data && wsConnect!= null) {
+            // Gérer les messages reçus du serveur WebSocket
+            wsConnect.onmessage = (event) => {
+                const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
+                if (receivedMessage.Accept && receivedMessage.Event){
+                    const eventTarget = eventUpdate(data.Events, receivedMessage)
+                    setData(prevData => {
+                        const updateEvents = prevData.Events.map(event => {
+                            if (event.Titre === eventTarget.Titre) {
+                                return eventTarget;
+                            } else {
+                                return event;
+                            }
+                        });
+                        return { ...prevData, Events: updateEvents };
+                    });
+                    console.log(data.Events[0].Followers)
+                }
+            }
+
+        }
+    }
+
+    onMessageWS()
+
     return (
         <div className={styles.background}>
            {data.Events ? <DashboardTop events={data.Events} ws={wsConnect}/> : <DashboardTop />}
@@ -206,36 +236,38 @@ export default function Page(){
                     <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>
                     <label className={styles.select} htmlFor="type">Type de publication :</label>
                     <select name="type" id="type" value={formData.type} onChange={handleChange}>
-                        <option value="Public">Public</option>
-                        <option value="Private">Private (followers only)</option>
+                        {formData.nature != "Event" && formData.nature ==="Post" ? (
+                            <>
+                                <option value="Public">Public</option>
+                                <option value="Private">Private (followers only)</option>
+                            </>
+                        ) : null}
                         <option value="Private++">Private++ (users of your choose)</option>
-                        
                     </select>
-
-                    {formData.type === 'Private++' && (
-                    <div className={styles.allUserForPrivate}>
-                        <input
-                        type="text"
-                        placeholder="user"
-                        id="searchPrivate"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        />
-                        <button onClick={(e) => handleAddUser(e)}>Add</button>
-                        <label htmlFor="searchPrivate">
-                            <ul>
-                                {suggestions.slice(0, 5).map((user, index) => (
-                                    <li key={index}>-{user.Nickname}</li>
-                                ))}
-                            </ul>
-                        </label>
-                        {formData.users && formData.users.map((user) => (
-                        <div key={user} className={styles.margeCrossUser}>
-                            {user}
-                            <button onClick={() => handleRemoveUser(user)}>X</button>
+                    {(formData.type === 'Private++' || formData.nature === "Event") && (
+                        <div className={styles.allUserForPrivate}>
+                            <input
+                            type="text"
+                            placeholder="user"
+                            id="searchPrivate"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                            />
+                            <button onClick={(e) => handleAddUser(e)}>Add</button>
+                            <label htmlFor="searchPrivate">
+                                <ul>
+                                    {suggestions.slice(0, 5).map((user, index) => (
+                                        <li key={index}>-{user.Nickname}</li>
+                                    ))}
+                                </ul>
+                            </label>
+                            {formData.users && formData.users.map((user) => (
+                            <div key={user} className={styles.margeCrossUser}>
+                                {user}
+                                <button onClick={() => handleRemoveUser(user)}>X</button>
+                            </div>
+                            ))}
                         </div>
-                        ))}
-                    </div>
                     )}
 
                     <br />

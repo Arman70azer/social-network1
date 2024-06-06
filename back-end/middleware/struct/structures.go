@@ -87,8 +87,10 @@ type Followers struct {
 }
 
 type PrivatesViewer struct {
-	ID     int
-	Author int
-	Viewer int
-	Post   int
+	ID       int
+	Author   int
+	Viewer   int
+	Post     int
+	Follow   bool
+	NoFollow bool
 }

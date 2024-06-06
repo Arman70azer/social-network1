@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/form3tech-oss/jwt-go"
@@ -145,6 +144,7 @@ func pushInPrivateViewers(db *sql.DB, post structures.Post) {
 	}
 }
 
+// Selectionne les privatesViewers d'un post private++ donné
 func SelectPrivateViewers(db *sql.DB, post structures.Post) []structures.PrivatesViewer {
 	var privatesViewers []structures.PrivatesViewer
 
@@ -165,6 +165,35 @@ func SelectPrivateViewers(db *sql.DB, post structures.Post) []structures.Private
 		privatesViewers = append(privatesViewers, privatesViewer)
 	}
 
+	if err := rows.Err(); err != nil {
+		log.Printf("Erreur lors de l'itération des résultats : %v", err)
+	}
+
+	return privatesViewers
+}
+
+// Fonction pour sélectionner les utilisateurs d'un événement privé
+func SelectPrivatesEvent(db *sql.DB, event structures.Post) []structures.PrivatesViewer {
+	var privatesViewers []structures.PrivatesViewer
+
+	query := "SELECT Event, User, Author, Follow, NoFollow FROM PrivatesEvents WHERE Event = ?"
+	rows, err := db.Query(query, event.ID)
+	if err != nil {
+		log.Printf("Erreur lors de l'exécution de la requête SQL : %v", err)
+		return privatesViewers
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var privatesViewer structures.PrivatesViewer
+		if err := rows.Scan(&privatesViewer.Post, &privatesViewer.Viewer, &privatesViewer.Author, &privatesViewer.Follow, &privatesViewer.NoFollow); err != nil {
+			log.Printf("Erreur lors de la lecture des résultats : %v", err)
+			continue
+		}
+		privatesViewers = append(privatesViewers, privatesViewer)
+	}
+
+	// Vérification des erreurs après la lecture des lignes
 	if err := rows.Err(); err != nil {
 		log.Printf("Erreur lors de l'itération des résultats : %v", err)
 	}
@@ -194,9 +223,53 @@ func SelectIdReferenceUser_db(nickOrMail string, db *sql.DB) int {
 	return id
 }
 
+func SelectUserByID_db(id int, db *sql.DB) structures.User {
+	var user structures.User
+	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
+	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe FROM Users WHERE ID = ?")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for selectID :", err)
+		return user
+	}
+	defer stmt.Close()
+
+	// Exécuter la requête SQL avec le pseudo ou l'email fourni
+	err = stmt.QueryRow(id).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe)
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de la requête SQL for selectID :", err)
+		return user
+	}
+
+	return user
+}
+
 func SelectIdReferencePost_db(tittle string, db *sql.DB) int {
 	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
 	stmt, err := db.Prepare("SELECT ID FROM Posts WHERE Titre = ?")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for selectID :", err)
+		return 0
+	}
+	defer stmt.Close()
+
+	// Exécuter la requête SQL avec le pseudo ou l'email fourni
+	var id int
+	err = stmt.QueryRow(tittle).Scan(&id)
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de la requête SQL for selectID :", err)
+		return 0
+	}
+
+	return id
+}
+
+func SelectIdReferenceEvent_db(tittle string, db *sql.DB) int {
+	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
+	stmt, err := db.Prepare("SELECT ID FROM Events WHERE Titre = ?")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for selectID :", err)
@@ -402,7 +475,7 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 	var result []structures.Post
 
 	// p. représente les colonnes de Posts tandis que u. représente les colonnes de Users
-	query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS AuthorNickname, p.Date, p.Image, u.ImageName AS AuthorImageName, u.ID AS AuthorID, p.Type, p.EventDate, p.Followers, p.NoFollowers, p.PrivateViewers FROM Events p JOIN Users u ON p.Author = u.ID"
+	query := "SELECT p.ID, p.Titre, p.Content, u.Nickname AS AuthorNickname, p.Date, p.Image, u.ImageName AS AuthorImageName, u.ID AS AuthorID, p.Type, p.EventDate, p.Followers, p.NoFollowers FROM Events p JOIN Users u ON p.Author = u.ID"
 
 	rows, err := db.Query(query)
 	if err != nil {
@@ -415,8 +488,7 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 		var post structures.Post
 		var followers string
 		var noFollowers string
-		var privateViewers string
-		if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author.Nickname, &post.Date, &post.ImageName, &post.Author.ImageName, &post.Author.ID, &post.Type, &post.EventDate, &followers, &noFollowers, &privateViewers); err != nil {
+		if err := rows.Scan(&post.ID, &post.Titre, &post.Content, &post.Author.Nickname, &post.Date, &post.ImageName, &post.Author.ImageName, &post.Author.ID, &post.Type, &post.EventDate, &followers, &noFollowers); err != nil {
 			log.Println("Erreur lors du scan des lignes:", err)
 			continue // Continuer à la prochaine ligne en cas d'erreur de scan
 		}
@@ -430,23 +502,6 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 		layout := "02/01/2006 15:04" // Format de la date reçue
 
 		eventDate, _ := time.Parse(layout, post.EventDate)
-
-		if followers != "" {
-			post.Followers = strings.Split(followers, " ")
-		}
-
-		if noFollowers != "" {
-			post.NoFollowers = strings.Split(noFollowers, " ")
-		}
-
-		if privateViewers != "" {
-			allPVOfthisEvents := strings.Split(privateViewers, " ")
-
-			for i := 0; i < len(allPVOfthisEvents); i++ {
-				user := SelectUserByNickname_db(db, allPVOfthisEvents[i])
-				post.PrivateViewers = append(post.PrivateViewers, user)
-			}
-		}
 
 		if time.Now().Before(eventDate) {
 			result = append(result, post)
@@ -469,7 +524,7 @@ func SelectAllEvents_db(db *sql.DB) []structures.Post {
 
 func PushInEvents_db(event structures.Post, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouveau post
-	stmt, err := db.Prepare("INSERT INTO Events(Titre, Content, Author, Date, Image, Type, PrivateViewers, EventDate, Followers, NoFollowers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Events(Titre, Content, Author, Date, Image, Type, EventDate, Followers, NoFollowers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
@@ -480,123 +535,67 @@ func PushInEvents_db(event structures.Post, db *sql.DB) {
 	// Obtenir l'ID de référence de l'auteur du post
 	authorID := SelectIdReferenceUser_db(event.Author.Nickname, db)
 
-	allPrivateviewers := ""
-
-	for i := 0; i < len(event.PrivateViewers); i++ {
-		if allPrivateviewers != "" {
-			allPrivateviewers = allPrivateviewers + "-" + event.PrivateViewers[i].Nickname
-		} else {
-			allPrivateviewers = allPrivateviewers + event.PrivateViewers[i].Nickname
-		}
-	}
-
 	// Exécuter la requête SQL pour insérer le nouveau post
-	_, err = stmt.Exec(event.Titre, event.Content, authorID, event.Date, event.ImageName, event.Type, allPrivateviewers, event.EventDate, "", "")
+	_, err = stmt.Exec(event.Titre, event.Content, authorID, event.Date, event.ImageName, event.Type, event.EventDate, "", "")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
 		return
+	} else {
+		if event.Type == "Private++" {
+			pushInPrivatesEvents(db, event)
+		}
 	}
 
 	// Le post a été inséré avec succès
 	fmt.Println("L'event a été inséré avec succès.")
 }
 
-// Ajoute l'user dans la colum sélèctionner ("Followers" ou "NoFollowers") dans la tab Events
-func AddYesOrNoEvent_db(db *sql.DB, column, eventTitle, userToAdd string) {
-	// Construire la requête SQL en incluant le nom de la colonne
-	query := fmt.Sprintf("SELECT %s FROM Events WHERE Titre = ?", column)
-
-	// Préparer la requête SQL
-	stmt, err := db.Prepare(query)
+func pushInPrivatesEvents(db *sql.DB, event structures.Post) {
+	stmt, err := db.Prepare("INSERT INTO PrivatesEvents (Event, Author, Date, Type, User) VALUES (?,?,?,?,?)")
 	if err != nil {
-		fmt.Println("Erreur lors de la préparation de l'instruction SQL:", err)
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
 		return
 	}
 	defer stmt.Close()
 
-	var followers string
-	err = stmt.QueryRow(eventTitle).Scan(&followers)
-	if err != nil {
-		fmt.Println("Erreur lors de l'exécution de la requête SQL:", err)
-		return
-	}
-
-	var splitFollow []string
-	if followers != "" {
-		splitFollow = strings.Split(followers, " ")
-	}
-
-	splitFollow = append(splitFollow, userToAdd)
-
-	updatedFollowers := strings.Join(splitFollow, " ")
-
-	// Préparer la requête SQL pour mettre à jour les followers
-	query = fmt.Sprintf("UPDATE Events SET %s = ? WHERE Titre = ?", column)
-	stmt2, err := db.Prepare(query)
-	if err != nil {
-		fmt.Println("Erreur lors de la préparation de l'instruction SQL:", err)
-		return
-	}
-	defer stmt2.Close()
-
-	// Exécuter la mise à jour
-	_, err = stmt2.Exec(updatedFollowers, eventTitle)
-	if err != nil {
-		fmt.Println("Erreur lors de l'exécution de la mise à jour SQL:", err)
-		return
-	}
-
-}
-
-// Supprime l'user dans la colum sélèctionner ("Followers" ou "NoFollowers") dans la tab Events
-func DeleteYesOrNoEvent_db(db *sql.DB, column, eventTitle, userToDelete string) {
-	// Préparer la requête SQL pour récupérer les followers actuels
-	query := fmt.Sprintf("SELECT %s FROM Events WHERE Titre = ?", column)
-	stmt, err := db.Prepare(query)
-	if err != nil {
-		fmt.Println("Erreur lors de la préparation de l'instruction SQL:", err)
-		return
-	}
-	defer stmt.Close()
-
-	var followers string
-	err = stmt.QueryRow(eventTitle).Scan(&followers)
-	if err != nil {
-		fmt.Println("Erreur lors de l'exécution de la requête SQL:", err)
-		return
-	}
-
-	// Séparer les followers existants en un tableau
-	arrayFollowers := strings.Split(followers, " ")
-
-	// Créer un nouveau tableau de followers sans le follower à supprimer
-	var newFollowers []string
-	for _, follower := range arrayFollowers {
-		if follower != userToDelete {
-			newFollowers = append(newFollowers, follower)
+	// Exécuter la requête SQL pour insérer le nouveau post
+	for i := 0; i < len(event.PrivateViewers); i++ {
+		_, err = stmt.Exec(SelectIdReferenceEvent_db(event.Titre, db), event.Author.ID, event.EventDate, event.Type, event.PrivateViewers[i].ID)
+		if err != nil {
+			// Gérer l'erreur
+			fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
+			return
 		}
 	}
+}
 
-	// Joindre les followers mis à jour en une seule chaîne
-	updatedFollowers := strings.Join(newFollowers, " ")
+// ChangeYesOrNoEvent_db inverse la valeur de la colonne booléenne spécifiée pour un événement et un utilisateur
+func ChangeYesOrNoEvent_db(db *sql.DB, column string, eventID, userID int) {
+	// Valider la colonne pour prévenir les injections SQL
+	if column != "Follow" && column != "NoFollow" {
+		fmt.Println("Colonne invalide spécifiée.")
+		return
+	}
 
-	// Préparer la requête SQL pour mettre à jour les followers
-	query = fmt.Sprintf("UPDATE Events SET %s = ? WHERE Titre = ?", column)
-	stmt2, err := db.Prepare(query)
+	// Préparer la requête SQL pour inverser la valeur booléenne
+	query := fmt.Sprintf("UPDATE PrivatesEvents SET %s = NOT %s WHERE Event = ? AND User = ?", column, column)
+	stmt, err := db.Prepare(query)
 	if err != nil {
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL:", err)
 		return
 	}
-	defer stmt2.Close()
+	defer stmt.Close()
 
 	// Exécuter la mise à jour
-	_, err = stmt2.Exec(updatedFollowers, eventTitle)
+	_, err = stmt.Exec(eventID, userID)
 	if err != nil {
 		fmt.Println("Erreur lors de l'exécution de la mise à jour SQL:", err)
 		return
 	}
 
+	fmt.Println("Mise à jour réussie pour l'événement", eventID, "et l'utilisateur", userID)
 }
 
 func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
@@ -625,7 +624,7 @@ func SelectEventByTitle_db(db *sql.DB, titre string) structures.Post {
 	var event structures.Post
 
 	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
-	stmt, err := db.Prepare("SELECT ID, Titre, Content, Author, Date, Image, Type, PrivateViewers, EventDate, Followers, NoFollowers FROM Events WHERE Titre = ?")
+	stmt, err := db.Prepare("SELECT ID, Titre, Content, Author, Date, Image, Type, EventDate FROM Events WHERE Titre = ?")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for SelectEventByTitle_db :", err)
@@ -633,31 +632,13 @@ func SelectEventByTitle_db(db *sql.DB, titre string) structures.Post {
 	}
 	defer stmt.Close()
 
-	var followers string
-	var privateFollowers string
-	var noFollowers string
-	err = stmt.QueryRow(titre).Scan(&event.ID, &event.Titre, &event.Content, &event.Author.Nickname, &event.Date, &event.ImageName, &event.Type, &privateFollowers, &event.EventDate, &followers, &noFollowers)
+	err = stmt.QueryRow(titre).Scan(&event.ID, &event.Titre, &event.Content, &event.Author.Nickname, &event.Date, &event.ImageName, &event.Type, &event.EventDate)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de la requête SQL for SelectEventByTitle_db :", err)
 		return event
 	}
 
-	if followers != "" {
-		event.Followers = strings.Split(followers, " ")
-	}
-
-	if noFollowers != "" {
-		event.NoFollowers = strings.Split(noFollowers, " ")
-	}
-
-	if privateFollowers != "" {
-		allPVfollower := strings.Split(privateFollowers, " ")
-
-		for _, pvFollow := range allPVfollower {
-			event.PrivateViewers = append(event.PrivateViewers, SelectUserByNickname_db(db, pvFollow))
-		}
-	}
 	fmt.Println(event)
 
 	return event
@@ -760,7 +741,6 @@ func SelectUserByToken(db *sql.DB, token string) structures.User {
 	defer stmt.Close()
 
 	// Execute the SQL statement
-	fmt.Println("ici", token)
 	err = stmt.QueryRow(token).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &user.UUID)
 	if err != nil {
 		if err == sql.ErrNoRows {

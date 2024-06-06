@@ -33,6 +33,8 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 
 				privateUsers = append(privateUsers, privateUser)
 			}
+			privateUsers = append(privateUsers, author)
+			fmt.Println(privateViewers)
 		}
 		var fileName string
 
