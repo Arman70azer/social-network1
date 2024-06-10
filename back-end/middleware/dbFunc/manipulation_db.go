@@ -211,7 +211,7 @@ func PushUser_db(user structures.User, db *sql.DB) {
 	}
 	defer stmt.Close()
 	// Exécuter la requête SQL pour insérer le nouvel utilisateur
-	_, err = stmt.Exec(user.Nickname, user.FirstName, user.LastName, user.Birthday, user.ImageName, user.AboutMe, user.Email, user.Password, "profil")
+	_, err = stmt.Exec(user.Nickname, user.FirstName, user.LastName, user.Birthday, user.ImageName, user.AboutMe, user.Email, user.Password, "public")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL pour PushUser :", err)
@@ -313,7 +313,7 @@ func SelectAllUsers_db(db *sql.DB) []structures.User {
 	var users []structures.User
 
 	// Préparer la requête SQL
-	stmt, err := db.Prepare("SELECT ID, Nickname, Birthday, Age, ImageName, Profil FROM Users")
+	stmt, err := db.Prepare("SELECT ID, Nickname, Birthday, Age, ImageName, Profil, AboutMe FROM Users")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for SelectAllUser :", err)
@@ -334,7 +334,7 @@ func SelectAllUsers_db(db *sql.DB) []structures.User {
 	for rows.Next() {
 		var user structures.User
 		// Scanner les valeurs dans la structure User
-		if err := rows.Scan(&user.ID, &user.Nickname, &user.Birthday, &user.Age, &user.ImageName, &user.Profil); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nickname, &user.Birthday, &user.Age, &user.ImageName, &user.Profil, &user.AboutMe); err != nil {
 			// Gérer l'erreur
 			fmt.Println("Erreur lors du scan des lignes:", err)
 			continue // Continuer à la prochaine ligne en cas d'erreur de scan

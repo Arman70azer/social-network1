@@ -51,7 +51,7 @@ export default function Register() {
     }else{
       setError({
         exist : true,
-        message : response.Error,
+        message : response.Nature,
       })
     }
   };

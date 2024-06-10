@@ -102,6 +102,18 @@ export default function page(){
         setSettings(!settings);
     };
 
+    const setUsertoParam = (key, value)=>{
+        setUserInfo({
+            ...userInfo,
+            [key]:value
+        })
+        if (key == "Nickname"){
+            setUser({
+                name: value
+            })
+        }
+    }
+
     onMessageWS()
 
     return(
@@ -118,7 +130,7 @@ export default function page(){
                                 </button>
                             </div>
                             {settings && (
-                                <SettingsProfil onClose={handleSettingsClick} user={userInfo} />
+                                <SettingsProfil onClose={handleSettingsClick} user={userInfo} setUser={setUsertoParam} />
                             )}
                         </>
                     )}
