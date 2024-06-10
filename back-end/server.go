@@ -20,6 +20,7 @@ func main() {
 	http.HandleFunc("/api/follow", handlers.HandlerFollow)
 	http.HandleFunc("/images/", handlers.ServeImage)
 	http.HandleFunc("/api/profil", handlers.HandlerProfil)
+	http.HandleFunc("/register", handlers.RegisterHandler)
 
 	err := http.ListenAndServe(":8000", nil)
 	if err != nil {

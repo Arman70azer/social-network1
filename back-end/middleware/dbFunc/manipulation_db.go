@@ -201,6 +201,26 @@ func SelectPrivatesEvent(db *sql.DB, event structures.Post) []structures.Private
 	return privatesViewers
 }
 
+func PushUser_db(user structures.User, db *sql.DB) {
+	// Préparer la requête SQL pour insérer un nouvel utilisateur
+	stmt, err := db.Prepare("INSERT INTO users (nickname, firstname, lastname, birthday, imagename, aboutme, email, password, profil) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL pour PushUser :", err)
+		return
+	}
+	defer stmt.Close()
+	// Exécuter la requête SQL pour insérer le nouvel utilisateur
+	_, err = stmt.Exec(user.Nickname, user.FirstName, user.LastName, user.Birthday, user.ImageName, user.AboutMe, user.Email, user.Password, "profil")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de l'exécution de l'instruction SQL pour PushUser :", err)
+		return
+	}
+	// L'utilisateur a été inséré avec succès
+	fmt.Println("L'utilisateur a été inséré avec succès.")
+}
+
 func SelectIdReferenceUser_db(nickOrMail string, db *sql.DB) int {
 	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
 	stmt, err := db.Prepare("SELECT ID FROM Users WHERE Nickname = ? OR Email = ?")
@@ -293,7 +313,7 @@ func SelectAllUsers_db(db *sql.DB) []structures.User {
 	var users []structures.User
 
 	// Préparer la requête SQL
-	stmt, err := db.Prepare("SELECT ID, Nickname, Birthday, Age, ImageName FROM Users")
+	stmt, err := db.Prepare("SELECT ID, Nickname, Birthday, Age, ImageName, Profil FROM Users")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for SelectAllUser :", err)
@@ -314,7 +334,7 @@ func SelectAllUsers_db(db *sql.DB) []structures.User {
 	for rows.Next() {
 		var user structures.User
 		// Scanner les valeurs dans la structure User
-		if err := rows.Scan(&user.ID, &user.Nickname, &user.Birthday, &user.Age, &user.ImageName); err != nil {
+		if err := rows.Scan(&user.ID, &user.Nickname, &user.Birthday, &user.Age, &user.ImageName, &user.Profil); err != nil {
 			// Gérer l'erreur
 			fmt.Println("Erreur lors du scan des lignes:", err)
 			continue // Continuer à la prochaine ligne en cas d'erreur de scan
@@ -601,7 +621,7 @@ func ChangeYesOrNoEvent_db(db *sql.DB, column string, eventID, userID int) {
 func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 	var user structures.User
 	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
-	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe FROM Users WHERE Nickname = ? OR Email = ?")
+	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe, Profil FROM Users WHERE Nickname = ? OR Email = ?")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for SelectUserByNickanme_db :", err)
@@ -610,7 +630,7 @@ func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 	defer stmt.Close()
 
 	// Exécuter la requête SQL avec le pseudo ou l'email fourni
-	err = stmt.QueryRow(nickname, nickname).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe)
+	err = stmt.QueryRow(nickname, nickname).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &user.Profil)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de la requête SQL for SelectUserByNickanme_db :", err)
@@ -732,7 +752,7 @@ func SelectUserByToken(db *sql.DB, token string) structures.User {
 	var user structures.User
 
 	// Prepare the SQL statement
-	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe, UUID FROM Users WHERE UUID = ?")
+	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe, UUID, Profil FROM Users WHERE UUID = ?")
 	if err != nil {
 		// Log and return the error
 		log.Printf("Error preparing SQL statement in SelectUserByToken: %v", err)
@@ -741,7 +761,7 @@ func SelectUserByToken(db *sql.DB, token string) structures.User {
 	defer stmt.Close()
 
 	// Execute the SQL statement
-	err = stmt.QueryRow(token).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &user.UUID)
+	err = stmt.QueryRow(token).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &user.UUID, &user.Profil)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Handle no rows returned specifically

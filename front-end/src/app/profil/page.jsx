@@ -7,6 +7,9 @@ import styles from "../styles/profil.module.css"
 import eventUpdate from "../utils/eventUpdate"
 import cookieExist from "../utils/cookieUserExist";
 import sendAndReceiveData from "../lib/sendForm&ReceiveData"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
+import SettingsProfil from "../components/settingsProfil"
 
 let wssocket;
 export default function page(){
@@ -29,6 +32,7 @@ export default function page(){
         UrlImage: "",
         AboutMe: "",
     })
+    const [settings, setSettings]= useState(false)
     const [postsUser, setPostsUser] = useState([])
     const [isFollowing, setIsFollow] = useState(false)
 
@@ -94,6 +98,10 @@ export default function page(){
         }
     }
 
+    const handleSettingsClick = () => {
+        setSettings(!settings);
+    };
+
     onMessageWS()
 
     return(
@@ -102,71 +110,83 @@ export default function page(){
             <div className={styles.background}>
                 {userInfo.Nickname != "" && !isLoading ? 
                 <div className={styles.Content}>
-                    <div className={styles.publicPart}>
-                        <img className={styles.avatar} src={`${userInfo.UrlImage}`} alt="Avatar" />
-                        <div className={styles.nickname}>
-                            {userInfo.Nickname}
-                        </div>
-                        {user.name !== userInfo.Nickname && (
-                            <button className={styles.followButton}>
-                                {isFollowing ? "Abonné" : "S'abonner"}
-                            </button>
-                        )}
-                        <div className={styles.statProfil}>
-                            <span>
-                                <i className="fas fa-birthday-cake"></i>
-                                Age: {userInfo.Age} years
-                            </span>
-                            <span>
-                                <i className="fas fa-calendar-alt"></i>
-                                Birthday:  {userInfo.Birthday}
-                            </span>
-                            <span>
-                                <i className="fas fa-foolowers"></i>
-                                Number of followers: {userInfo.Followers && userInfo.Followers.length > 0 ? userInfo.Followers.length : 0}
-                            </span>
-                            <span>
-                                <i className="fas fa-posts"></i>
-                                Number of posts: {postsUser && postsUser.length > 0 ? postsUser.length : 0}
-                            </span>
-                        </div>
-                        <div>Bio:</div>
-                        <div className={styles.bio}>
-                            {userInfo.AboutMe ? userInfo.AboutMe : "Give some information about you!!!"}
-                        </div>
-                        <div>Post:</div>
-                       
-                        <div>
-                            {postsUser && postsUser.length > 0 ? (
-                                postsUser.map((post, index) => (
-                                    <div className={styles.post_details} key={index}>
-                                        <div className={styles.post_date}>
-                                            From {post.Date.split(" ")[0]} to {post.Date.split(" ")[1]}
-                                        </div>
-                                        {post.ImageName && 
-                                        (<img src={post.UrlImage} className={styles.post_image}></img>)
-                                        }
-                                        <div className={styles.post_content}>
-                                            {post.Content}
-                                        </div>
-                                        <div className={styles.likeDislike}>
-                                            Like: {post.Likes && post.Likes.length>0 ? post.Likes.length : 0} Dislike:  {post.Dislikes && post.Dislikes.length>0 ? post.Dislikes.length : 0}
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className={styles.no_posts}>aucun post</div>
+                    {user.name === userInfo.Nickname && (
+                        <>
+                            <div className={styles.settings}>
+                                <button className={styles.settingsButton} onClick={handleSettingsClick}>
+                                    <FontAwesomeIcon icon={faCog} className={styles.settingsIcon} />
+                                </button>
+                            </div>
+                            {settings && (
+                                <SettingsProfil onClose={handleSettingsClick} user={userInfo} />
                             )}
-                        </div>
+                        </>
+                    )}
+                    <div className={styles.publicPart}>
+                    <img className={styles.avatar} src={`${userInfo.UrlImage}`} alt="Avatar" />
+                    <div className={styles.nickname}>
+                        {userInfo.Nickname}
+                    </div>
+                    {user.name !== userInfo.Nickname && (
+                        <button className={styles.followButton}>
+                            {isFollowing ? "Abonné" : "S'abonner"}
+                        </button>
+                    )}
+                    <div className={styles.statProfil}>
+                        <span>
+                            <i className="fas fa-birthday-cake"></i>
+                            Age: {userInfo.Age} years
+                        </span>
+                        <span>
+                            <i className="fas fa-calendar-alt"></i>
+                            Birthday:  {userInfo.Birthday}
+                        </span>
+                        <span>
+                            <i className="fas fa-foolowers"></i>
+                            Number of followers: {userInfo.Followers && userInfo.Followers.length > 0 ? userInfo.Followers.length : 0}
+                        </span>
+                        <span>
+                            <i className="fas fa-posts"></i>
+                            Number of posts: {postsUser && postsUser.length > 0 ? postsUser.length : 0}
+                        </span>
+                    </div>
+                    <div>Bio:</div>
+                    <div className={styles.bio}>
+                        {userInfo.AboutMe ? userInfo.AboutMe : "Give some information about you!!!"}
+                    </div>
+                    <div>Post:</div>
+                
+                    <div>
+                        {postsUser && postsUser.length > 0 ? (
+                            postsUser.map((post, index) => (
+                                <div className={styles.post_details} key={index}>
+                                    <div className={styles.post_date}>
+                                        From {post.Date.split(" ")[0]} to {post.Date.split(" ")[1]}
+                                    </div>
+                                    {post.ImageName && 
+                                    (<img src={post.UrlImage} className={styles.post_image}></img>)
+                                    }
+                                    <div className={styles.post_content}>
+                                        {post.Content}
+                                    </div>
+                                    <div className={styles.likeDislike}>
+                                        Like: {post.Likes && post.Likes.length>0 ? post.Likes.length : 0} Dislike:  {post.Dislikes && post.Dislikes.length>0 ? post.Dislikes.length : 0}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className={styles.no_posts}>aucun post</div>
+                        )}
                     </div>
                 </div>
-                :
-                <div className={styles.overlay}>
-                    <div className={styles.loader}></div>
-                    <p>Load of profile data...</p>
-                </div>
-                }
             </div>
+            :
+            <div className={styles.overlay}>
+                <div className={styles.loader}></div>
+                <p>Load of profile data...</p>
+            </div>
+            }
+        </div>
         </div>
     )
 }

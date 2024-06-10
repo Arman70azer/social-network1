@@ -20,19 +20,22 @@ type Post struct {
 }
 
 type User struct {
-	ID        int
-	Nickname  string
-	Email     string
-	Password  string
-	FirstName string
-	LastName  string
-	Birthday  string
-	Age       int
-	ImageName string
-	UrlImage  string
-	AboutMe   string
-	UUID      string
-	Followers []Followers
+	ID               int
+	Nickname         string
+	Email            string
+	Password         string
+	FirstName        string
+	LastName         string
+	Birthday         string
+	Age              int
+	ImageName        string
+	UrlImage         string
+	AboutMe          string
+	UUID             string
+	Subscriber       []User
+	WantBeSubscriber []User
+	Profil           string
+	
 }
 
 type Data struct {

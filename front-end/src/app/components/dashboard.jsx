@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import sendFormToBack from '../lib/sendFormToBack';
 import cookieExist from '../utils/cookieUserExist';
 import sendAndReceiveData from "../lib/sendForm&ReceiveData"
+import Cookies from "js-cookie"
 
 
 //TODO Mettre les href une fois les pages finit !!!!!

@@ -211,25 +211,25 @@ export default function Page(){
                     </select>
                     {formData.nature === 'Event' && (
                         <div>
-                            <input
-                                type="text"
-                                id="title"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
-                                placeholder="Title"
-                            />
-                            <input 
-                                type="datetime-local"
-                                id="eventDate"
-                                name="eventDate"
-                                value={formData.eventDate}
-                                onChange={handleChange}
-                                style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
-                            />
-                        </div>
-                    )}
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
+                            placeholder="Title"
+                        />
+                        <input 
+                            type="datetime-local"
+                            id="eventDate"
+                            name="eventDate"
+                            value={formData.eventDate}
+                            onChange={handleChange}
+                            style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
+                        />
+                    </div>
+                )}
 
                     <input type="file" className={styles.file} name="file" onChange={handleFile}/>
                     {!fileValid && <span id="errorTypeFile" className={styles.error}>This file is not a image</span>}
