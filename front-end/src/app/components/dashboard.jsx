@@ -6,9 +6,8 @@ import cookieExist from '../utils/cookieUserExist';
 import sendAndReceiveData from "../lib/sendForm&ReceiveData"
 import Cookies from "js-cookie"
 
-
 //TODO Mettre les href une fois les pages finit !!!!!
-function DashboardTop({ events = [], ws = null }) {
+function DashboardTop({ events = [], ws = null, handleTchat}) {
     const origin= "home";
 
     const [showExtraButtons, setShowExtraButtons] = useState(false);
@@ -82,7 +81,7 @@ function DashboardTop({ events = [], ws = null }) {
     return (
         <div className={styles.dashboardTopPage}>
             <Link href="/home" className={styles.titleHome}>Social-Network</Link>
-            <Link href="/message" className={styles.buttonConversations}>Conversations</Link>
+            <button className={styles.buttonConversations} onClick={handleTchat}>Conversations</button>
             <div className={styles.eventContainer} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                 <button className={styles.buttonNotif}>{events.length>0 ? "Events("+events.length+")" : "Events"}</button>
                 {showExtraButtons && (

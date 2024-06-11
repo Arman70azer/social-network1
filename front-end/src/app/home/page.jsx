@@ -9,10 +9,12 @@ import sendFormToBack from '../lib/sendFormToBack'
 import eventUpdate from '../utils/eventUpdate'
 import cookieExist from '../utils/cookieUserExist'
 import sendAndReceiveData from "../lib/sendForm&ReceiveData"
+import Tchat from "../components/tchat"
 
 let wssocket;
 export default function Page(){
     const [data, setData] = useState([]);
+    const [seeTchat, setTchat]=useState(false)
     const [allData, setAllData]=useState([])
     const [seeThisPostCommentaries, setCommentaries] = useState("")
     const [enterComment, setEnterComment] = useState("")
@@ -259,12 +261,17 @@ export default function Page(){
 
         sendFormToBack("/api/home",formDislikePost)
     } 
+
+    function handleTchat(){
+        setTchat(!seeTchat)
+    }
     
     onMessageWS()
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div className={styles.background}>
-           {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} /> : <DashboardTop />}
+        {seeTchat && (<Tchat onClose={handleTchat}/>)}
+           {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
@@ -350,12 +357,12 @@ export default function Page(){
                 </div>
              </div>
              }
-            <div className={styles.dashboardBottomPage}>
+            {!seeTchat && (<div className={styles.dashboardBottomPage}>
                 <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
                 <button className={styles.buttonPostPrivates} onClick={onlyPrivatePosts}>Privates Posts</button>
                 <button className={styles.buttonPostsAll} onClick={resetDataToOrigine}> All Posts </button>
                 <Link href="/createPost" className={styles.buttonCreatePost}>Add New Post or Event [+]</Link>
-            </div>
+            </div>)}
         </div>
     );
 }

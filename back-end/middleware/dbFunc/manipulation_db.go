@@ -27,6 +27,28 @@ func Open_db() *sql.DB {
 	return db
 }
 
+func CheckUserExists_db(user string, db *sql.DB) bool {
+	stmt, err := db.Prepare("SELECT Password FROM Users WHERE Nickname = ? OR Email = ?")
+	if err != nil {
+		// Gérer l'erreur
+		log.Println("Erreur lors de la préparation de l'instruction SQL:", err)
+		return false
+	}
+	defer stmt.Close()
+	var hashedPassword string
+	err = stmt.QueryRow(user, user).Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// L'utilisateur n'existe pas
+			return false
+		}
+		// Gérer l'erreur
+		log.Println("Erreur lors de l'exécution de la requête SQL:", err)
+		return false
+	}
+	return true
+}
+
 // SelectAllsSameValues_db sélectionne les valeurs similaires dans la colonne choisie dans la db.
 func SelectAllsSameValuesUsers_db(db *sql.DB, column, value string) []string {
 	var result []string
