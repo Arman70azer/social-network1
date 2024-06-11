@@ -27,6 +27,96 @@ func Open_db() *sql.DB {
 	return db
 }
 
+func FollowedUsers(db *sql.DB, user structures.User) []structures.User {
+	// Requête SQL pour sélectionner les utilisateurs suivis en joignant la table Follow et Users
+	querySub := `
+        SELECT u.Nickname, u.ID, u.Age, u.ImageName
+        FROM Follow f
+        JOIN Users u ON f.UserID_Following = u.ID
+        WHERE f.UserID_Follower = ?`
+	var followedUsers []structures.User
+	// Exécuter la requête SQL
+	rows, err := db.Query(querySub, user.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	// Parcourir les résultats
+	for rows.Next() {
+		var userFollowed structures.User
+		if err := rows.Scan(&userFollowed.Nickname, &userFollowed.ID, &userFollowed.Age, &userFollowed.ImageName); err != nil {
+			log.Fatal(err)
+		}
+		followedUsers = append(followedUsers, userFollowed)
+	}
+	// Vérifier s'il y a des erreurs après avoir parcouru les résultats
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return followedUsers
+}
+
+func SelectSubscribers(db *sql.DB, user structures.User) []structures.User {
+	// Requête SQL pour sélectionner les abonnés en joignant la table Follow et Users
+	querySub := `
+        SELECT u.Nickname, u.ID, u.Age, u.ImageName
+        FROM Follow f
+        JOIN Users u ON f.UserID_Follower = u.ID
+        WHERE f.UserID_Following = ?`
+	var userSubscribers []structures.User
+	uniqueUsers := make(map[int]bool) // Utiliser une carte pour vérifier les identifiants uniques
+	// Exécuter la requête SQL
+	rows, err := db.Query(querySub, user.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	// Parcourir les résultats
+	for rows.Next() {
+		var userSub structures.User
+		if err := rows.Scan(&userSub.Nickname, &userSub.ID, &userSub.Age, &userSub.ImageName); err != nil {
+			log.Fatal(err)
+		}
+		if !uniqueUsers[userSub.ID] {
+			userSubscribers = append(userSubscribers, userSub)
+			uniqueUsers[userSub.ID] = true
+		}
+	}
+	// Vérifier s'il y a des erreurs après avoir parcouru les résultats
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return userSubscribers
+}
+
+// Supprime un abonnement dans la base de données
+func RemoveFollow(db *sql.DB, followerID int, followingID int) error {
+	_, err := db.Exec("DELETE FROM Follow WHERE UserID_Follower = ? AND UserID_Following = ?", followerID, followingID)
+	if err != nil {
+		return fmt.Errorf("erreur lors de la suppression de l'abonnement : %v", err)
+	}
+	return nil
+}
+
+// Ajoute un abonnement dans la base de données
+func AddFollow(db *sql.DB, followerID int, followingID int) error {
+	_, err := db.Exec("INSERT INTO Follow (UserID_Follower, UserID_Following, Date) VALUES (?, ?, datetime('now'))", followerID, followingID)
+	if err != nil {
+		return fmt.Errorf("erreur lors de l'ajout de l'abonnement : %v", err)
+	}
+	return nil
+}
+
+// Vérifie si un utilisateur suit déjà un autre utilisateur
+func CheckIfFollowing(db *sql.DB, followerID int, followingID int) bool {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM Follow WHERE UserID_Follower = ? AND UserID_Following = ?", followerID, followingID).Scan(&count)
+	if err != nil {
+		return false
+	}
+	return count > 0
+}
+
 func CheckUserExists_db(user string, db *sql.DB) bool {
 	stmt, err := db.Prepare("SELECT Password FROM Users WHERE Nickname = ? OR Email = ?")
 	if err != nil {

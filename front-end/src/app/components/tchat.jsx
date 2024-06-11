@@ -1,14 +1,18 @@
 import { useEffect } from "react"
 import styles from "../styles/tchat.module.css"
 import sendMessageToWebsocket from "../lib/wsSendMessage"
+import cookieExist from "../utils/cookieUserExist"
 function Tchat({onClose, ws}){
 
-    useEffect(
-
+    useEffect(() => {
         
+        const request1 ={
+            User: cookieExist(),
+            Origin: "chat-home"
+        }
+        sendMessageToWebsocket(ws, request1)
         
-        sendMessageToWebsocket(ws)
-    )
+    },);
 
     return(
         <div className={styles.overlay}>

@@ -270,7 +270,7 @@ export default function Page(){
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div className={styles.background}>
-        {seeTchat && (<Tchat onClose={handleTchat}/>)}
+        {seeTchat && (<Tchat onClose={handleTchat} ws={wssocket}/>)}
            {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>

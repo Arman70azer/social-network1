@@ -18,6 +18,8 @@ export default function page(){
         token: "",
         name:"",
     })
+    const [nbrSub, setNewFollow]= useState(0)
+    const [isFollowing, setIsFollowing] = useState(false);
     const [isLoading, setLoading] = useState(true)
     const [userInfo, setUserInfo] = useState({
         ID:0,
@@ -32,9 +34,13 @@ export default function page(){
         UrlImage: "",
         AboutMe: "",
     })
+    const [followers, setFollow] = useState({
+        sub : [], 
+        followed : [],
+        subPlusFollow : [],
+    })
     const [settings, setSettings]= useState(false)
     const [postsUser, setPostsUser] = useState([])
-    const [isFollowing, setIsFollow] = useState(false)
 
     useEffect(() => {
         const cookieUser = cookieExist()
@@ -48,7 +54,8 @@ export default function page(){
             // Récupérer les données des posts
             const datafetch = await fetchDataHome();
             setData(datafetch);
-            setUserInfo(datafetch.Users.filter((client) => client.Nickname === userParam)[0]);
+            const userProfil =datafetch.Users.filter((client) => client.Nickname === userParam)[0]
+            setUserInfo(userProfil);
 
             const form = new FormData
             form.append("token", cookieUser)
@@ -62,8 +69,28 @@ export default function page(){
             if (datafetch.Posts){
                 setPostsUser(datafetch.Posts.filter((post) => post.Author.Nickname === userParam));
             }
+
+            await fetchFollow(userProfil, userInfo1.Users[0].Nickname);
         };
-        
+        const fetchFollow = async (userProfil, userName) =>{
+            const formData = new FormData
+            formData.append("token", cookieUser)
+            formData.append("userProfil", userProfil.Nickname)
+            const dataReceved = await sendAndReceiveData("/api/follow", formData)
+            setFollow({
+                sub : dataReceved.userProfil.PeopleWhoFollowMe,
+                followed : dataReceved.userProfil.PeopleIFollow,
+                subPlusFollow : dataReceved.userProfil.PeopleIFollowAndFollowMe,
+            })
+
+            if (dataReceved.userProfil.PeopleWhoFollowMe){
+                setNewFollow(dataReceved.userProfil.PeopleWhoFollowMe.length)
+            }
+
+            if (dataReceved.userProfil.PeopleWhoFollowMe && dataReceved.userProfil.PeopleWhoFollowMe.some((userSub) => userSub.Nickname === userName)) {
+                setIsFollowing(true);
+            }            
+        }
     
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchData();
@@ -103,6 +130,25 @@ export default function page(){
         setSettings(!settings);
     };
 
+    const handleFollow = async () => {
+        const formFollow = new FormData();
+        formFollow.append("token", user.token);
+        formFollow.append("userProfil", userInfo.Nickname);
+        formFollow.append("nature", "follow");
+        const response = await sendAndReceiveData("/api/follow", formFollow);
+        console.log(response)
+        if (response.Accept) {
+            if (response.action === "You're now subscribe") {
+                setNewFollow(nbrSub+1)
+                setIsFollowing(true)
+        
+            }else {
+                setNewFollow(nbrSub-1)
+                setIsFollowing(false)
+            }
+        }
+      };
+
     const setUsertoParam = (key, value)=>{
         setUserInfo({
             ...userInfo,
@@ -141,8 +187,8 @@ export default function page(){
                         {userInfo.Nickname}
                     </div>
                     {user.name !== userInfo.Nickname && (
-                        <button className={styles.followButton}>
-                            {isFollowing ? "Abonné" : "S'abonner"}
+                        <button className={styles.followButton} onClick={handleFollow}>
+                            {isFollowing ? "Unsubscribe" : "Subscribe"}
                         </button>
                     )}
                     <div className={styles.statProfil}>
@@ -156,7 +202,7 @@ export default function page(){
                         </span>
                         <span>
                             <i className="fas fa-foolowers"></i>
-                            Number of followers: {userInfo.Followers && userInfo.Followers.length > 0 ? userInfo.Followers.length : 0}
+                            Number of followers: {nbrSub}
                         </span>
                         <span>
                             <i className="fas fa-posts"></i>

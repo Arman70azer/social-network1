@@ -83,11 +83,12 @@ type Migrations struct {
 	ID      string
 }
 
-type Followers struct {
-	ID        int
-	Following string
-	Follower  string
+type Follow struct {
+	PeopleIFollow            []User
+	PeopleWhoFollowMe        []User
+	PeopleIFollowAndFollowMe []User
 }
+
 
 type PrivatesViewer struct {
 	ID       int
