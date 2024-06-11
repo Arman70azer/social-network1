@@ -9,24 +9,23 @@ import (
 func Tchat(clients *Clients, message structures.Request) {
 	fmt.Println("hh:", message)
 	if message.ObjectOfRequest == "see users connect" {
-		connectUsers := whoIsConnect(clients, message.User)
+		connectUsers := whoIsConnect(clients)
 		message.Accept = true
 		message.Origin = "tchat"
 		var object structures.Tchat
 		object.ClientsConnect = connectUsers
 		message.Tchat = object
 
-		BroadcastToOneClient(message.User, message)
+		Broadcast(message)
 	}
 }
 
-func whoIsConnect(clients *Clients, uuidUser string) []structures.User {
+func whoIsConnect(clients *Clients) []structures.User {
 	var uuidUsers []string
 	var usersConnect []structures.User
 	for userName, _ := range clients.connections {
-		if userName != uuidUser {
-			uuidUsers = append(uuidUsers, userName)
-		}
+
+		uuidUsers = append(uuidUsers, userName)
 	}
 
 	for _, userUUID := range uuidUsers {
@@ -37,4 +36,14 @@ func whoIsConnect(clients *Clients, uuidUser string) []structures.User {
 	}
 
 	return usersConnect
+}
+
+func userDisconnectOrConnect(clients *Clients, userDisconnect string) {
+	var message structures.Request
+	message.Accept = true
+	message.Nature = "user disconnect or first connexions"
+	message.User = dbFunc.SelectUserByToken(dbFunc.Open_db(), userDisconnect).Nickname
+	message.Tchat.ClientsConnect = whoIsConnect(clients)
+
+	Broadcast(message)
 }

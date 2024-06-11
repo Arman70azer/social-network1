@@ -66,7 +66,6 @@ export default function Page(){
     useEffect(() => {
 
         const userCookie = cookieExist()
-        setUser(userCookie)
        
         const fetchData = async () => {
             // Récupérer les données des posts
@@ -82,6 +81,7 @@ export default function Page(){
             const data = await sendAndReceiveData("/api/profil", formToken);
 
             setUser(data.Users[0])
+
         }
 
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
@@ -255,7 +255,7 @@ export default function Page(){
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div className={styles.background}>
-            {seeTchat && (<Tchat onClose={handleTchat} ws={wssocket}/>)}
+            {seeTchat && user && (<Tchat onClose={handleTchat} ws={wssocket} user={user}/>)}
            {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat} setAllData={setAllData} setData={setData}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>

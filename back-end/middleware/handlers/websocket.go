@@ -69,6 +69,7 @@ func handleWebSocket(conn *websocket.Conn) {
 		clients.connections[userName] = conn
 
 		fmt.Println("New user connected:", userName)
+		userDisconnectOrConnect(clients, userName)
 	} else {
 
 		clients.connections[userName] = conn
@@ -108,6 +109,7 @@ func handleWebSocket(conn *websocket.Conn) {
 
 	// Remove the connection from the map of clients
 	delete(clients.connections, userName)
+	userDisconnectOrConnect(clients, userName)
 }
 
 func BroadcastToOneClient(client string, msg structures.Request) {
