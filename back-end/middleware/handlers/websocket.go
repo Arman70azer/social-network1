@@ -98,7 +98,12 @@ func handleWebSocket(conn *websocket.Conn) {
 			continue // Ignorer les messages mal formés
 		}
 
-		fmt.Println("Message: ", clientMsg)
+		if clientMsg.Nature == "chat" {
+			Tchat(clients, clientMsg)
+		} else {
+
+			fmt.Println("Message (non tchat): ", clientMsg)
+		}
 	}
 
 	// Remove the connection from the map of clients

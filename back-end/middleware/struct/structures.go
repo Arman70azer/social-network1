@@ -35,7 +35,6 @@ type User struct {
 	Subscriber       []User
 	WantBeSubscriber []User
 	Profil           string
-	
 }
 
 type Data struct {
@@ -58,15 +57,16 @@ type Commentary struct {
 }
 
 type Request struct {
-	Origin           string `json:"Origin"`
-	Nature           string `json:"Nature"`
-	User             string `json:"User"`
-	ObjectOfRequest  string `json:"ObjectOfRequest"`
-	Post             string `json:"Post"`
-	Accept           bool   `json:"Accept"`
-	Date             string `json:"Date"`
-	OtherLikeDislike bool   `json:"OtherLikeDislike"`
-	Event            string `json:"Event"`
+	Origin           string      `json:"Origin"`
+	Nature           string      `json:"Nature"`
+	User             string      `json:"User"`
+	ObjectOfRequest  string      `json:"ObjectOfRequest"`
+	Post             string      `json:"Post"`
+	Accept           bool        `json:"Accept"`
+	Date             string      `json:"Date"`
+	OtherLikeDislike bool        `json:"OtherLikeDislike"`
+	Event            string      `json:"Event"`
+	Object           interface{} `json:"Object"`
 }
 
 type LikeOrDislike struct {
@@ -88,7 +88,6 @@ type Follow struct {
 	PeopleWhoFollowMe        []User
 	PeopleIFollowAndFollowMe []User
 }
-
 
 type PrivatesViewer struct {
 	ID       int

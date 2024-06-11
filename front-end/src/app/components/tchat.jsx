@@ -8,10 +8,12 @@ function Tchat({onClose, ws}){
         
         const request1 ={
             User: cookieExist(),
-            Origin: "chat-home"
+            Origin: "chat-home",
+            Nature:"chat",
+            ObjectOfRequest: "see users connect"
         }
         sendMessageToWebsocket(ws, request1)
-        
+
     },);
 
     return(

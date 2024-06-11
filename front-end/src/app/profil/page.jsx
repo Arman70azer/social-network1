@@ -34,11 +34,7 @@ export default function page(){
         UrlImage: "",
         AboutMe: "",
     })
-    const [followers, setFollow] = useState({
-        sub : [], 
-        followed : [],
-        subPlusFollow : [],
-    })
+
     const [settings, setSettings]= useState(false)
     const [postsUser, setPostsUser] = useState([])
 
@@ -77,19 +73,13 @@ export default function page(){
             formData.append("token", cookieUser)
             formData.append("userProfil", userProfil.Nickname)
             const dataReceved = await sendAndReceiveData("/api/follow", formData)
-            setFollow({
-                sub : dataReceved.userProfil.PeopleWhoFollowMe,
-                followed : dataReceved.userProfil.PeopleIFollow,
-                subPlusFollow : dataReceved.userProfil.PeopleIFollowAndFollowMe,
-            })
 
             if (dataReceved.userProfil.PeopleWhoFollowMe){
                 setNewFollow(dataReceved.userProfil.PeopleWhoFollowMe.length)
-            }
-
-            if (dataReceved.userProfil.PeopleWhoFollowMe && dataReceved.userProfil.PeopleWhoFollowMe.some((userSub) => userSub.Nickname === userName)) {
-                setIsFollowing(true);
-            }            
+                if (dataReceved.userProfil.PeopleWhoFollowMe.some((userSub) => userSub.Nickname === userName)){
+                    setIsFollowing(true);
+                }
+            }     
         }
     
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
