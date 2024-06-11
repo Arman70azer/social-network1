@@ -26,7 +26,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 			} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
 				likeDislike(r, user)
 			} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
-				event(db, r, user)
+				event(db, r, user, w)
 
 			} else {
 
@@ -201,7 +201,7 @@ func comment(r *http.Request, user structures.User) {
 }
 
 // Gère les requêtes concernant les events
-func event(db *sql.DB, r *http.Request, user structures.User) {
+func event(db *sql.DB, r *http.Request, user structures.User, w http.ResponseWriter) {
 
 	titre := r.FormValue("event")
 
@@ -259,8 +259,7 @@ func event(db *sql.DB, r *http.Request, user structures.User) {
 			fmt.Println("func event ----->error cause the nature of request is: ", r.FormValue("nature"))
 			request.Accept = false
 		}
-
-		BroadcastToOneClient(user.UUID, request)
+		middleware.ReturnWithW(w, request)
 	}
 }
 

@@ -6,19 +6,15 @@ import (
 	"fmt"
 )
 
-type object struct {
-	clientsConnect []structures.User
-}
-
 func Tchat(clients *Clients, message structures.Request) {
 	fmt.Println("hh:", message)
 	if message.ObjectOfRequest == "see users connect" {
 		connectUsers := whoIsConnect(clients, message.User)
 		message.Accept = true
 		message.Origin = "tchat"
-		var object object
-		object.clientsConnect = connectUsers
-		message.Object = object
+		var object structures.Tchat
+		object.ClientsConnect = connectUsers
+		message.Tchat = object
 
 		BroadcastToOneClient(message.User, message)
 	}
@@ -34,7 +30,10 @@ func whoIsConnect(clients *Clients, uuidUser string) []structures.User {
 	}
 
 	for _, userUUID := range uuidUsers {
-		usersConnect = append(usersConnect, dbFunc.SelectUserByToken(dbFunc.Open_db(), userUUID))
+		user := dbFunc.SelectUserByToken(dbFunc.Open_db(), userUUID)
+		user.Password = ""
+		user.UUID = ""
+		usersConnect = append(usersConnect, user)
 	}
 
 	return usersConnect

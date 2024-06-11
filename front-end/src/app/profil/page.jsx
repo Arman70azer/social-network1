@@ -155,7 +155,7 @@ export default function page(){
 
     return(
         <div>
-            {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} /> : <DashboardTop />}
+            {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} setData={setData} /> : <DashboardTop />}
             <div className={styles.background}>
                 {userInfo.Nickname != "" && !isLoading ? 
                 <div className={styles.Content}>

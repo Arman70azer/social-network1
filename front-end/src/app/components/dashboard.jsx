@@ -1,13 +1,13 @@
 import styles from '../styles/home.module.css'; // Utilisez des guillemets simples ou doubles pour l'importation
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import sendFormToBack from '../lib/sendFormToBack';
+import sendAndReceiveData from '../lib/sendForm&ReceiveData';
 import cookieExist from '../utils/cookieUserExist';
-import sendAndReceiveData from "../lib/sendForm&ReceiveData"
 import Cookies from "js-cookie"
+import eventUpdate from '../utils/eventUpdate';
 
 //TODO Mettre les href une fois les pages finit !!!!!
-function DashboardTop({ events = [], ws = null, handleTchat}) {
+function DashboardTop({ events = [], ws = null, handleTchat, setAllData, setData}) {
     const origin= "home";
 
     const [showExtraButtons, setShowExtraButtons] = useState(false);
@@ -54,7 +54,7 @@ function DashboardTop({ events = [], ws = null, handleTchat}) {
         }
     };
 
-    const handleEventYes=(titre)=>{
+    const handleEventYes= async (titre)=>{
         if (ws != null){
             const formEventPost = new FormData();
             formEventPost.append("event", titre)
@@ -62,10 +62,41 @@ function DashboardTop({ events = [], ws = null, handleTchat}) {
             formEventPost.append("nature", "yes")
             formEventPost.append("origin", origin)
 
-            sendFormToBack("/api/home",formEventPost)
+            const receivedMessage = await sendAndReceiveData("/api/home",formEventPost)
+
+            console.log("ici regarde:", receivedMessage.User)
+
+            setEvents(receivedMessage)
         }
     }
-    const handleEventNo= (titre)=>{
+    const setEvents=(receivedMessage)=>{
+        if (receivedMessage.Accept && receivedMessage.Event){
+            const eventTarget = eventUpdate(events, receivedMessage)
+            if (setAllData){
+                setAllData(prevData => {
+                    const updateEvents = prevData.Events.map(event => {
+                        if (event.Titre === eventTarget.Titre) {
+                            return eventTarget;
+                        } else {
+                            return event;
+                        }
+                    });
+                    return { ...prevData, Events: updateEvents };
+                });
+            }
+            setData(prevData => {
+                const updateEvents = prevData.Events.map(event => {
+                    if (event.Titre === eventTarget.Titre) {
+                        return eventTarget;
+                    } else {
+                        return event;
+                    }
+                });
+                return { ...prevData, Events: updateEvents };
+            })
+        }
+    }
+    const handleEventNo= async (titre)=>{
         if (ws != null){
             const formEventPost = new FormData();
             formEventPost.append("event", titre)
@@ -73,7 +104,9 @@ function DashboardTop({ events = [], ws = null, handleTchat}) {
             formEventPost.append("nature", "no")
             formEventPost.append("origin", origin)
 
-            sendFormToBack("/api/home", formEventPost)
+            const receivedMessage = await sendAndReceiveData("/api/home",formEventPost)
+
+            setEvents(receivedMessage)
         }
     }
 

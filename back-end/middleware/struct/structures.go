@@ -43,12 +43,6 @@ type Data struct {
 	Events []Post `json:"Events"`
 }
 
-type Chat struct {
-	Messages    []string `json:"messages"`
-	Sender      string   `json:"sender"`
-	MembersChat []string `json:"memberschat"`
-}
-
 type Commentary struct {
 	Content string
 	Author  User
@@ -57,16 +51,16 @@ type Commentary struct {
 }
 
 type Request struct {
-	Origin           string      `json:"Origin"`
-	Nature           string      `json:"Nature"`
-	User             string      `json:"User"`
-	ObjectOfRequest  string      `json:"ObjectOfRequest"`
-	Post             string      `json:"Post"`
-	Accept           bool        `json:"Accept"`
-	Date             string      `json:"Date"`
-	OtherLikeDislike bool        `json:"OtherLikeDislike"`
-	Event            string      `json:"Event"`
-	Object           interface{} `json:"Object"`
+	Origin           string `json:"Origin"`
+	Nature           string `json:"Nature"`
+	User             string `json:"User"`
+	ObjectOfRequest  string `json:"ObjectOfRequest"`
+	Post             string `json:"Post"`
+	Accept           bool   `json:"Accept"`
+	Date             string `json:"Date"`
+	OtherLikeDislike bool   `json:"OtherLikeDislike"`
+	Event            string `json:"Event"`
+	Tchat            Tchat  `json:"Tchat"`
 }
 
 type LikeOrDislike struct {
@@ -96,4 +90,8 @@ type PrivatesViewer struct {
 	Post     int
 	Follow   bool
 	NoFollow bool
+}
+
+type Tchat struct {
+	ClientsConnect []User `json:"ClientsConnect"`
 }

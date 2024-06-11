@@ -6,7 +6,6 @@ import styles from '../styles/home.module.css'
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import sendFormToBack from '../lib/sendFormToBack'
-import eventUpdate from '../utils/eventUpdate'
 import cookieExist from '../utils/cookieUserExist'
 import sendAndReceiveData from "../lib/sendForm&ReceiveData"
 import Tchat from "../components/tchat"
@@ -215,20 +214,6 @@ export default function Page(){
                     } else {
                         console.log("Aucune donnée des posts trouvée.");
                     }
-                }else if (receivedMessage.Accept && receivedMessage.Event){
-                    const eventTarget = eventUpdate(data.Events, receivedMessage)
-                    setAllData(prevData => {
-                        const updateEvents = prevData.Events.map(event => {
-                            if (event.Titre === eventTarget.Titre) {
-                                return eventTarget;
-                            } else {
-                                return event;
-                            }
-                        });
-                        return { ...prevData, Events: updateEvents };
-                    });
-                    setData(allData)
-                    console.log(data.Events[0].Followers)
                 }
             };
         }
@@ -270,8 +255,8 @@ export default function Page(){
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div className={styles.background}>
-        {seeTchat && (<Tchat onClose={handleTchat} ws={wssocket}/>)}
-           {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
+            {seeTchat && (<Tchat onClose={handleTchat} ws={wssocket}/>)}
+           {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat} setAllData={setAllData} setData={setData}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
             <div className={styles.centerElementChilds}>
                 <button className={styles.actualiserPosts} onClick={actualiserPage}>
                     {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}

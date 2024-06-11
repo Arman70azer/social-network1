@@ -6,13 +6,24 @@ function Tchat({onClose, ws}){
 
     useEffect(() => {
         
-        const request1 ={
-            User: cookieExist(),
-            Origin: "chat-home",
-            Nature:"chat",
-            ObjectOfRequest: "see users connect"
+        const searchConnectUser= async () =>{
+
+            const request ={
+                User: cookieExist(),
+                Origin: "chat-home",
+                Nature:"chat",
+                ObjectOfRequest: "see users connect"
+            }
+
+            try{
+                const response = await sendMessageToWebsocket(ws, request)
+                console.log("Réponse reçue du serveur:", response);
+            }catch(error){
+                console.error("Erreur lors de l'envoi du message ou de la réception de la réponse:", error);
+                
+            }
         }
-        sendMessageToWebsocket(ws, request1)
+        searchConnectUser()
 
     },);
 
