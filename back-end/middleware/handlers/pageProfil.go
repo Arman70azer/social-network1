@@ -30,8 +30,13 @@ func HandlerProfil(w http.ResponseWriter, r *http.Request) {
 
 		if nature == "Nickname" && middleware.RegexSpaceAndScript(change) {
 
-			updateNickname(db, user, change)
+			if nicknameAlreadyTake(db, change) {
+				request.Accept = false
+				request.ObjectOfRequest = "Nickname already exist"
 
+			} else {
+				updateNickname(db, user, change)
+			}
 			middleware.ReturnWithW(w, request)
 		} else if nature == "Password" && middleware.RegexSpaceAndScript(change) {
 			updatePassword(db, user, change)
@@ -102,4 +107,18 @@ func updateProfil(db *sql.DB, user structures.User) string {
 		fmt.Println("ERROR2 updateProfil:", err)
 	}
 	return newProfil
+}
+
+func nicknameAlreadyTake(db *sql.DB, nickname string) bool {
+	var existingNickname string
+	err := db.QueryRow("SELECT Nickname FROM Users WHERE Nickname = ?", nickname).Scan(&existingNickname)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		}
+		fmt.Println("Erreur lors de la vérification du surnom:", err)
+		return true
+	}
+	return true
 }

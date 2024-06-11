@@ -87,6 +87,8 @@ function SettingsProfil({ onClose, user, setUser }){
                     console.log("error setNewChange")
                     break
             }
+        }else{
+            updateEffectuate(response)
         }
     }
     function updateEffectuate(response){

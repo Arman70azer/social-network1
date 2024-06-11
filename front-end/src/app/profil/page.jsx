@@ -63,6 +63,7 @@ export default function page(){
                 setPostsUser(datafetch.Posts.filter((post) => post.Author.Nickname === userParam));
             }
         };
+        
     
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchData();
