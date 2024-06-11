@@ -45,13 +45,13 @@ export default function Register() {
     form.append("aboutme", formData.aboutme);
     form.append("email", formData.email);
     form.append("password", formData.password);
-    const response = sendFormToBackAndReceive("/register", form);
+    const response = await sendFormToBackAndReceive("/register", form);
     if (response.Accept){
       window.location.href = '/'
     }else{
       setError({
         exist : true,
-        message : response.Error,
+        message : response.Nature,
       })
     }
   };

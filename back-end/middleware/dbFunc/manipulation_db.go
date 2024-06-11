@@ -203,7 +203,7 @@ func SelectPrivatesEvent(db *sql.DB, event structures.Post) []structures.Private
 
 func PushUser_db(user structures.User, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouvel utilisateur
-	stmt, err := db.Prepare("INSERT INTO users (nickname, firstname, lastname, birthday, imagename, aboutme, email, password, profil) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO users (nickname, firstname, lastname, birthday, imagename, aboutme, email, password, profil, age) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL pour PushUser :", err)
@@ -211,7 +211,7 @@ func PushUser_db(user structures.User, db *sql.DB) {
 	}
 	defer stmt.Close()
 	// Exécuter la requête SQL pour insérer le nouvel utilisateur
-	_, err = stmt.Exec(user.Nickname, user.FirstName, user.LastName, user.Birthday, user.ImageName, user.AboutMe, user.Email, user.Password, "profil")
+	_, err = stmt.Exec(user.Nickname, user.FirstName, user.LastName, user.Birthday, user.ImageName, user.AboutMe, user.Email, user.Password, "profil", user.Age)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL pour PushUser :", err)
@@ -663,6 +663,33 @@ func SelectEventByTitle_db(db *sql.DB, titre string) structures.Post {
 
 	return event
 }
+
+//////////////////////////////
+
+func CheckUserExists_db(user string, db *sql.DB) bool {
+	stmt, err := db.Prepare("SELECT Password FROM Users WHERE Nickname = ? OR Email = ?")
+	if err != nil {
+		// Gérer l'erreur
+		log.Println("Erreur lors de la préparation de l'instruction SQL:", err)
+		return false
+	}
+	defer stmt.Close()
+
+	var hashedPassword string
+	err = stmt.QueryRow(user, user).Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// L'utilisateur n'existe pas
+			return false
+		}
+		// Gérer l'erreur
+		log.Println("Erreur lors de l'exécution de la requête SQL:", err)
+		return false
+	}
+	return true
+}
+
+////////////////////////////////////////
 
 // Renvoie un boolean qui vérifie si l'user existe et que son mot de passe l'est aussi
 func UserExist_db(db *sql.DB, user string, password string) bool {
