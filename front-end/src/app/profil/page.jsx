@@ -10,13 +10,24 @@ import sendAndReceiveData from "../lib/sendForm&ReceiveData"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import SettingsProfil from "../components/settingsProfil"
+import Tchat from "../components/tchat";
 
 let wssocket;
 export default function page(){
     const [data, setData] = useState([])
+    const [seeTchat, setTchat]=useState(false)
     const [user, setUser] = useState({
-        token: "",
-        name:"",
+        ID:0,
+        Nickname:"",
+        Email: "",
+        Password:"",
+        FirstName: "",
+        LastName: "",
+        Birthday: "",
+        Age: 0,
+        ImageName: "",
+        UrlImage: "",
+        AboutMe: "",
     })
     const [nbrSub, setNewFollow]= useState(0)
     const [isFollowing, setIsFollowing] = useState(false);
@@ -56,12 +67,8 @@ export default function page(){
             const form = new FormData
             form.append("token", cookieUser)
             const userInfo1 = await sendAndReceiveData("/api/profil", form)
-            setUser({ 
-                name: userInfo1.Users[0].Nickname, 
-                token: cookieUser 
-            });
+            setUser(userInfo1.Users[0]);
 
-            console.log(user)
             if (datafetch.Posts){
                 setPostsUser(datafetch.Posts.filter((post) => post.Author.Nickname === userParam));
             }
@@ -122,7 +129,7 @@ export default function page(){
 
     const handleFollow = async () => {
         const formFollow = new FormData();
-        formFollow.append("token", user.token);
+        formFollow.append("token", cookieExist());
         formFollow.append("userProfil", userInfo.Nickname);
         formFollow.append("nature", "follow");
         const response = await sendAndReceiveData("/api/follow", formFollow);
@@ -137,7 +144,7 @@ export default function page(){
                 setIsFollowing(false)
             }
         }
-      };
+    };
 
     const setUsertoParam = (key, value)=>{
         setUserInfo({
@@ -145,21 +152,26 @@ export default function page(){
             [key]:value
         })
         if (key == "Nickname"){
-            setUser({
-                name: value
-            })
+            setUser((previousUser) => {
+                return [...previousUser, { Nickname: value }];
+            });
         }
+    }
+
+    function handleTchat(){
+        setTchat(!seeTchat)
     }
 
     onMessageWS()
 
     return(
         <div>
-            {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} setData={setData} /> : <DashboardTop />}
+            {data.Events && wssocket!= null ?<DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat} setData={setData}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
+            {seeTchat && user && (<Tchat onClose={handleTchat} ws={wssocket} user={user}/>)}
             <div className={styles.background}>
                 {userInfo.Nickname != "" && !isLoading ? 
                 <div className={styles.Content}>
-                    {user.name === userInfo.Nickname && (
+                    {user.Nickname === userInfo.Nickname && (
                         <>
                             <div className={styles.settings}>
                                 <button className={styles.settingsButton} onClick={handleSettingsClick}>
@@ -176,7 +188,7 @@ export default function page(){
                     <div className={styles.nickname}>
                         {userInfo.Nickname}
                     </div>
-                    {user.name !== userInfo.Nickname && (
+                    {user.Nickname !== userInfo.Nickname && (
                         <button className={styles.followButton} onClick={handleFollow}>
                             {isFollowing ? "Unsubscribe" : "Subscribe"}
                         </button>

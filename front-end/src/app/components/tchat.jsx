@@ -13,10 +13,7 @@ function Tchat({ onClose, ws, user}) {
     const [message, setMessage] = useState("")
     const chatWindowRef = useRef(null);
     const [chats, setChats] = useState([])
-    const [chatSee, setChatSee]=useState({
-        see:true,
-        nickname:"",
-    })
+ 
     const [notSub, setNotSub] = useState("")
 
     useEffect(() => {
@@ -51,7 +48,11 @@ function Tchat({ onClose, ws, user}) {
                         setChats(receivedMessage.Tchat.Messages)
                     }
                 }else if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "message save")){
-                    setChats((prevChats) => [...prevChats, receivedMessage.Tchat.Messages[0]]);
+                    if (chats){
+                        setChats((prevChats) => [...prevChats, receivedMessage.Tchat.Messages[0]]);
+                    }else{
+                        setChats(receivedMessage.Tchat.Messages)
+                    }
                     scrollToBottom();
                 }else if (!receivedMessage.Accept && receivedMessage.ObjectOfRequest == "You're not following this user or he don't follow you")
                     setNotSub(receivedMessage.ToUser)
@@ -133,7 +134,7 @@ function Tchat({ onClose, ws, user}) {
                                                 <h2>Chat</h2>
                                             </div>
                                             <div className={styles.messages} ref={chatWindowRef}>
-                                                {chats.map((message, index) => (
+                                                {chats && chats.map((message, index) => (
                                                     message && (message.Author === openChat.nickname || message.Recipient === openChat.nickname) && (
                                                         <div key={index} className={message.Author === user.Nickname ? styles.myMessage : styles.otherMessage}>
                                                             <div className={styles.messageContent}>

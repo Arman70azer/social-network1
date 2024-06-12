@@ -24,9 +24,7 @@ func HandlerFollow(w http.ResponseWriter, r *http.Request) {
 		token := r.FormValue("token")
 		userToFollow := r.FormValue("userProfil")
 		nature := r.FormValue("nature")
-		fmt.Println(token)
-		fmt.Println(userToFollow)
-		fmt.Println(nature)
+
 		userProfil := dbFunc.SelectUserByNickname_db(db, userToFollow)
 		user := dbFunc.SelectUserByToken(db, token)
 		var response response
