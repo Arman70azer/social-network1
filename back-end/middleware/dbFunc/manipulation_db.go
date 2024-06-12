@@ -749,6 +749,8 @@ func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 		return user
 	}
 
+	user.UrlImage = "http://localhost:8000/images/" + user.ImageName
+
 	return user
 }
 
@@ -884,6 +886,7 @@ func SelectUserByToken(db *sql.DB, token string) structures.User {
 		log.Printf("Error executing SQL query in SelectUserByToken: %v", err)
 		return user
 	}
+	user.UrlImage = "http://localhost:8000/images/" + user.ImageName
 
 	return user
 }

@@ -49,3 +49,32 @@
     border-radius: 50%; /* Bord arrondi pour créer un aspect de bouton rond */
     transition: background-color 0.3s ease; /* Transition de couleur de fond en douceur */
 }
+
+.usersList {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.connectedUser {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.3s;
+}
+
+.connectedUser:hover {
+    background: #f9f9f9;
+}
+
+.userAvatar img {
+    width: 60px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.userNickname {
+    font-size: 16px;
+    font-weight: 500;
+}

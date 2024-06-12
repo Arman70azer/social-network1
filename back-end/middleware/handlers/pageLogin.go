@@ -3,8 +3,10 @@ package handlers
 import (
 	"back-end/middleware"
 	"back-end/middleware/dbFunc"
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -36,6 +38,7 @@ func HandlerLogin(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("Erreur interne du serveur :", err)
 			return
 		}
+		updateTokenUser(db, token, dbFunc.SelectUserByToken(db, user).ID)
 		response := LoginResponse{}
 		if valid {
 			response = LoginResponse{
@@ -56,5 +59,12 @@ func HandlerLogin(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(response)
 	} else {
 		http.Error(w, "Données invalides", http.StatusBadRequest)
+	}
+}
+
+func updateTokenUser(db *sql.DB, newToken string, userID int) {
+	_, err := db.Exec("UPDATE Users SET UUID = ? WHERE ID = ?", newToken, userID)
+	if err != nil {
+		log.Printf("Erreur lors de la mise à jour du token utilisateur : %v", err)
 	}
 }

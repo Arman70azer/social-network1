@@ -30,7 +30,7 @@ function Tchat({ onClose, ws, user}) {
         if (ws && user){
             ws.onmessage = (event) => {
                 const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
-                if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "see users connect" || receivedMessage.Nature==="user disconnect")) {
+                if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "see users connect" || receivedMessage.Nature==="user disconnect or first connexions")) {
                     setConnectUsers(receivedMessage.Tchat.ClientsConnect.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
                 }
 
@@ -46,11 +46,20 @@ function Tchat({ onClose, ws, user}) {
             <div className={styles.settingsContainer}>
                 <div className={styles.center}>
                     <button className={styles.closeButton} onClick={onClose}>X</button>
-                    {connectUsers && connectUsers.map((connectUser, index) => (
-                        <div key={index} className={styles.connectedUsers}>
-                            {connectUser.Nickname}
-                        </div>
-                    ))}
+                    <div className={styles.usersList}>
+                        <div className={styles.center}>Users Connects:</div>
+                        {connectUsers && connectUsers.map((connectUser, index) => (
+                            <div key={index} className={styles.connectedUser}>
+                                <div className={styles.userAvatar}>
+                                    {/* Placeholder for avatar, replace with actual image if available */}
+                                    <img src={connectUser.UrlImage} alt="avatar" />
+                                </div>
+                                <div className={styles.userNickname}>
+                                    {connectUser.Nickname}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
