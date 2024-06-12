@@ -1,5 +1,4 @@
 package structures
-
 type Post struct {
 	ID             int
 	Titre          string
@@ -18,7 +17,6 @@ type Post struct {
 	NoFollowers    []string
 	Error          string
 }
-
 type User struct {
 	ID               int
 	Nickname         string
@@ -35,28 +33,18 @@ type User struct {
 	Subscriber       []User
 	WantBeSubscriber []User
 	Profil           string
-	
 }
-
 type Data struct {
 	Posts  []Post `json:"Posts"`
 	Users  []User `json:"Users"`
 	Events []Post `json:"Events"`
 }
-
-type Chat struct {
-	Messages    []string `json:"messages"`
-	Sender      string   `json:"sender"`
-	MembersChat []string `json:"memberschat"`
-}
-
 type Commentary struct {
 	Content string
 	Author  User
 	Post    Post
 	Date    string
 }
-
 type Request struct {
 	Origin           string `json:"Origin"`
 	Nature           string `json:"Nature"`
@@ -67,28 +55,25 @@ type Request struct {
 	Date             string `json:"Date"`
 	OtherLikeDislike bool   `json:"OtherLikeDislike"`
 	Event            string `json:"Event"`
+	Tchat            Tchat  `json:"Tchat"`
 }
-
 type LikeOrDislike struct {
 	Type string
 	User string
 	Post string
 	Date string
 }
-
 type Migrations struct {
 	Name    string
 	Type    string
 	Request string
 	ID      string
 }
-
-type Followers struct {
-	ID        int
-	Following string
-	Follower  string
+type Follow struct {
+	PeopleIFollow            []User
+	PeopleWhoFollowMe        []User
+	PeopleIFollowAndFollowMe []User
 }
-
 type PrivatesViewer struct {
 	ID       int
 	Author   int
@@ -96,4 +81,7 @@ type PrivatesViewer struct {
 	Post     int
 	Follow   bool
 	NoFollow bool
+}
+type Tchat struct {
+	ClientsConnect []User `json:"ClientsConnect"`
 }
