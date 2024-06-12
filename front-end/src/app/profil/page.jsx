@@ -144,7 +144,7 @@ export default function page(){
                 setIsFollowing(false)
             }
         }
-    };
+      };
 
     const setUsertoParam = (key, value)=>{
         setUserInfo({
@@ -160,15 +160,16 @@ export default function page(){
 
     function handleTchat(){
         setTchat(!seeTchat)
+        console.log("ggg")
     }
 
     onMessageWS()
 
     return(
         <div>
-            {data.Events && wssocket!= null ?<DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat} setData={setData}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
-            {seeTchat && user && (<Tchat onClose={handleTchat} ws={wssocket} user={user}/>)}
             <div className={styles.background}>
+            {seeTchat && user && (<Tchat onClose={handleTchat} ws={wssocket} user={user}/>)}
+            {data.Events && wssocket!= null ?<DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat} setData={setData}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
                 {userInfo.Nickname != "" && !isLoading ? 
                 <div className={styles.Content}>
                     {user.Nickname === userInfo.Nickname && (

@@ -8,22 +8,45 @@ import openWebSocketConnexion from "../lib/websocket";
 import sendRequestToWebsocket from "../lib/wsSendMessage"
 import sendFormToBack from "../lib/sendFormToBack";
 import cookieExist from "../utils/cookieUserExist";
+import Tchat from "../components/tchat";
+import sendAndReceiveData from "../lib/sendForm&ReceiveData";
 
 //permet de retourner sur la page d'acceuil
 
-let wsConnect;
+let wssocket;
 export default function Page(){
 
     const [data, setData] = useState([]);
+    const [seeTchat, setTchat]=useState(false)
 
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [correctForm, setCorrectForm] = useState(true);
-    const [user, setUser] = useState("")
+    const [user, setUser] = useState({
+        ID:0,
+        Nickname:"",
+        Email: "",
+        Password:"",
+        FirstName: "",
+        LastName: "",
+        Birthday: "",
+        Age: 0,
+        ImageName: "",
+        UrlImage: "",
+        AboutMe: "",
+    })
 
     useEffect(() => {
         const userCookie = cookieExist()
-        setUser(userCookie)
+        const fetchUserInfo = async () => {
+            const formToken = new FormData
+            formToken.append("token", userCookie)
+        
+            const data = await sendAndReceiveData("/api/profil", formToken);
+
+            setUser(data.Users[0])
+
+        }
         const fetchData = async () => {
             // Récupérer les données des posts
             const datafetch = await fetchUsersAndPosts();
@@ -31,10 +54,11 @@ export default function Page(){
         };
 
         fetchData();
+        fetchUserInfo()
 
-        wsConnect = openWebSocketConnexion()
+        wssocket = openWebSocketConnexion()
         setTimeout(() => {
-            sendRequestToWebsocket(wsConnect, { Origin: "creationPost", Nature: "enterToCreationPost", User:user });
+            sendRequestToWebsocket(wssocket, { Origin: "creationPost", Nature: "enterToCreationPost", User:cookieExist() });
         }, 200);
      
           // Mettre à jour les suggestions une seule fois
@@ -97,7 +121,7 @@ export default function Page(){
                 // Créer un objet FormData pour envoyer le formulaire avec le fichier
                 const formDataToSend = new FormData();
                 formDataToSend.append('content', formData.content);
-                formDataToSend.append('user', user)
+                formDataToSend.append('user', cookieExist())
                 formDataToSend.append('nature', formData.nature)
                 formDataToSend.append('title', formData.title)
                 formDataToSend.append('eventDate', formData.eventDate)
@@ -174,9 +198,9 @@ export default function Page(){
     };
 
     const onMessageWS = () => {
-        if (data && wsConnect!= null) {
+        if (data && wssocket!= null) {
             // Gérer les messages reçus du serveur WebSocket
-            wsConnect.onmessage = (event) => {
+            wssocket.onmessage = (event) => {
                 const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
                 if (receivedMessage.Accept && receivedMessage.Event){
                     const eventTarget = eventUpdate(data.Events, receivedMessage)
@@ -197,11 +221,16 @@ export default function Page(){
         }
     }
 
+    function handleTchat(){
+        setTchat(!seeTchat)
+    }
+
     onMessageWS()
 
     return (
         <div className={styles.background}>
-           {data.Events ? <DashboardTop events={data.Events} ws={wsConnect} setData={setData}/> : <DashboardTop />}
+          {seeTchat && user && (<Tchat onClose={handleTchat} ws={wssocket} user={user}/>)}
+          {data.Events && wssocket!= null ?<DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat} setData={setData}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
             <div className={styles.center}>
                 <form className={styles.menuNewPost}>
                     <label htmlFor="nature">Write New {formData.nature}:</label>
