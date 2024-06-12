@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"back-end/middleware"
 	"back-end/middleware/dbFunc"
 	structures "back-end/middleware/struct"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -55,17 +55,7 @@ func HandlerFollow(w http.ResponseWriter, r *http.Request) {
 				response.Action = "You're now subscribe"
 			}
 		}
-		// Convertir les données en JSON
-		jsonData, err := json.Marshal(response)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// Définir le type de contenu de la réponse comme JSON
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		// Renvoyer les données JSON en réponse
-		w.Write(jsonData)
+		middleware.ReturnWithW(w, response)
 	}
 }
 

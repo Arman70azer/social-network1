@@ -110,6 +110,10 @@ function DashboardTop({ events = [], ws = null, handleTchat, setAllData, setData
         }
     }
 
+    const redirection = ()=>{
+        window.location.href= "/profil?user="+userInfo
+    }
+
 
     return (
         <div className={styles.dashboardTopPage}>
@@ -159,7 +163,7 @@ function DashboardTop({ events = [], ws = null, handleTchat, setAllData, setData
                     </div>
                 )}
             </div>
-            <Link href={{ pathname: "/profil", query: { user: userInfo } }} className={styles.buttonProfil}>Profil</Link>
+            <Link href={{ pathname: "/profil", query: { user: userInfo } }} className={styles.buttonProfil} onClick={redirection}>Profil</Link>
             <Link href="/" className={styles.buttonLogout} onClick={logout}>Logout</Link>
         </div>
     );

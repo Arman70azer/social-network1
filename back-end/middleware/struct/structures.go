@@ -61,6 +61,8 @@ type Request struct {
 	OtherLikeDislike bool   `json:"OtherLikeDislike"`
 	Event            string `json:"Event"`
 	Tchat            Tchat  `json:"Tchat"`
+	ToUser           string `json:"ToUser"`
+	Message          string `json:"Message"`
 }
 
 type LikeOrDislike struct {
@@ -94,4 +96,15 @@ type PrivatesViewer struct {
 
 type Tchat struct {
 	ClientsConnect []User `json:"ClientsConnect"`
+	Clients        []User `json:"Clients"`
+	Messages       []Message
+}
+
+type Message struct {
+	ID        int    `json:"ID"`
+	Author    string `json:"Author"`
+	Recipient string `json:"Recipient"`
+	Content   string `json:"Content"`
+	Date      string `json:"Date"`
+	Groupe    bool   `json:"Groupe"`
 }

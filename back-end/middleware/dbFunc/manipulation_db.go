@@ -139,10 +139,10 @@ func CheckUserExists_db(user string, db *sql.DB) bool {
 	return true
 }
 
-// SelectAllsSameValues_db sélectionne les valeurs similaires dans la colonne choisie dans la db.
+// SelectAllsSameValues_db sélectionne les valeurs similaires dans la colonne choisie dans .
 func SelectAllsSameValuesUsers_db(db *sql.DB, column, value string) []string {
 	var result []string
-	query := "SELECT " + column + " FROM Users WHERE " + column + " = ?"
+	query := "SELECT " + column + " FROM Users WHERE " + value + " = ?"
 
 	rows, err := db.Query(query, value)
 	if err != nil {
@@ -889,4 +889,56 @@ func SelectUserByToken(db *sql.DB, token string) structures.User {
 	user.UrlImage = "http://localhost:8000/images/" + user.ImageName
 
 	return user
+}
+
+func SelectUUID(db *sql.DB, userNickname string) string {
+	var uUID string
+	err := db.QueryRow("SELECT UUID FROM Users WHERE Nickname = ?", userNickname).Scan(&uUID)
+	if err != nil {
+		fmt.Println("erreur selectUUID:", err)
+	}
+	return uUID
+}
+
+func SelectAllChats(db *sql.DB, userID int) []structures.Message {
+	var allMessages []structures.Message
+
+	query := `
+		SELECT c.ID, u1.Nickname AS Author, u2.Nickname AS Recipient, c.Message, c.Date
+		FROM ChatsUsers c
+		JOIN Users u1 ON c.Author = u1.ID
+		JOIN Users u2 ON c.Recipient = u2.ID
+		WHERE c.Author = ? OR c.Recipient = ?
+	`
+
+	rows, err := db.Query(query, userID, userID)
+	if err != nil {
+		fmt.Println("erreur lors de l'exécution de la requête (SelectAllChats):", err)
+		return allMessages
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var message structures.Message
+		err := rows.Scan(&message.ID, &message.Author, &message.Recipient, &message.Content, &message.Date)
+		if err != nil {
+			fmt.Println("erreur lors de la lecture des résultats(SelectAllChats):", err)
+			continue
+		}
+		allMessages = append(allMessages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Println("erreur lors de l'itération des résultats(SelectAllChats):", err)
+	}
+
+	return allMessages
+}
+
+func PushNewMessage_db(db *sql.DB, message structures.Request, userID, recipientID int) {
+	query := "INSERT INTO ChatsUsers (Author, Recipient, Date, Message) VALUES (?, ?, ?, ?)"
+	_, err := db.Exec(query, userID, recipientID, message.Date, message.Message)
+	if err != nil {
+		fmt.Println("error PushNewMessage_db:", err)
+	}
 }

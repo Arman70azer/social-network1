@@ -1,9 +1,23 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import styles from "../styles/tchat.module.css"
 import sendMessageToWebsocket from "../lib/wsSendMessage"
 import cookieExist from "../utils/cookieUserExist"
+
 function Tchat({ onClose, ws, user}) {
     const [connectUsers, setConnectUsers] = useState([]);
+    const [users, setUsers]=useState([])
+    const [openChat, setOpenChat] = useState({
+        open:false,
+        nickname:""
+    })
+    const [message, setMessage] = useState("")
+    const chatWindowRef = useRef(null);
+    const [chats, setChats] = useState([])
+    const [chatSee, setChatSee]=useState({
+        see:true,
+        nickname:"",
+    })
+    const [notSub, setNotSub] = useState("")
 
     useEffect(() => {
         const searchConnectUser = async () => {
@@ -32,13 +46,64 @@ function Tchat({ onClose, ws, user}) {
                 const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
                 if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "see users connect" || receivedMessage.Nature==="user disconnect or first connexions")) {
                     setConnectUsers(receivedMessage.Tchat.ClientsConnect.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
-                }
+                    setUsers(receivedMessage.Tchat.Clients.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
+                    if (receivedMessage.ObjectOfRequest == "see users connect"){
+                        setChats(receivedMessage.Tchat.Messages)
+                    }
+                }else if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "message save")){
+                    setChats((prevChats) => [...prevChats, receivedMessage.Tchat.Messages[0]]);
+                    scrollToBottom();
+                }else if (!receivedMessage.Accept && receivedMessage.ObjectOfRequest == "You're not following this user or he don't follow you")
+                    setNotSub(receivedMessage.ToUser)
 
                 console.log("Réponse du serveur (ws):", receivedMessage)
             }
         }
     }
 
+    const openChatWithUser=(user)=>{
+        setOpenChat({
+            open:!openChat.open,
+            nickname:user
+        })
+    }
+
+    const messageIsWritting = (event) => {
+        console.log(users)
+        console.log(connectUsers)
+        const { value } = event.target;
+        setMessage(value);
+    }
+
+    const handleKeyPress = async (e) => {
+        if (e.key === 'Enter' && message){
+            const request = {
+                User: cookieExist(),
+                Origin: "chat-home",
+                Nature: "chat",
+                ObjectOfRequest: "new message",
+                toUser: openChat.nickname,
+                Message: message
+            };
+    
+            sendMessageToWebsocket(ws, request)
+            setMessage("")
+        }
+    }
+
+    const isUserConnected = (userNickname) => {
+        const inConnectUsers = connectUsers && connectUsers.some((userConnect) => userConnect.Nickname === userNickname);
+        const inOtherUsers = users && users.some((otherUser) => otherUser.Nickname === userNickname);
+        return inConnectUsers && inOtherUsers;
+    };
+    const scrollToBottom = async() => {
+        setTimeout(()=>{
+            if (chatWindowRef.current) {
+                chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
+            }
+        }, 100)
+    };
+    
     onMessageWS()
 
     return (
@@ -48,16 +113,47 @@ function Tchat({ onClose, ws, user}) {
                     <button className={styles.closeButton} onClick={onClose}>X</button>
                     <div className={styles.usersList}>
                         <div className={styles.center}>Users Connects:</div>
-                        {connectUsers && connectUsers.map((connectUser, index) => (
-                            <div key={index} className={styles.connectedUser}>
-                                <div className={styles.userAvatar}>
-                                    {/* Placeholder for avatar, replace with actual image if available */}
-                                    <img src={connectUser.UrlImage} alt="avatar" />
+                        {users && connectUsers && users.map((userTchat, index) => (
+                            <div key={index}>
+                                <div key={index} className={styles.connectedUser} onClick={() => openChatWithUser(userTchat.Nickname)}>
+                                    <div className={styles.userAvatar}>
+                                        {/* Placeholder for avatar, replace with actual image if available */}
+                                        <img src={userTchat.UrlImage} alt="avatar" />
+                                    </div>
+                                    <div className={styles.userNickname}>
+                                    <div className={isUserConnected(userTchat.Nickname) ? styles.pointVert : styles.pointNoir}></div>
+                                        {userTchat.Nickname}
+                                    </div>
                                 </div>
-                                <div className={styles.userNickname}>
-                                    {connectUser.Nickname}
-                                </div>
-                            </div>
+
+                                {openChat.open && openChat.nickname === userTchat.Nickname && (
+                                    <div>
+                                        <div className={styles.chatWindow}>
+                                            <div className={styles.header}>
+                                                <h2>Chat</h2>
+                                            </div>
+                                            <div className={styles.messages} ref={chatWindowRef}>
+                                                {chats.map((message, index) => (
+                                                    message && (message.Author === openChat.nickname || message.Recipient === openChat.nickname) && (
+                                                        <div key={index} className={message.Author === user.Nickname ? styles.myMessage : styles.otherMessage}>
+                                                            <div className={styles.messageContent}>
+                                                                <p>{message.Content}</p>
+                                                                <p>{new Date(message.Date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                ))}
+                                                {notSub === openChat.nickname && (
+                                                    <div className={styles.notSub}>You're not subscribed to this user Or he don't follow you</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className={styles.center}>
+                                            <input type="text" className={styles.chatInput} value={message} id="message" onChange={messageIsWritting} placeholder="Type a message..." onKeyDown={handleKeyPress} />
+                                        </div>
+                                    </div>
+                                )}
+                             </div>
                         ))}
                     </div>
                 </div>
