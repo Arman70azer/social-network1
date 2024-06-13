@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS ChatsUsers (
     Message TEXT,
     Date TEXT,
     Groupe BOOLEAN NOT NULL DEFAULT 0,
+    See BOOLEAN NOT NULL DEFAULT 1,
     FOREIGN KEY (Author) REFERENCES Users(ID),
     FOREIGN KEY (Recipient) REFERENCES Users(ID)
 );

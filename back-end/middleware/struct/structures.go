@@ -107,4 +107,5 @@ type Message struct {
 	Content   string `json:"Content"`
 	Date      string `json:"Date"`
 	Groupe    bool   `json:"Groupe"`
+	See       bool   `json:Groupe`
 }

@@ -904,7 +904,7 @@ func SelectAllChats(db *sql.DB, userID int) []structures.Message {
 	var allMessages []structures.Message
 
 	query := `
-		SELECT c.ID, u1.Nickname AS Author, u2.Nickname AS Recipient, c.Message, c.Date
+		SELECT c.ID, u1.Nickname AS Author, u2.Nickname AS Recipient, c.Message, c.Date, c.See
 		FROM ChatsUsers c
 		JOIN Users u1 ON c.Author = u1.ID
 		JOIN Users u2 ON c.Recipient = u2.ID
@@ -920,7 +920,7 @@ func SelectAllChats(db *sql.DB, userID int) []structures.Message {
 
 	for rows.Next() {
 		var message structures.Message
-		err := rows.Scan(&message.ID, &message.Author, &message.Recipient, &message.Content, &message.Date)
+		err := rows.Scan(&message.ID, &message.Author, &message.Recipient, &message.Content, &message.Date, &message.See)
 		if err != nil {
 			fmt.Println("erreur lors de la lecture des résultats(SelectAllChats):", err)
 			continue

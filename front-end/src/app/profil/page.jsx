@@ -194,52 +194,56 @@ export default function page(){
                             {isFollowing ? "Unsubscribe" : "Subscribe"}
                         </button>
                     )}
-                    <div className={styles.statProfil}>
-                        <span>
-                            <i className="fas fa-birthday-cake"></i>
-                            Age: {userInfo.Age} years
-                        </span>
-                        <span>
-                            <i className="fas fa-calendar-alt"></i>
-                            Birthday:  {userInfo.Birthday}
-                        </span>
-                        <span>
-                            <i className="fas fa-foolowers"></i>
-                            Number of followers: {nbrSub}
-                        </span>
-                        <span>
-                            <i className="fas fa-posts"></i>
-                            Number of posts: {postsUser && postsUser.length > 0 ? postsUser.length : 0}
-                        </span>
-                    </div>
-                    <div>Bio:</div>
-                    <div className={styles.bio}>
-                        {userInfo.AboutMe ? userInfo.AboutMe : "Give some information about you!!!"}
-                    </div>
-                    <div>Post:</div>
-                
-                    <div>
-                        {postsUser && postsUser.length > 0 ? (
-                            postsUser.map((post, index) => (
-                                <div className={styles.post_details} key={index}>
-                                    <div className={styles.post_date}>
-                                        From {post.Date.split(" ")[0]} to {post.Date.split(" ")[1]}
-                                    </div>
-                                    {post.ImageName && 
-                                    (<img src={post.UrlImage} className={styles.post_image}></img>)
-                                    }
-                                    <div className={styles.post_content}>
-                                        {post.Content}
-                                    </div>
-                                    <div className={styles.likeDislike}>
-                                        Like: {post.Likes && post.Likes.length>0 ? post.Likes.length : 0} Dislike:  {post.Dislikes && post.Dislikes.length>0 ? post.Dislikes.length : 0}
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className={styles.no_posts}>aucun post</div>
-                        )}
-                    </div>
+                    {(isFollowing || userInfo.Profil === "public" || user.Nickname === userInfo.Nickname) && ( // Afficher les informations utilisateur uniquement si l'utilisa
+                        <>
+                            <div className={styles.statProfil}>
+                                <span>
+                                    <i className="fas fa-birthday-cake"></i>
+                                    Age: {userInfo.Age} years
+                                </span>
+                                <span>
+                                    <i className="fas fa-calendar-alt"></i>
+                                    Birthday:  {userInfo.Birthday}
+                                </span>
+                                <span>
+                                    <i className="fas fa-foolowers"></i>
+                                    Number of followers: {nbrSub}
+                                </span>
+                                <span>
+                                    <i className="fas fa-posts"></i>
+                                    Number of posts: {postsUser && postsUser.length > 0 ? postsUser.length : 0}
+                                </span>
+                            </div>
+                            <div>Bio:</div>
+                            <div className={styles.bio}>
+                                {userInfo.AboutMe ? userInfo.AboutMe : "Give some information about you!!!"}
+                            </div>
+                            <div>Post:</div>
+                        
+                            <div>
+                                {postsUser && postsUser.length > 0 ? (
+                                    postsUser.map((post, index) => (
+                                        <div className={styles.post_details} key={index}>
+                                            <div className={styles.post_date}>
+                                                From {post.Date.split(" ")[0]} to {post.Date.split(" ")[1]}
+                                            </div>
+                                            {post.ImageName && 
+                                            (<img src={post.UrlImage} className={styles.post_image}></img>)
+                                            }
+                                            <div className={styles.post_content}>
+                                                {post.Content}
+                                            </div>
+                                            <div className={styles.likeDislike}>
+                                                Like: {post.Likes && post.Likes.length>0 ? post.Likes.length : 0} Dislike:  {post.Dislikes && post.Dislikes.length>0 ? post.Dislikes.length : 0}
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className={styles.no_posts}>aucun post</div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
             :

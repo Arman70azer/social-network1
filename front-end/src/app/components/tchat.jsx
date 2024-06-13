@@ -10,6 +10,7 @@ function Tchat({ onClose, ws, user}) {
         open:false,
         nickname:""
     })
+    const [notif, setNotif]=useState([])
     const [message, setMessage] = useState("")
     const chatWindowRef = useRef(null);
     const [chats, setChats] = useState([])
@@ -53,10 +54,21 @@ function Tchat({ onClose, ws, user}) {
                     }else{
                         setChats(receivedMessage.Tchat.Messages)
                     }
-                    scrollToBottom();
-                }else if (!receivedMessage.Accept && receivedMessage.ObjectOfRequest == "You're not following this user or he don't follow you")
+                    if (openChat.open){
+                        scrollToBottom();
+                    }else if (!openChat.open && receivedMessage.Tchat.Messages[0].Recipient=== user.Nickname){
+                        console.log("fermer")
+                        const request = {
+                            User: cookieExist(),
+                            Origin: "chat-home",
+                            Nature: "chat",
+                            ObjectOfRequest: "see users connect"
+                        };
+                        sendMessageToWebsocket(ws, )
+                    }
+                }else if (!receivedMessage.Accept && receivedMessage.ObjectOfRequest === "You're not following this user or he don't follow you"){
                     setNotSub(receivedMessage.ToUser)
-
+                }
                 console.log("Réponse du serveur (ws):", receivedMessage)
             }
         }
@@ -139,7 +151,7 @@ function Tchat({ onClose, ws, user}) {
                                                         <div key={index} className={message.Author === user.Nickname ? styles.myMessage : styles.otherMessage}>
                                                             <div className={styles.messageContent}>
                                                                 <p>{message.Content}</p>
-                                                                <p>{new Date(message.Date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                                                <p>{message.Date}</p>
                                                             </div>
                                                         </div>
                                                     )
