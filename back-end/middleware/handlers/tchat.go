@@ -27,6 +27,8 @@ func Tchat(clients *Clients, message structures.Request) {
 		newMessage(message)
 	} else if message.ObjectOfRequest == "user not see message" {
 		chatNotSee(message)
+	} else if message.ObjectOfRequest == "user see message" {
+		chatSee(message)
 	}
 }
 
@@ -101,16 +103,41 @@ func chatNotSee(message structures.Request) {
 	var request structures.Request
 
 	request.Accept = true
-	request.Message = message.ObjectOfRequest
+	request.ObjectOfRequest = message.ObjectOfRequest
 	request.User = author.Nickname
 
 	BroadcastToOneClient(message.User, request)
 
 }
 
+// Sélectionne une row pour changer la valeur de See
 func updateChatSee(db *sql.DB, recipientID, authorID int, content string, see bool) {
 	_, err := db.Exec("UPDATE ChatsUsers SET See = ? WHERE Recipient = ? AND Author = ? AND Message = ?", see, recipientID, authorID, content)
 	if err != nil {
 		fmt.Println("error updateChatSee:", err)
+	}
+}
+
+func chatSee(message structures.Request) {
+	db := dbFunc.Open_db()
+	user := dbFunc.SelectUserByToken(db, message.User)
+	author := dbFunc.SelectUserByNickname_db(db, message.ToUser)
+
+	updateChatSee2(db, user.ID, author.ID, true)
+
+	var request structures.Request
+
+	request.Accept = true
+	request.ObjectOfRequest = message.ObjectOfRequest
+	request.User = author.Nickname
+
+	BroadcastToOneClient(message.User, request)
+}
+
+// Selectionne toutes les rows avec le recipient et l'author choisie
+func updateChatSee2(db *sql.DB, userID, authorID int, see bool) {
+	_, err := db.Exec("UPDATE ChatsUsers SET See = ? WHERE Recipient = ? AND Author = ?", see, userID, authorID)
+	if err != nil {
+		fmt.Println("error updateChatSee2:", err)
 	}
 }
