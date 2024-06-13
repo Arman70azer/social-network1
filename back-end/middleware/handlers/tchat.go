@@ -4,6 +4,7 @@ import (
 	"back-end/middleware"
 	"back-end/middleware/dbFunc"
 	structures "back-end/middleware/struct"
+	"database/sql"
 	"fmt"
 	"time"
 )
@@ -24,6 +25,8 @@ func Tchat(clients *Clients, message structures.Request) {
 		Broadcast(message)
 	} else if message.ObjectOfRequest == "new message" {
 		newMessage(message)
+	} else if message.ObjectOfRequest == "user not see message" {
+		chatNotSee(message)
 	}
 }
 
@@ -85,4 +88,29 @@ func newMessage(message structures.Request) {
 	}
 
 	BroadcastToOneClient(message.User, response)
+}
+
+func chatNotSee(message structures.Request) {
+	db := dbFunc.Open_db()
+	recipient := dbFunc.SelectUserByToken(db, message.User)
+	author := dbFunc.SelectUserByNickname_db(db, message.ToUser)
+	content := message.Message
+
+	updateChatSee(db, recipient.ID, author.ID, content, false)
+
+	var request structures.Request
+
+	request.Accept = true
+	request.Message = message.ObjectOfRequest
+	request.User = author.Nickname
+
+	BroadcastToOneClient(message.User, request)
+
+}
+
+func updateChatSee(db *sql.DB, recipientID, authorID int, content string, see bool) {
+	_, err := db.Exec("UPDATE ChatsUsers SET See = ? WHERE Recipient = ? AND Author = ? AND Message = ?", see, recipientID, authorID, content)
+	if err != nil {
+		fmt.Println("error updateChatSee:", err)
+	}
 }

@@ -57,17 +57,26 @@ function Tchat({ onClose, ws, user}) {
                     if (openChat.open){
                         scrollToBottom();
                     }else if (!openChat.open && receivedMessage.Tchat.Messages[0].Recipient=== user.Nickname){
-                        console.log("fermer")
                         const request = {
                             User: cookieExist(),
+                            ToUser: receivedMessage.Tchat.Messages[0].Author,
                             Origin: "chat-home",
                             Nature: "chat",
-                            ObjectOfRequest: "see users connect"
+                            ObjectOfRequest: "user not see message",
+                            Message:receivedMessage.Tchat.Messages[0].Content
                         };
-                        sendMessageToWebsocket(ws, )
+                        sendMessageToWebsocket(ws,request)
                     }
                 }else if (!receivedMessage.Accept && receivedMessage.ObjectOfRequest === "You're not following this user or he don't follow you"){
                     setNotSub(receivedMessage.ToUser)
+                }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "user not see message"){
+                    setNotif((prevNotif) => {
+                        if (Array.isArray(prevNotif)) {
+                            return [...prevNotif, receivedMessage.User];
+                        } else {
+                            return [receivedMessage.User];
+                        }
+                    });                    
                 }
                 console.log("Réponse du serveur (ws):", receivedMessage)
             }
@@ -134,8 +143,9 @@ function Tchat({ onClose, ws, user}) {
                                         <img src={userTchat.UrlImage} alt="avatar" />
                                     </div>
                                     <div className={styles.userNickname}>
-                                    <div className={isUserConnected(userTchat.Nickname) ? styles.pointVert : styles.pointNoir}></div>
+                                        <div className={isUserConnected(userTchat.Nickname) ? styles.pointVert : styles.pointNoir}></div>
                                         {userTchat.Nickname}
+                                        {notif}
                                     </div>
                                 </div>
 
