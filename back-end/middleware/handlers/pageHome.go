@@ -5,7 +5,6 @@ import (
 	dbFunc "back-end/middleware/dbFunc"
 	structures "back-end/middleware/struct"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -20,38 +19,36 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		db := dbFunc.Open_db()
 		user := dbFunc.SelectUserByToken(db, r.FormValue("token"))
-		if user.Nickname != "" {
-			if r.FormValue("nature") == "comment" {
-				comment(r, user)
-			} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
-				likeDislike(r, user)
-			} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
-				event(db, r, user, w)
 
+		if r.FormValue("nature") == "comment" {
+			comment(r, user)
+		} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
+			likeDislike(r, user)
+		} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
+			event(db, r, user, w)
+
+		} else if r.FormValue("nature") == "cookie" {
+			fmt.Println("ddd:", user)
+			var request structures.Request
+			request.Nature = "cookie"
+			if user.ID == 0 {
+				request.Accept = false
 			} else {
-
-				var data structures.Data
-
-				posts := sortPrivatePlus(db, user, dbFunc.SelectAllPosts_db(db))
-				events := sortPrivatePlus(db, user, dbFunc.SelectAllEvents_db(db))
-
-				data.Posts = commentAndLikeToPost(posts, db)
-				data.Users = dbFunc.SelectAllUsers_db(db)
-				data.Events = events
-
-				// Convertissez les données en JSON
-				jsonData, err := json.Marshal(data)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-
-				// Définissez le type de contenu de la réponse comme JSON
-				w.Header().Set("Content-Type", "application/json")
-				w.Header().Set("Access-Control-Allow-Origin", "*")
-				// Renvoyez les données JSON en réponse
-				w.Write(jsonData)
+				request.Accept = true
 			}
+			middleware.ReturnWithW(w, request)
+		} else {
+
+			var data structures.Data
+
+			posts := sortPrivatePlus(db, user, dbFunc.SelectAllPosts_db(db))
+			events := sortPrivatePlus(db, user, dbFunc.SelectAllEvents_db(db))
+
+			data.Posts = commentAndLikeToPost(posts, db)
+			data.Users = dbFunc.SelectAllUsers_db(db)
+			data.Events = events
+
+			middleware.ReturnWithW(w, data)
 		}
 	}
 }

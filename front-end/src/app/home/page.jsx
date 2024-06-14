@@ -63,7 +63,13 @@ export default function Page(){
     
     useEffect(() => {
 
-        const userCookie = cookieExist()
+        let userCookie;
+
+        const awaitCookie= async ()=>{
+            userCookie = await cookieExist()
+        }
+
+        awaitCookie()
        
         const fetchData = async () => {
             // Récupérer les données des posts
