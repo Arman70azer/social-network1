@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react"
 import styles from "../styles/tchat.module.css"
 import sendMessageToWebsocket from "../lib/wsSendMessage"
 import cookieExist from "../utils/cookieUserExist"
+import CreateGroup from "../components/createGroup"
 
 function Tchat({ onClose, ws, user, setNotification, notification}) {
     const [connectUsers, setConnectUsers] = useState([]);
@@ -15,6 +16,7 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
     const [chats, setChats] = useState([])
  
     const [notSub, setNotSub] = useState("")
+    const [creaGroup, setCreaGroup] = useState(false)
 
     useEffect(() => {
         const searchConnectUser = async () => {
@@ -113,6 +115,7 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
     
             sendMessageToWebsocket(ws, request)
             setMessage("")
+            scrollToBottom()
         }
     }
 
@@ -128,14 +131,22 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
             }
         }, 100)
     };
+
+    const creaGroupSet=()=>{
+        setCreaGroup(!creaGroup)
+    }
     
     onMessageWS()
 
     return (
         <div className={styles.overlay}>
             <div className={styles.settingsContainer}>
-                <div className={styles.center}>
+                <div className={styles.buttonContainer}>
                     <button className={styles.closeButton} onClick={onClose}>X</button>
+                    <button className={styles.createGroup} onClick={creaGroupSet}>Create a group</button>
+                </div>
+                <div className={styles.center}>
+                    {creaGroup && users && (<CreateGroup users={users}/>)}
                     <div className={styles.usersList}>
                         <div className={styles.center}>Users Connects:</div>
                         {users && connectUsers && users.map((userTchat, index) => (

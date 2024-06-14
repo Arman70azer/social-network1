@@ -9,6 +9,7 @@ import Tchat from './tchat';
 import sendMessageToWebsocket from '../lib/wsSendMessage';
 
 //TODO Mettre les href une fois les pages finit !!!!!
+let timout
 function DashboardTop({ events = [], ws = null, setAllData, setData, userComplete}) {
     const origin= "home";
 
@@ -169,10 +170,14 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
 
                     if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "message save"){
                         setNotif(receivedMessage.Tchat.Messages[0].Author)
-                    }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "notifications" && receivedMessage.Tchat && receivedMessage.Tchat.AuthorNotSee){
-                        for (let i = 0; i<receivedMessage.Tchat.AuthorNotSee.length; i++ ){
-                            setNotif(receivedMessage.Tchat.AuthorNotSee[i])
-                        }
+                    }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "notifications" && receivedMessage.Tchat && receivedMessage.Tchat.AuthorNotSee && !timout){
+
+                        timout = setTimeout(()=>{
+                            console.log("hhhhh:",receivedMessage.Tchat.AuthorNotSee)
+                            for (let i = 0; i<receivedMessage.Tchat.AuthorNotSee.length; i++ ){
+                                setNotif(receivedMessage.Tchat.AuthorNotSee[i])
+                            }
+                        },200)
                     }
                 }
             }

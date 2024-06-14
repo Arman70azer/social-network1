@@ -39,16 +39,33 @@
     width: 100%;
 }
 
-.closeButton {
-    background-color: transparent; /* Fond transparent */
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #333; /* Couleur du texte */
-    padding: 5px;
-    border-radius: 50%; /* Bord arrondi pour créer un aspect de bouton rond */
-    transition: background-color 0.3s ease; /* Transition de couleur de fond en douceur */
+.buttonContainer {
+    display: flex;
+    justify-content: space-between; /* Aligne les boutons aux extrémités opposées */
+    align-items: center; /* Centre verticalement les boutons */
+    margin-bottom: 10px; /* Marge en bas pour l'espace */
 }
+
+.closeButton {
+    background-color: #8d8d8d; /* Couleur de fond */
+    color: white; /* Couleur du texte */
+    border: none; /* Pas de bordure */
+    padding: 10px 15px; /* Rembourrage intérieur */
+    font-size: 16px; /* Taille de police */
+    cursor: pointer; /* Curseur de la souris en pointer */
+    border-radius: 5px; /* Bordure arrondie */
+}
+
+.createGroup {
+    background-color: #4CAF50; /* Couleur de fond */
+    color: white; /* Couleur du texte */
+    border: none; /* Pas de bordure */
+    padding: 10px 15px; /* Rembourrage intérieur */
+    font-size: 16px; /* Taille de police */
+    cursor: pointer; /* Curseur de la souris en pointer */
+    border-radius: 5px; /* Bordure arrondie */
+}
+
 
 .usersList {
     max-height: 400px;
@@ -174,4 +191,97 @@
     color: red;
     font-weight: bold;
     margin: 10px;
+}
+
+.contains_creaGroup {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 400px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contains_creaGroup div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.contains_creaGroup input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.contains_creaGroup button {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.contains_creaGroup button:hover {
+    background-color: #45a049;
+}
+
+.userSuggestions {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: white;
+    margin-top: 5px;
+}
+
+.userSuggestion {
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.userSuggestion:hover {
+    background-color: #f0f0f0;
+}
+
+.selectedUsers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.selectedUser {
+    display: inline-flex;
+    align-items: center;
+    background-color: #e0e0e0;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.selectedUser span {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.selectedUser button {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 5px;
+    transition: background-color 0.3s;
+    margin-left: 15px;
+}
+
+.selectedUser button:hover {
+    background-color: #e60000;
 }
