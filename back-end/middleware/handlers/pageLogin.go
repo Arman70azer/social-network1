@@ -39,7 +39,7 @@ func HandlerLogin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		updateTokenUser(db, token, dbFunc.SelectUserByToken(db, user).ID)
-		response := LoginResponse{}
+		var response = LoginResponse{}
 		if valid {
 			response = LoginResponse{
 				Token:    token,

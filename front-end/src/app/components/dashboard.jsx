@@ -19,14 +19,9 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
     const [user, setUser] = useState("");
     const [userInfo, setUserInfo] = useState("")
     useEffect(() => {
-        let userFromCookie;
 
-        const awaitCookie= async ()=>{
-            userFromCookie = await cookieExist()
-        }
+        const userFromCookie= cookieExist()
 
-        awaitCookie()
-        
         if (userFromCookie) {
             setUser(userFromCookie);
         }

@@ -47,6 +47,7 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     if (receivedMessage.ObjectOfRequest == "see users connect"){
                         setChats(receivedMessage.Tchat.Messages)
                     }
+                    console.log(receivedMessage.Tchat.Clients.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
                 }else if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "message save")){
                     if (chats){
                         setChats((prevChats) => [...prevChats, receivedMessage.Tchat.Messages[0]]);

@@ -18,37 +18,35 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "POST" {
 		db := dbFunc.Open_db()
-		user := dbFunc.SelectUserByToken(db, r.FormValue("token"))
+		token := r.FormValue("token")
+		user := dbFunc.SelectUserByToken(db, token)
 
-		if r.FormValue("nature") == "comment" {
-			comment(r, user)
-		} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
-			likeDislike(r, user)
-		} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
-			event(db, r, user, w)
+		if user.Nickname != "" {
+			if r.FormValue("nature") == "comment" {
+				comment(r, user)
+			} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
+				likeDislike(r, user)
+			} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
+				event(db, r, user, w)
 
-		} else if r.FormValue("nature") == "cookie" {
-			fmt.Println("ddd:", user)
+			} else {
+
+				var data structures.Data
+
+				posts := sortPrivatePlus(db, user, dbFunc.SelectAllPosts_db(db))
+				events := sortPrivatePlus(db, user, dbFunc.SelectAllEvents_db(db))
+
+				data.Posts = commentAndLikeToPost(posts, db)
+				data.Users = dbFunc.SelectAllUsers_db(db)
+				data.Events = events
+
+				middleware.ReturnWithW(w, data)
+			}
+		} else {
 			var request structures.Request
 			request.Nature = "cookie"
-			if user.ID == 0 {
-				request.Accept = false
-			} else {
-				request.Accept = true
-			}
+			request.Accept = false
 			middleware.ReturnWithW(w, request)
-		} else {
-
-			var data structures.Data
-
-			posts := sortPrivatePlus(db, user, dbFunc.SelectAllPosts_db(db))
-			events := sortPrivatePlus(db, user, dbFunc.SelectAllEvents_db(db))
-
-			data.Posts = commentAndLikeToPost(posts, db)
-			data.Users = dbFunc.SelectAllUsers_db(db)
-			data.Events = events
-
-			middleware.ReturnWithW(w, data)
 		}
 	}
 }
