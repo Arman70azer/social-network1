@@ -8,7 +8,6 @@ import openWebSocketConnexion from "../lib/websocket";
 import sendRequestToWebsocket from "../lib/wsSendMessage"
 import sendFormToBack from "../lib/sendFormToBack";
 import cookieExist from "../utils/cookieUserExist";
-import Tchat from "../components/tchat";
 import sendAndReceiveData from "../lib/sendForm&ReceiveData";
 
 //permet de retourner sur la page d'acceuil
@@ -17,7 +16,6 @@ let wssocket;
 export default function Page(){
 
     const [data, setData] = useState([]);
-    const [seeTchat, setTchat]=useState(false)
 
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
@@ -221,16 +219,11 @@ export default function Page(){
         }
     }
 
-    function handleTchat(){
-        setTchat(!seeTchat)
-    }
-
     onMessageWS()
 
     return (
         <div className={styles.background}>
-          {seeTchat && user && (<Tchat onClose={handleTchat} ws={wssocket} user={user}/>)}
-          {data.Events && wssocket!= null ?<DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat} setData={setData}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
+          {data.Events && wssocket!= null ?<DashboardTop events={data.Events} ws={wssocket} setData={setData} userComplete={user}/> : <DashboardTop ws={wssocket} setData={data} userComplete={user} />}
             <div className={styles.center}>
                 <form className={styles.menuNewPost}>
                     <label htmlFor="nature">Write New {formData.nature}:</label>

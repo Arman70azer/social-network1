@@ -5,13 +5,16 @@ import sendAndReceiveData from '../lib/sendForm&ReceiveData';
 import cookieExist from '../utils/cookieUserExist';
 import Cookies from "js-cookie"
 import eventUpdate from '../utils/eventUpdate';
+import Tchat from './tchat';
+import sendMessageToWebsocket from '../lib/wsSendMessage';
 
 //TODO Mettre les href une fois les pages finit !!!!!
-function DashboardTop({ events = [], ws = null, handleTchat, setAllData, setData}) {
+function DashboardTop({ events = [], ws = null, setAllData, setData, userComplete}) {
     const origin= "home";
 
     const [showExtraButtons, setShowExtraButtons] = useState(false);
     const [showContentEvent, setShowContent] = useState({ index: null, show: false });
+    const [seeTchat, setTchat]=useState(false)
 
     const [user, setUser] = useState("");
     const [userInfo, setUserInfo] = useState("")
@@ -28,7 +31,17 @@ function DashboardTop({ events = [], ws = null, handleTchat, setAllData, setData
 
             setUserInfo(data.Users[0].Nickname)
         }
+        const notific= async ()=>{
+            const request = {
+                User: cookieExist(),
+                Origin: "chat-home",
+                Nature: "chat",
+                ObjectOfRequest: "notifications"
+            };
+            sendMessageToWebsocket(ws, request)
+        }
         fetchData()
+        notific()
     }, []);
 
     const logout = () => {
@@ -114,11 +127,76 @@ function DashboardTop({ events = [], ws = null, handleTchat, setAllData, setData
         window.location.href= "/profil?user="+userInfo
     }
 
+    function handleTchat(){
+        console.log("gggjjj")
+        setTchat(!seeTchat)
+    }
+
+    const [notification, setNotification] = useState([]);
+
+    function setNotif(nickname, supp) {
+        if (supp) {
+            setNotification((prevNotification) => 
+                prevNotification.filter((notif) => notif.nickname !== nickname)
+            );
+        }else{
+            setNotification((previous) => {
+                // Check if the notification already exists
+                const existingNotif = previous.find((value) => value.nickname === nickname);
+
+                if (existingNotif) {
+                    // Increment the num value for the existing notification
+                    return previous.map((notif) =>
+                        notif.nickname === nickname ? { ...notif, num: notif.num + 1 } : notif
+                    );
+                } else {
+                    // Add a new notification with num set to 1
+                    return [...previous, { nickname: nickname, num: 1 }];
+                }
+            });
+        }
+    }
+
+    function countNotifWithNoTchat(){
+        if (!seeTchat) {
+            if (ws && user){
+                ws.onmessage = (event) => {
+                    const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
+
+                    console.log(receivedMessage)
+
+                    if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "message save"){
+                        setNotif(receivedMessage.Tchat.Messages[0].Author)
+                    }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "notifications" && receivedMessage.Tchat && receivedMessage.Tchat.AuthorNotSee){
+                        for (let i = 0; i<receivedMessage.Tchat.AuthorNotSee.length; i++ ){
+                            setNotif(receivedMessage.Tchat.AuthorNotSee[i])
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    countNotifWithNoTchat()
+
 
     return (
+        <>
         <div className={styles.dashboardTopPage}>
             <Link href="/home" className={styles.titleHome}>Social-Network</Link>
-            <button className={styles.buttonConversations} onClick={handleTchat}>Conversations</button>
+            <button className={styles.buttonConversations} onClick={handleTchat}>Conversations {notification && notification.length > 0 ? 
+            (
+                <div>
+                    New message(s):{" "}
+                    {notification.map((notif, index) => (
+                        <span key={index}>
+                            {notif.nickname} ({notif.num})
+                            {index < notification.length - 1 ? ", " : ""}
+                        </span>
+                    ))}
+                </div>
+            ) : null}</button>
             <div className={styles.eventContainer} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                 <button className={styles.buttonNotif}>{events.length>0 ? "Events("+events.length+")" : "Events"}</button>
                 {showExtraButtons && (
@@ -166,6 +244,8 @@ function DashboardTop({ events = [], ws = null, handleTchat, setAllData, setData
             <Link href={{ pathname: "/profil", query: { user: userInfo } }} className={styles.buttonProfil} onClick={redirection}>Profil</Link>
             <Link href="/" className={styles.buttonLogout} onClick={logout}>Logout</Link>
         </div>
+        {seeTchat && userComplete && ws && (<Tchat onClose={handleTchat} ws={ws} user={userComplete} setNotification={setNotif} notification={notification}/>)}
+        </>
     );
 }
 

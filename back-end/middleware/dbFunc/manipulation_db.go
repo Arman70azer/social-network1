@@ -942,3 +942,39 @@ func PushNewMessage_db(db *sql.DB, message structures.Request, userID, recipient
 		fmt.Println("error PushNewMessage_db:", err)
 	}
 }
+
+func SelectAuthorNotSee(db *sql.DB, userID int) []string {
+	var allMessages []string
+
+	query := `
+		SELECT u1.Nickname AS Author
+		FROM ChatsUsers c
+		JOIN Users u1 ON c.Author = u1.ID
+		JOIN Users u2 ON c.Recipient = u2.ID
+		WHERE c.Recipient = ? AND c.See = ?
+	`
+
+	rows, err := db.Query(query, userID, false)
+	if err != nil {
+		fmt.Println("erreur lors de l'exécution de la requête (SelectAuthorNotSee):", err)
+		return allMessages
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var author string
+		err := rows.Scan(&author)
+		if err != nil {
+			fmt.Println("erreur lors de la lecture des résultats (SelectAuthorNotSee):", err)
+			continue
+		}
+		allMessages = append(allMessages, author)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Println("erreur lors de l'itération des résultats (SelectAuthorNotSee):", err)
+	}
+
+	return allMessages
+}
+

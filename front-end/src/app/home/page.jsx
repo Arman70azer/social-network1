@@ -8,12 +8,10 @@ import Link from 'next/link';
 import sendFormToBack from '../lib/sendFormToBack'
 import cookieExist from '../utils/cookieUserExist'
 import sendAndReceiveData from "../lib/sendForm&ReceiveData"
-import Tchat from "../components/tchat"
 
 let wssocket;
 export default function Page(){
     const [data, setData] = useState([]);
-    const [seeTchat, setTchat]=useState(false)
     const [allData, setAllData]=useState([])
     const [seeThisPostCommentaries, setCommentaries] = useState("")
     const [enterComment, setEnterComment] = useState("")
@@ -246,94 +244,92 @@ export default function Page(){
 
         sendFormToBack("/api/home",formDislikePost)
     } 
-
-    function handleTchat(){
-        setTchat(!seeTchat)
-    }
     
     onMessageWS()
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div className={styles.background}>
-            {seeTchat && user && (<Tchat onClose={handleTchat} ws={wssocket} user={user}/>)}
-           {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} handleTchat={handleTchat} setAllData={setAllData} setData={setData}/> : <DashboardTop  ws={wssocket}  handleTchat={handleTchat}/>}
-            <div className={styles.centerElementChilds}>
-                <button className={styles.actualiserPosts} onClick={actualiserPage}>
-                    {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
-                </button>
-            </div>
-            {!wssocket && !isLoading && (<span style={{ color: 'red', display: "flex", alignItems: "center", justifyContent: "center" }}>You need to reload page to connect to server!!!</span>)}
-            {data && !isLoading ? <div className={styles.Content}>
-                {data.Posts && data.Posts.map((post, index) => (
-                    <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
-                        <div className={styles.alineProfilPost}>
-                            <div className={styles.avatarProfil}>
-                                <img className={styles.avatarPost} src={`${post.Author.UrlImage}`} alt="Avatar" />
-                            </div>
-                            <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }} className={styles.authorPost}>
-                                {post.Author.Nickname}
-                            </Link>
-                            <div className={styles.typePost}>
-                                {post.Type} Post
-                            </div>
-                        </div>
-                        <div className={styles.postContent}>
-                            <div className={styles.titlePost}>
-                                {post.Content}
-                            </div>
-                            {post.ImageName &&(
-                            <div className={styles.imagePostContainer}>
-                               <img className={styles.imagePost} src={`${post.UrlImage}`}/>
-                            </div>)}
-                        </div>
-                        <div className={styles.postFooter}>
-                            <div className={styles.buttonLike}>
-                                <button
-                                    onClick={() => like(post.Titre)}
-                                    style={{ color: post.Likes && post.Likes.some(likeOrDislike => likeOrDislike.User === user.Nickname) ? "blue" : "white" }}
-                                >
-                                    {post.Likes && post.Likes.length> 0 ? `Like (${post.Likes.length})` : "Like"}
-                                </button>
-                            </div>
-                            <div className={styles.buttonDislike}>
-                                <button onClick={()=>dislike(post.Titre)} 
-                                className={styles.marginLeft}
-                                style={{ color: post.Dislikes && post.Dislikes.some(likeOrDislike => likeOrDislike.User === user.Nickname) ? "red" : "white" }}
-                                >
-                                   {post.Dislikes && post.Dislikes.length > 0 ? `Dislikes (${post.Dislikes.length})` : "Dislikes"}
-                                </button>
-                            </div>
-                            <div className={styles.commentaires}>
-                            <button onClick={() => seeCommentaries(post.Titre)}>
-                                {post.Commentaries && post.Commentaries.length>0 ? `See commentaries (${post.Commentaries.length})` : "See commentaries"}
-                            </button>
-
-                            </div>
-                            <div className={styles.datePost}>
-                                {post.Date}
-                            </div>
-                        </div>
-                        {seeThisPostCommentaries === post.Titre && 
-                            <div className={styles.areaCommentary}>
-                                <div className={styles.inputComment}>
-                                    <input type="text" placeholder="Add commentary" onKeyDown={(event) => submitCommentary(event)} 
-                                    value={enterComment} 
-                                    onChange={(event) => setEnterComment(event.target.value)} />
+            {data && !isLoading ? 
+            <>
+                {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} setAllData={setAllData} setData={setData} userComplete={user}/> : <DashboardTop ws={wssocket} setData={data} setAllData={allData} userComplete={user} />}
+                <div className={styles.centerElementChilds}>
+                    <button className={styles.actualiserPosts} onClick={actualiserPage}>
+                        {newPosts && newPosts.length>0 ? `Actualiser(${newPosts.length})`: `Actualiser`}
+                    </button>
+                </div>
+                {!wssocket && !isLoading && (<span style={{ color: 'red', display: "flex", alignItems: "center", justifyContent: "center" }}>You need to reload page to connect to server!!!</span>)}
+                <div className={styles.Content}>
+                    {data.Posts && data.Posts.map((post, index) => (
+                        <div key={index} className={styles.windowPost} id={`postBy${post.Author}`}>
+                            <div className={styles.alineProfilPost}>
+                                <div className={styles.avatarProfil}>
+                                    <img className={styles.avatarPost} src={`${post.Author.UrlImage}`} alt="Avatar" />
                                 </div>
-
-                                {post.Commentaries && post.Commentaries.map((comment, index)=>(
-                                    <div className={styles.commentsContent} key={index}>
-                                         <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }}>{comment.Author.Nickname}: </Link>
-                                         {comment.Content}
-                                         <div className={styles.dateComment}>{comment.Date}</div>
-                                    </div>
-                                ))
-                                }
+                                <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }} className={styles.authorPost}>
+                                    {post.Author.Nickname}
+                                </Link>
+                                <div className={styles.typePost}>
+                                    {post.Type} Post
+                                </div>
                             </div>
-                        }
-                    </div>
-                ))}
-            </div>
+                            <div className={styles.postContent}>
+                                <div className={styles.titlePost}>
+                                    {post.Content}
+                                </div>
+                                {post.ImageName &&(
+                                <div className={styles.imagePostContainer}>
+                                <img className={styles.imagePost} src={`${post.UrlImage}`}/>
+                                </div>)}
+                            </div>
+                            <div className={styles.postFooter}>
+                                <div className={styles.buttonLike}>
+                                    <button
+                                        onClick={() => like(post.Titre)}
+                                        style={{ color: post.Likes && post.Likes.some(likeOrDislike => likeOrDislike.User === user.Nickname) ? "blue" : "white" }}
+                                    >
+                                        {post.Likes && post.Likes.length> 0 ? `Like (${post.Likes.length})` : "Like"}
+                                    </button>
+                                </div>
+                                <div className={styles.buttonDislike}>
+                                    <button onClick={()=>dislike(post.Titre)} 
+                                    className={styles.marginLeft}
+                                    style={{ color: post.Dislikes && post.Dislikes.some(likeOrDislike => likeOrDislike.User === user.Nickname) ? "red" : "white" }}
+                                    >
+                                    {post.Dislikes && post.Dislikes.length > 0 ? `Dislikes (${post.Dislikes.length})` : "Dislikes"}
+                                    </button>
+                                </div>
+                                <div className={styles.commentaires}>
+                                <button onClick={() => seeCommentaries(post.Titre)}>
+                                    {post.Commentaries && post.Commentaries.length>0 ? `See commentaries (${post.Commentaries.length})` : "See commentaries"}
+                                </button>
+
+                                </div>
+                                <div className={styles.datePost}>
+                                    {post.Date}
+                                </div>
+                            </div>
+                            {seeThisPostCommentaries === post.Titre && 
+                                <div className={styles.areaCommentary}>
+                                    <div className={styles.inputComment}>
+                                        <input type="text" placeholder="Add commentary" onKeyDown={(event) => submitCommentary(event)} 
+                                        value={enterComment} 
+                                        onChange={(event) => setEnterComment(event.target.value)} />
+                                    </div>
+
+                                    {post.Commentaries && post.Commentaries.map((comment, index)=>(
+                                        <div className={styles.commentsContent} key={index}>
+                                            <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }}>{comment.Author.Nickname}: </Link>
+                                            {comment.Content}
+                                            <div className={styles.dateComment}>{comment.Date}</div>
+                                        </div>
+                                    ))
+                                    }
+                                </div>
+                            }
+                        </div>
+                    ))}
+                </div>
+            </>
              :
              <div>
                 <div className={styles.overlay}>
@@ -342,12 +338,12 @@ export default function Page(){
                 </div>
              </div>
              }
-            {!seeTchat && (<div className={styles.dashboardBottomPage}>
+            <div className={styles.dashboardBottomPage}>
                 <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
                 <button className={styles.buttonPostPrivates} onClick={onlyPrivatePosts}>Privates Posts</button>
                 <button className={styles.buttonPostsAll} onClick={resetDataToOrigine}> All Posts </button>
                 <Link href="/createPost" className={styles.buttonCreatePost}>Add New Post or Event [+]</Link>
-            </div>)}
+            </div>
         </div>
     );
 }

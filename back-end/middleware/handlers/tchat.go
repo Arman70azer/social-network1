@@ -23,12 +23,17 @@ func Tchat(clients *Clients, message structures.Request) {
 		message.Tchat = object
 
 		Broadcast(message)
+		message.Tchat.AuthorNotSee = dbFunc.SelectAuthorNotSee(db, dbFunc.SelectUserByToken(db, message.User).ID)
+		BroadcastToOneClient(message.User, message)
 	} else if message.ObjectOfRequest == "new message" {
 		newMessage(message)
-	} else if message.ObjectOfRequest == "user not see message" {
-		chatNotSee(message)
 	} else if message.ObjectOfRequest == "user see message" {
 		chatSee(message)
+	} else if message.ObjectOfRequest == "notifications" {
+		db := dbFunc.Open_db()
+		message.Tchat.AuthorNotSee = dbFunc.SelectAuthorNotSee(db, dbFunc.SelectUserByToken(db, message.User).ID)
+		message.Accept = true
+		BroadcastToOneClient(message.User, message)
 	}
 }
 
@@ -92,31 +97,23 @@ func newMessage(message structures.Request) {
 	BroadcastToOneClient(message.User, response)
 }
 
-func chatNotSee(message structures.Request) {
-	db := dbFunc.Open_db()
-	recipient := dbFunc.SelectUserByToken(db, message.User)
-	author := dbFunc.SelectUserByNickname_db(db, message.ToUser)
-	content := message.Message
+// func chatNotSee(message structures.Request) {
+// 	db := dbFunc.Open_db()
+// 	recipient := dbFunc.SelectUserByToken(db, message.User)
+// 	author := dbFunc.SelectUserByNickname_db(db, message.ToUser)
+// 	content := message.Message
 
-	updateChatSee(db, recipient.ID, author.ID, content, false)
+// 	updateChatSee(db, recipient.ID, author.ID, content, false)
 
-	var request structures.Request
+// }
 
-	request.Accept = true
-	request.ObjectOfRequest = message.ObjectOfRequest
-	request.User = author.Nickname
-
-	BroadcastToOneClient(message.User, request)
-
-}
-
-// Sélectionne une row pour changer la valeur de See
-func updateChatSee(db *sql.DB, recipientID, authorID int, content string, see bool) {
-	_, err := db.Exec("UPDATE ChatsUsers SET See = ? WHERE Recipient = ? AND Author = ? AND Message = ?", see, recipientID, authorID, content)
-	if err != nil {
-		fmt.Println("error updateChatSee:", err)
-	}
-}
+// // Sélectionne une row pour changer la valeur de See
+// func updateChatSee(db *sql.DB, recipientID, authorID int, content string, see bool) {
+// 	_, err := db.Exec("UPDATE ChatsUsers SET See = ? WHERE Recipient = ? AND Author = ? AND Message = ?", see, recipientID, authorID, content)
+// 	if err != nil {
+// 		fmt.Println("error updateChatSee:", err)
+// 	}
+// }
 
 func chatSee(message structures.Request) {
 	db := dbFunc.Open_db()
@@ -125,18 +122,15 @@ func chatSee(message structures.Request) {
 
 	updateChatSee2(db, user.ID, author.ID, true)
 
-	var request structures.Request
-
-	request.Accept = true
-	request.ObjectOfRequest = message.ObjectOfRequest
-	request.User = author.Nickname
-
-	BroadcastToOneClient(message.User, request)
 }
 
-// Selectionne toutes les rows avec le recipient et l'author choisie
 func updateChatSee2(db *sql.DB, userID, authorID int, see bool) {
-	_, err := db.Exec("UPDATE ChatsUsers SET See = ? WHERE Recipient = ? AND Author = ?", see, userID, authorID)
+	query := `
+		UPDATE ChatsUsers
+		SET See = ?
+		WHERE Recipient = ? AND Author = ? AND See <> ?
+	` //<> il indique l'iverse de la valeur ici true et false
+	_, err := db.Exec(query, see, userID, authorID, see)
 	if err != nil {
 		fmt.Println("error updateChatSee2:", err)
 	}

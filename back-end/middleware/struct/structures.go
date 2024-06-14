@@ -98,6 +98,7 @@ type Tchat struct {
 	ClientsConnect []User `json:"ClientsConnect"`
 	Clients        []User `json:"Clients"`
 	Messages       []Message
+	AuthorNotSee   []string
 }
 
 type Message struct {

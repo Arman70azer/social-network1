@@ -3,14 +3,13 @@ import styles from "../styles/tchat.module.css"
 import sendMessageToWebsocket from "../lib/wsSendMessage"
 import cookieExist from "../utils/cookieUserExist"
 
-function Tchat({ onClose, ws, user}) {
+function Tchat({ onClose, ws, user, setNotification, notification}) {
     const [connectUsers, setConnectUsers] = useState([]);
     const [users, setUsers]=useState([])
     const [openChat, setOpenChat] = useState({
         open:false,
         nickname:""
     })
-    const [notif, setNotif]=useState([])
     const [message, setMessage] = useState("")
     const chatWindowRef = useRef(null);
     const [chats, setChats] = useState([])
@@ -54,27 +53,21 @@ function Tchat({ onClose, ws, user}) {
                     }else{
                         setChats(receivedMessage.Tchat.Messages)
                     }
-                    if (openChat.open){
-                        scrollToBottom();
-                    }else if (!openChat.open && receivedMessage.Tchat.Messages[0].Recipient=== user.Nickname){
+                    if (openChat.open && openChat.nickname === receivedMessage.Tchat.Messages[0].Author){
                         const request = {
                             User: cookieExist(),
                             ToUser: receivedMessage.Tchat.Messages[0].Author,
                             Origin: "chat-home",
                             Nature: "chat",
-                            ObjectOfRequest: "user not see message",
-                            Message:receivedMessage.Tchat.Messages[0].Content
+                            ObjectOfRequest: "user see message",
                         };
-                        sendMessageToWebsocket(ws,request)
+                        sendMessageToWebsocket(ws, request)
+                        scrollToBottom();
+                    }else if (!openChat.open && receivedMessage.Tchat.Messages[0].Recipient=== user.Nickname){
+                        setNotification(receivedMessage.Tchat.Messages[0].Author)
                     }
                 }else if (!receivedMessage.Accept && receivedMessage.ObjectOfRequest === "You're not following this user or he don't follow you"){
                     setNotSub(receivedMessage.ToUser)
-                }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "user not see message"){
-                    setNotif((prevNotif) => [...prevNotif, receivedMessage.User]);       
-                
-                }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "user see message"){
-                    console.log("sse see see")
-                    setNotif(notif.filter((userName) => userName !== receivedMessage.User));
                 }
                 console.log("Réponse du serveur (ws):", receivedMessage)
             }
@@ -86,22 +79,22 @@ function Tchat({ onClose, ws, user}) {
             open:!openChat.open,
             nickname:user
         })
-        if (notif.filter((newMessageUser)=> newMessageUser === user).length>0){
-            const request = {
-                User: cookieExist(),
-                ToUser: user,
-                Origin: "chat-home",
-                Nature: "chat",
-                ObjectOfRequest: "user see message",
-            };
-            sendMessageToWebsocket(ws, request)
-        }
+       
+        const request = {
+            User: cookieExist(),
+            ToUser: user,
+            Origin: "chat-home",
+            Nature: "chat",
+            ObjectOfRequest: "user see message",
+        };
+        sendMessageToWebsocket(ws, request)
+
+        setNotification(user, true)
+        
         scrollToBottom();
     }
 
     const messageIsWritting = (event) => {
-        console.log(users)
-        console.log(connectUsers)
         const { value } = event.target;
         setMessage(value);
     }
@@ -154,10 +147,11 @@ function Tchat({ onClose, ws, user}) {
                                     <div className={styles.userNickname}>
                                         <div className={isUserConnected(userTchat.Nickname) ? styles.pointVert : styles.pointNoir}></div>
                                         {userTchat.Nickname}
-                                        {notif && notif.filter((value) => (value === userTchat.Nickname)).length>0 ? (
-                                                <div key={index} className={styles.newMessages}>: New message({notif.filter((value) => (value === userTchat.Nickname)).length})!!!</div>
-                                            ) : (null
-                                        )}
+                                        {notification && notification.filter((value) => value.nickname === userTchat.Nickname).length > 0 ? (
+                                            <div key={index} className={styles.newMessages}>
+                                                New message({notification.find((value) => value.nickname === userTchat.Nickname).num})!!!
+                                            </div>
+                                        ) : null}
                                     </div>
                                 </div>
 
