@@ -1,14 +1,21 @@
 import React, { useState } from 'react';
 import styles from '../styles/tchat.module.css';
+import cookieExist from '../utils/cookieUserExist';
+import sendMessageToWebsocket from '../lib/wsSendMessage';
 
-function CreateGroup({ users }) {
+function CreateGroup({ users, ws }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [error, setErr] = useState("")
+    const [newGroup, setNewGroup] = useState("")
 
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
+
+    const handleNewGroup =(e)=>{
+        setNewGroup(e.target.value)
+    }
 
     const handleAddUser = (userNickname) => {
         const user = users.find((u) => u.Nickname === userNickname);
@@ -36,11 +43,47 @@ function CreateGroup({ users }) {
         );
     };
 
+    const sendGroupChat=()=>{
+
+        if (newGroup!== "" && selectedUsers && selectedUsers.length>0){
+            const request = {
+                User: cookieExist(),
+                Origin: "chat-home",
+                Nature: "chat",
+                ObjectOfRequest: "new group",
+                Message: newGroup,
+                Users: selectedUsers
+            };
+            sendMessageToWebsocket(ws, request)
+        }else{
+            setErr("ERROR: name of group doesn't exist or no selected users")
+            setTimeout(()=>{
+                setErr("")
+            }, 5000)
+        }
+    }
+
+    const onMessageWS = async () => {
+        if (ws && cookieExist()){
+            ws.onmessage = (event) => {
+                const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
+                if (!receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "new group")) {
+                    setErr(receivedMessage.Message)
+                    setTimeout(()=>{
+                        setErr("")
+                    }, 5000)
+                }
+            }
+        }
+    }
+
+    onMessageWS()
+
     return (
         <div className={styles.contains_creaGroup}>
             <div>
                 <label htmlFor="groupName">Choose name group:</label>
-                <input type="text" id="groupName" />
+                <input type="text" id="groupName" value={newGroup} onChange={handleNewGroup} />
             </div>
             <div>
                 <label htmlFor="searchUser">Add users to group:</label>
@@ -65,7 +108,8 @@ function CreateGroup({ users }) {
                     </div>
                 )}
             </div>
-            <button onClick={(e) => handleAddUser(e)}>Add</button>
+            {error && (<div className={styles.error}> {error} </div>)}
+            <button onClick={(e) => sendGroupChat(e)}>Create</button>
             <div className={styles.selectedUsers}>
                 {selectedUsers.map((user, index) => (
                     <div key={index} className={styles.selectedUser}>

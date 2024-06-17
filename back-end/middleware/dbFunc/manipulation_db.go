@@ -733,7 +733,7 @@ func ChangeYesOrNoEvent_db(db *sql.DB, column string, eventID, userID int) {
 func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 	var user structures.User
 	// Préparer la requête SQL avec une clause WHERE pour vérifier le pseudo ou l'email
-	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe, Profil FROM Users WHERE Nickname = ? OR Email = ?")
+	stmt, err := db.Prepare("SELECT ID, Nickname, Password, FirstName, LastName, Birthday, Age, ImageName, AboutMe, Profil, UUID FROM Users WHERE Nickname = ? OR Email = ?")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for SelectUserByNickanme_db :", err)
@@ -742,7 +742,7 @@ func SelectUserByNickname_db(db *sql.DB, nickname string) structures.User {
 	defer stmt.Close()
 
 	// Exécuter la requête SQL avec le pseudo ou l'email fourni
-	err = stmt.QueryRow(nickname, nickname).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &user.Profil)
+	err = stmt.QueryRow(nickname, nickname).Scan(&user.ID, &user.Nickname, &user.Password, &user.FirstName, &user.LastName, &user.Birthday, &user.Age, &user.ImageName, &user.AboutMe, &user.Profil, &user.UUID)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de la requête SQL for SelectUserByNickanme_db :", err)
@@ -961,4 +961,153 @@ func SelectAuthorNotSee(db *sql.DB, userID int) []string {
 	}
 
 	return allMessages
+}
+
+// GetGroupMembers retrieves the members of a group given the group's name
+func GetGroupMembers(db *sql.DB, groupName string) []structures.User {
+	var groupID int
+	var users []structures.User
+
+	// Get the Group ID from the group name
+	err := db.QueryRow("SELECT ID FROM GroupChat WHERE GroupName = ?", groupName).Scan(&groupID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			fmt.Println("group not found")
+			return users
+		}
+		return users
+	}
+
+	// Get the members of the group
+	rows, err := db.Query("SELECT u.ID, u.Nickname FROM Users u JOIN GroupMembers gm ON u.ID = gm.Member WHERE gm.GroupID = ?", groupID)
+	if err != nil {
+		fmt.Println("error:", nil)
+		return users
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var user structures.User
+		if err := rows.Scan(&user.ID, &user.Nickname); err != nil {
+			fmt.Println("error:", err)
+			return users
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Println("error3:", err)
+		return users
+	}
+
+	return users
+}
+
+func GetsGroups(db *sql.DB, userID int) []structures.Group {
+	var allGroups []structures.Group
+	groups := getsGroupsNames(db, userID)
+
+	fmt.Println("groups:", groups)
+	if len(groups) > 0 {
+		for i := 0; i < len(groups); i++ {
+			var group structures.Group
+			group.Name = groups[i]
+			group.Members = GetGroupMembers(db, groups[i])
+			group.Conv = getsChatsGroup(db, groups[i], userID)
+
+			allGroups = append(allGroups, group)
+		}
+	}
+
+	return allGroups
+}
+
+// GetsGroups retrieves the group names that a user belongs to
+func getsGroupsNames(db *sql.DB, userID int) []string {
+	var nameGroups []string
+
+	// Query to get the group names
+	rows, err := db.Query(`
+		SELECT gc.GroupName
+		FROM GroupMembers gm
+		JOIN GroupChat gc ON gm.GroupID = gc.ID
+		WHERE gm.Member = ?`, userID)
+	if err != nil {
+		fmt.Println("error GetsGroupsNames:", err)
+		return nameGroups
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var groupName string
+		if err := rows.Scan(&groupName); err != nil {
+			fmt.Println("error GetsGroupsNames1:", err)
+			return nameGroups
+		}
+		nameGroups = append(nameGroups, groupName)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Println("error GetsGroupsName2s:", err)
+		return nameGroups
+	}
+
+	return nameGroups
+}
+
+// Récupère les messages d'un groupe de chat et vérifie si chaque message a été vu par l'utilisateur
+func getsChatsGroup(db *sql.DB, groupName string, userID int) []structures.Message {
+	var messages []structures.Message
+
+	query := `
+        SELECT gcc.ID, u.Nickname, gcc.Content, gcc.Date
+        FROM GroupChat gc
+        JOIN GroupChatConv gcc ON gc.ID = gcc.GroupID
+        JOIN Users u ON gcc.UserID = u.ID
+        WHERE gc.GroupName = ?`
+
+	rows, err := db.Query(query, groupName)
+	if err != nil {
+		fmt.Println("Query execution error:", err)
+		return messages
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var message structures.Message
+		var chatID int
+		if err := rows.Scan(&chatID, &message.Author, &message.Content, &message.Date); err != nil {
+			fmt.Println("Row scan error:", err)
+			return messages
+		}
+
+		message.See = chatGroupHasBeenSeeByUser(db, chatID, userID)
+		messages = append(messages, message)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Println("Rows iteration error:", err)
+	}
+
+	return messages
+}
+
+// Vérifie si un message de groupe a été vu par l'utilisateur
+func chatGroupHasBeenSeeByUser(db *sql.DB, chatID, userID int) bool {
+	query := `
+        SELECT Seen
+        FROM GroupChatSee
+        WHERE ChatID = ? AND UserID = ?`
+
+	var seen bool
+	err := db.QueryRow(query, chatID, userID).Scan(&seen)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false // Message non vu
+		}
+		fmt.Println("QueryRow error:", err)
+		return false
+	}
+
+	return seen
 }

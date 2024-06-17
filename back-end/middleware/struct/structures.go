@@ -63,6 +63,8 @@ type Request struct {
 	Tchat            Tchat  `json:"Tchat"`
 	ToUser           string `json:"ToUser"`
 	Message          string `json:"Message"`
+	Users            []User `json:"Users"`
+	Name             string `json:"Name"`
 }
 
 type LikeOrDislike struct {
@@ -99,6 +101,13 @@ type Tchat struct {
 	Clients        []User `json:"Clients"`
 	Messages       []Message
 	AuthorNotSee   []string
+	Group          []Group
+}
+
+type Group struct {
+	Name    string
+	Members []User
+	Conv    []Message
 }
 
 type Message struct {
@@ -107,6 +116,6 @@ type Message struct {
 	Recipient string `json:"Recipient"`
 	Content   string `json:"Content"`
 	Date      string `json:"Date"`
-	Groupe    bool   `json:"Groupe"`
+	Groupe    string `json:"Groupe"`
 	See       bool   `json:"See"`
 }

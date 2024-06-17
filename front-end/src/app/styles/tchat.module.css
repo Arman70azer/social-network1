@@ -285,3 +285,33 @@
 .selectedUser button:hover {
     background-color: #e60000;
 }
+
+.error{
+    color: red;
+}
+
+.groupContainer {
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.groupName {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.memberList {
+    margin-left: 15px;
+    margin-top: 5px;
+}
+
+.memberNickname {
+    margin-bottom: 3px;
+    font-size: 1rem;
+    color: #666;
+}
+

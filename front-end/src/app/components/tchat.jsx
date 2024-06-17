@@ -3,6 +3,7 @@ import styles from "../styles/tchat.module.css"
 import sendMessageToWebsocket from "../lib/wsSendMessage"
 import cookieExist from "../utils/cookieUserExist"
 import CreateGroup from "../components/createGroup"
+import ChatWindowGroup from "../components/windowGroupChat"
 
 function Tchat({ onClose, ws, user, setNotification, notification}) {
     const [connectUsers, setConnectUsers] = useState([]);
@@ -17,6 +18,13 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
  
     const [notSub, setNotSub] = useState("")
     const [creaGroup, setCreaGroup] = useState(false)
+
+    const [groups, setGroups] = useState([])
+    const [seeGroup, setSeeGroup] = useState({
+        Name:"",
+        Members :[],
+        Conv:[],
+    });
 
     useEffect(() => {
         const searchConnectUser = async () => {
@@ -48,6 +56,7 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     setUsers(receivedMessage.Tchat.Clients.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
                     if (receivedMessage.ObjectOfRequest == "see users connect"){
                         setChats(receivedMessage.Tchat.Messages)
+                        setGroups(receivedMessage.Tchat.Group)
                     }
                     console.log(receivedMessage.Tchat.Clients.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
                 }else if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "message save")){
@@ -135,7 +144,22 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
     const creaGroupSet=()=>{
         setCreaGroup(!creaGroup)
     }
-    
+
+    const seeGroupSet = (group) => {
+        if (group && seeGroup.Name === "") {
+            console.log("Group selected:", group);
+            setSeeGroup(group);
+        } else {
+            console.log(seeGroup)
+            setSeeGroup({
+                Name:"",
+                Members:[],
+                Conv:[]
+            });
+        }
+    };
+
+
     onMessageWS()
 
     return (
@@ -146,8 +170,28 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     <button className={styles.createGroup} onClick={creaGroupSet}>Create a group</button>
                 </div>
                 <div className={styles.center}>
-                    {creaGroup && users && (<CreateGroup users={users}/>)}
+                    {creaGroup && users && (<CreateGroup users={users} ws={ws} />)}
                     <div className={styles.usersList}>
+                        <>
+                            {groups && groups.length > 0 ? (
+                                <>
+                                    <div className={styles.center}>Groups:</div>
+                                    {groups.map((group, groupIndex) => (
+                                        <div key={groupIndex} className={styles.groupContainer} onClick={() => seeGroupSet(group)}>
+                                            <button className={styles.groupName}>{group.Name}</button>
+                                        </div>
+                                    ))}
+
+                                    {seeGroup.Name !== "" && ws && (
+                                        <ChatWindowGroup user={user} ws={ws} group={seeGroup} />
+                                    )}
+
+                                </>
+                            ) : (
+                                null
+                            )}
+                        </>
+
                         <div className={styles.center}>Users Connects:</div>
                         {users && connectUsers && users.map((userTchat, index) => (
                             <div key={index}>
