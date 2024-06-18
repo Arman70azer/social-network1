@@ -11,6 +11,52 @@ import (
 	"github.com/form3tech-oss/jwt-go"
 )
 
+//---------------------ici---------------------------
+func AddSubscriptionRequest(db *sql.DB, requesterID, requestedID int) error {
+    query := `INSERT INTO SubscriptionRequests (RequesterID, RequestedID, Status, Timestamp) VALUES (?, ?, 'pending', ?)`
+    _, err := db.Exec(query, requesterID, requestedID, time.Now().Format(time.RFC3339))
+    if err != nil {
+        fmt.Println("Error adding subscription request:", err)
+    } else {
+        fmt.Println("Subscription request added successfully for requesterID:", requesterID, "requestedID:", requestedID)
+    }
+    return err
+}
+
+func AddNotification(db *sql.DB, recipientID, senderID int, notificationType string) error {
+    query := `INSERT INTO Notifications (RecipientID, SenderID, Type, Timestamp) VALUES (?, ?, ?, ?)`
+    _, err := db.Exec(query, recipientID, senderID, notificationType, time.Now().Format(time.RFC3339))
+    if err != nil {
+        fmt.Println("Error adding notification:", err)
+    } else {
+        fmt.Println("Notification added successfully for recipientID:", recipientID, "senderID:", senderID)
+    }
+    return err
+}
+
+func GetNotifications(db *sql.DB, userID int) ([]structures.Notification, error) {
+    query := `SELECT ID, SenderID, Type, Timestamp FROM Notifications WHERE RecipientID = ? ORDER BY Timestamp DESC`
+    rows, err := db.Query(query, userID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var notifications []structures.Notification
+    for rows.Next() {
+        var notification structures.Notification
+        err := rows.Scan(&notification.ID, &notification.SenderID, &notification.Type, &notification.Timestamp)
+        if err != nil {
+            return nil, err
+        }
+        notifications = append(notifications, notification)
+    }
+    fmt.Println("Retrieved notifications for userID:", userID, notifications)
+    return notifications, nil
+}
+
+
+//------------------------------------------------
 // Ouvre la db et permet par la suite de la manipuler
 func Open_db() *sql.DB {
 	db, err := sql.Open("sqlite3", "db/social-network.db")

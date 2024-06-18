@@ -1,5 +1,12 @@
 package structures
 
+type Notification struct {
+    ID        int    `json:"id"`
+    SenderID  int    `json:"sender_id"`
+    Type      string `json:"type"`
+    Timestamp string `json:"timestamp"`
+}
+
 type Post struct {
 	ID             int
 	Titre          string

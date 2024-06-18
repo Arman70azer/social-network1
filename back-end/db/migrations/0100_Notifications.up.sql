@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS Notifications (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    RecipientID INTEGER NOT NULL,
+    SenderID INTEGER NOT NULL,
+    Type TEXT,
+    Timestamp TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (RecipientID) REFERENCES Users(ID),
+    FOREIGN KEY (SenderID) REFERENCES Users(ID)
+);
