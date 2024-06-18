@@ -85,6 +85,7 @@ type Follow struct {
 	PeopleIFollow            []User
 	PeopleWhoFollowMe        []User
 	PeopleIFollowAndFollowMe []User
+	PrivateSub               []User
 }
 
 type PrivatesViewer struct {
@@ -119,4 +120,9 @@ type Message struct {
 	Date      string `json:"Date"`
 	Groupe    string `json:"Groupe"`
 	See       bool   `json:"See"`
+}
+type Notification struct {
+	ID        int    `json:"id"`
+	SenderID  int    `json:"sender_id"`
+	Timestamp string `json:"timestamp"`
 }

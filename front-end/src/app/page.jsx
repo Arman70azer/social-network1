@@ -2,6 +2,7 @@
 import { useState } from "react";
 import sendFormAndReceiveData from "./lib/sendForm&ReceiveData";
 import Cookies from "js-cookie";
+import styles from "../app/styles/register.module.css"
 
 import "../app/styles/connexions.css"; 
 import "../app/styles/styles.css"; 
@@ -10,6 +11,7 @@ import t from '../app/assets/armand.jpg';
 import tt from '../app/assets/alex.webp'; 
 import ttt from '../app/assets/brad.jpg'; 
 import tttt from '../app/assets/cypri.jpg'; 
+import Link from "next/link";
 
 export default function Page() {
   const [form, setForm] = useState({
@@ -113,12 +115,11 @@ export default function Page() {
           {error && (<div>{message}</div>)}
           <button type="submit" className="my-form__button" onClick={sendForm}>Login</button>
           <div className="my-form__actions">
-            <a href="#" title="Reset Password">
-              Reset Password
-            </a>
-            <a href="#" title="Create Account">
-              Already have an account?
-            </a>
+          <div className={styles.registerLinkContainer}>
+              <Link href="/register" className={styles.registerLink}>
+                  Don't have an account?
+              </Link>
+          </div>
           </div>
         </form>
       </div>

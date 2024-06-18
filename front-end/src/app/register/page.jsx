@@ -57,128 +57,130 @@ export default function Register() {
   };
   return (
     <div className={styles.page}>
-      <div className={styles.container}>
-        <h1 className={styles.header}>Inscription</h1>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.formGroup}>
-            <label htmlFor="nickname" className={styles.label}>
-              Nom d'utilisateur
-            </label>
-            <input
-              type="text"
-              id="nickname"
-              name="nickname"
-              value={formData.nickname}
-              onChange={handleChange}
-              className={styles.input}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="firstname" className={styles.label}>
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstname"
-              name="firstname"
-              value={formData.firstname}
-              onChange={handleChange}
-              required
-              className={styles.input}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="lastname" className={styles.label}>
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastname"
-              name="lastname"
-              value={formData.lastname}
-              onChange={handleChange}
-              required
-              className={styles.input}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="birthday" className={styles.label}>
-              Birthday
-            </label>
-            <input
-              type="date"
-              id="birthday"
-              name="birthday"
-              value={formData.birthday}
-              onChange={handleChange}
-              required
-              className={styles.input}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="imagename" className={styles.label}>
-              Image
-            </label>
-            <input
-              type="file"
-              id="imagename"
-              name="imagename"
-              onChange={handleChange}
-              className={styles.input}
-            />
-            <button type="reset" className={styles.button}>
-              reset
+      <div className={styles.pageContent}>
+        <div className={styles.container}>
+          <h1 className={styles.header}>Inscription</h1>
+          <form onSubmit={handleSubmit} className={styles.form}>
+            <div className={styles.formGroup}>
+              <label htmlFor="nickname" className={styles.label}>
+                Nom d'utilisateur
+              </label>
+              <input
+                type="text"
+                id="nickname"
+                name="nickname"
+                value={formData.nickname}
+                onChange={handleChange}
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="firstname" className={styles.label}>
+                First Name
+              </label>
+              <input
+                type="text"
+                id="firstname"
+                name="firstname"
+                value={formData.firstname}
+                onChange={handleChange}
+                required
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="lastname" className={styles.label}>
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="lastname"
+                name="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                required
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="birthday" className={styles.label}>
+                Birthday
+              </label>
+              <input
+                type="date"
+                id="birthday"
+                name="birthday"
+                value={formData.birthday}
+                onChange={handleChange}
+                required
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="imagename" className={styles.label}>
+                Image
+              </label>
+              <input
+                type="file"
+                id="imagename"
+                name="imagename"
+                onChange={handleChange}
+                className={styles.input}
+              />
+              <button type="reset" className={styles.button}>
+                reset
+              </button>
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="aboutme" className={styles.label}>
+                About Me
+              </label>
+              <input
+                type="text"
+                id="aboutme"
+                name="aboutme"
+                value={formData.aboutme}
+                onChange={handleChange}
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="email" className={styles.label}>
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className={styles.input}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="password" className={styles.label}>
+                Mot de passe
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className={styles.input}
+              />
+            </div>
+            {error.exist && (<div className={styles.error}>{error.message}</div>)}
+            <button type="submit" className={styles.button}>
+              S'inscrire
             </button>
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="aboutme" className={styles.label}>
-              About Me
-            </label>
-            <input
-              type="text"
-              id="aboutme"
-              name="aboutme"
-              value={formData.aboutme}
-              onChange={handleChange}
-              className={styles.input}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.label}>
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className={styles.input}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.label}>
-              Mot de passe
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className={styles.input}
-            />
-          </div>
-          {error.exist && (<div className={styles.error}>{error.message}</div>)}
-          <button type="submit" className={styles.button}>
-            S'inscrire
-          </button>
-        </form>
-        <p className={styles.link}>
-          Vous avez déjà un compte ? <Link href="/">Se connecter</Link>
-        </p>
+          </form>
+          <p className={styles.link}>
+            Vous avez déjà un compte ? <Link href="/">Se connecter</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -30,6 +30,8 @@ export default function page(){
     })
     const [nbrSub, setNewFollow]= useState(0)
     const [isFollowing, setIsFollowing] = useState(false);
+    const [waitResponse, setWaitResponse]=useState("")
+    const [usersWantFollowYou, setUsersWantFollowYou]=useState([])
     const [isLoading, setLoading] = useState(true)
     const [userInfo, setUserInfo] = useState({
         ID:0,
@@ -86,6 +88,16 @@ export default function page(){
                     setIsFollowing(true);
                 }
             }     
+
+
+            if (dataReceved.privateSub){
+                setWaitResponse("Wait for a response of profil")
+            }
+
+            if (dataReceved.userProfil.PrivateSub){
+                setUsersWantFollowYou(dataReceved.userProfil.PrivateSub)
+            }
+
         }
     
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
@@ -137,7 +149,13 @@ export default function page(){
             if (response.action === "You're now subscribe") {
                 setNewFollow(nbrSub+1)
                 setIsFollowing(true)
-        
+
+            }else if (response.action ==="Wait for a response of profil"){
+                setIsFollowing(false)
+                setWaitResponse(response.action )
+            }else if (response.action === "cancel request private profil"){
+                setIsFollowing(false)
+                setWaitResponse("")
             }else {
                 setNewFollow(nbrSub-1)
                 setIsFollowing(false)
@@ -154,6 +172,31 @@ export default function page(){
             setUser((previousUser) => {
                 return [...previousUser, { Nickname: value }];
             });
+        }
+    }
+
+    const acceptFollow = async (name)=>{
+        const formFollow = new FormData();
+        formFollow.append("token", cookieExist());
+        formFollow.append("nature", "accept follow");
+        formFollow.append("userProfil", name)
+        const response = await sendAndReceiveData("/api/follow", formFollow);
+        console.log("réponse serveur:",response)
+        if (response.Accept){
+            setUsersWantFollowYou(usersWantFollowYou.filter((previous)=> previous.Nickname !== response.action))
+            setNewFollow(nbrSub+1)
+        }
+    }
+
+    const refuseFollow = async (name)=>{
+        const formFollow = new FormData();
+        formFollow.append("token", cookieExist());
+        formFollow.append("nature", "refuse follow");
+        formFollow.append("userProfil", name)
+        const response = await sendAndReceiveData("/api/follow", formFollow);
+        console.log("réponse serveur:",response)
+        if (response.Accept){
+            setUsersWantFollowYou(usersWantFollowYou.filter((previous)=> previous.Nickname !== response.action))
         }
     }
 
@@ -180,6 +223,25 @@ export default function page(){
                                 )}
                             </>
                         )}
+                       
+                        {usersWantFollowYou.length > 0 ? (
+                            <div className={styles.requestContainer}>
+                                <>
+                                    <div className={styles.requestHeader}>Subscription Requests:</div>
+                                    {usersWantFollowYou.map((notification, index) => (
+                                        <div key={index} className={styles.followRequest}>
+                                            <div className={styles.requestInfo}>
+                                                <span className={styles.requestText}>User {notification.Nickname} wants to follow you.</span>
+                                                <button className={styles.acceptButton} onClick={() => acceptFollow(notification.Nickname)}>Accept</button>
+                                                <button className={styles.refuseButton} onClick={() => refuseFollow(notification.Nickname)}>Refuse</button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </>
+                            </div>
+                        ) : (
+                            null
+                        )}
                         <div className={styles.publicPart}>
                         <img className={styles.avatar} src={`${userInfo.UrlImage}`} alt="Avatar" />
                         <div className={styles.nickname}>
@@ -187,7 +249,11 @@ export default function page(){
                         </div>
                         {user.Nickname !== userInfo.Nickname && (
                             <button className={styles.followButton} onClick={handleFollow}>
-                                {isFollowing ? "Unsubscribe" : "Subscribe"}
+                            {waitResponse ? (
+                                    "Please wait for a response..."
+                                ) : (
+                                    isFollowing ? "Unsubscribe" : "Subscribe"
+                                )}
                             </button>
                         )}
                         {(isFollowing || userInfo.Profil === "public" || user.Nickname === userInfo.Nickname) && ( // Afficher les informations utilisateur uniquement si l'utilisa
