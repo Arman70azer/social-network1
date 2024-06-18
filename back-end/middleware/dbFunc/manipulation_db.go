@@ -1,6 +1,7 @@
 package dbFunc
 
 import (
+	"back-end/middleware"
 	structures "back-end/middleware/struct"
 	"database/sql"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/form3tech-oss/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Ouvre la db et permet par la suite de la manipuler
@@ -315,15 +317,16 @@ func SelectPrivatesEvent(db *sql.DB, event structures.Post) []structures.Private
 
 func PushUser_db(user structures.User, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouvel utilisateur
-	stmt, err := db.Prepare("INSERT INTO users (nickname, firstname, lastname, birthday, imagename, aboutme, email, password, profil) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO users (nickname, firstname, lastname, birthday, imagename, aboutme, email, password, profil, Age) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL pour PushUser :", err)
 		return
 	}
 	defer stmt.Close()
+	hashedPassword := middleware.HashedPassword(user.Password)
 	// Exécuter la requête SQL pour insérer le nouvel utilisateur
-	_, err = stmt.Exec(user.Nickname, user.FirstName, user.LastName, user.Birthday, user.ImageName, user.AboutMe, user.Email, user.Password, "public")
+	_, err = stmt.Exec(user.Nickname, user.FirstName, user.LastName, user.Birthday, user.ImageName, user.AboutMe, user.Email, hashedPassword, "public", user.Age)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL pour PushUser :", err)
@@ -830,10 +833,13 @@ func CheckUserCredentials(db *sql.DB, emailOrNickname, password string) (bool, s
 		return false, "", err
 	}
 	fmt.Printf("Mot de passe récupéré de la base de données pour l'utilisateur %s: %s\n", emailOrNickname, storedPassword)
-	if storedPassword != password {
-		fmt.Println("Le mot de passe ne correspond pas")
+	// Comparer le mot de passe fourni avec le mot de passe hashé stocké en base de données
+	err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(password))
+	if err != nil {
+		fmt.Println("Mot de passe incorrect pour l'utilisateur", emailOrNickname)
 		return false, "", nil
 	}
+
 	// Générer le token JWT avec l'ID utilisateur, l'email, et un horodatage unique
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{

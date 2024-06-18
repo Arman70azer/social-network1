@@ -46,6 +46,7 @@ export default function Register() {
     form.append("email", formData.email);
     form.append("password", formData.password);
     const response = await sendFormToBackAndReceive("/register", form);
+    console.log(response)
     if (response.Accept){
       window.location.href = '/'
     }else{

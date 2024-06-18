@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func SelectImageDatabase(name string) []byte {
@@ -113,4 +115,13 @@ func ReturnWithW(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	// Renvoyez les données JSON en réponse
 	w.Write(jsonData)
+}
+
+func HashedPassword(password string) string {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		fmt.Println("Erreur lors du hachage du mot de passe :", err)
+		return ""
+	}
+	return string(hashedPassword)
 }

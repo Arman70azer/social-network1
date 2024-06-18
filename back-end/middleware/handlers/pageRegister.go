@@ -4,7 +4,6 @@ import (
 	"back-end/middleware/dbFunc"
 	s "back-end/middleware/struct"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -87,7 +86,6 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			user.Age = calculateAge(user.Birthday)
 			// Save the user to the database
 			dbFunc.PushUser_db(user, db)
-			fmt.Fprintln(w, "Inscription réussie!")
 			response.Accept = true
 			response.Nature = "c'est bon"
 		} else {
