@@ -2,10 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import styles from "../styles/tchat.module.css";
 import sendMessageToWebsocket from "../lib/wsSendMessage";
 
-function ChatWindowGroup({ ws, user, group }) {
+function ChatWindowGroup({ ws, user, groupSelect, setNotification }) {
     const [message, setMessage]= useState("")
     const chatWindowRef = useRef(null);
     const [newMessages, setNewMessages]= useState([])
+    const [group, setGroup] = useState({
+        Name:"",
+        Members : [],
+        Conv : [],
+        NoSeeMessages: 0
+    })
 
     const userSeeChatGroup = ()=>{
         const request = {
@@ -13,16 +19,44 @@ function ChatWindowGroup({ ws, user, group }) {
             Origin: "chat-Group",
             Nature: "chat",
             ObjectOfRequest: "message group see",
-            toUser: group.Name,
+            toUser: groupSelect.Name,
         };
         
         sendMessageToWebsocket(ws, request)
+
+        scrollToBottom()
     }
 
-    useEffect(()=>{
-       userSeeChatGroup()
+    useEffect(() => {
+        userSeeChatGroup()
+        const wsWaitForGroup = async () => {
+            return new Promise((resolve, reject) => {
+                if (ws && user) {
+                    ws.onmessage = (event) => {
+                        const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
+                        if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "message group see") {
+                            setGroup(receivedMessage.Tchat.Group[0]);
+                            setNotification(receivedMessage.Tchat.Group[0].Name, true)
+                            resolve();
+                        }
+                    };
+                } else {
+                    reject("WebSocket or user is not defined");
+                }
+            });
+        };
 
-    },[])
+        const initialize = async () => {
+            try {
+                await wsWaitForGroup();
+                // Page can proceed now
+            } catch (error) {
+                console.error("Error initializing component:", error);
+            }
+        };
+
+        initialize();
+    }, [ws, user]);
 
     // Fonction utilitaire pour obtenir la liste formatée des noms des membres
     const formatMemberList = () => {
@@ -68,6 +102,9 @@ function ChatWindowGroup({ ws, user, group }) {
                     setNewMessages((previous)=> [...previous, receivedMessage.Tchat.Messages[0]])
                     scrollToBottom()
                     userSeeChatGroup()
+                }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "message group seep") {
+                    setGroup(receivedMessage.Tchat.Group[0])
+                    console.log(receivedMessage.Tchat.Group[0])
                 }
             }
         }

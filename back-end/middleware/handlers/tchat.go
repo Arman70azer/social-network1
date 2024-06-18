@@ -38,6 +38,7 @@ func Tchat(clients *Clients, message structures.Request) {
 	} else if message.ObjectOfRequest == "notifications" {
 		db := dbFunc.Open_db()
 		message.Tchat.AuthorNotSee = dbFunc.SelectAuthorNotSee(db, dbFunc.SelectUserByToken(db, message.User).ID)
+		message.Tchat.Group= dbFunc.GetsGroups(db, dbFunc.SelectUserByToken(db, message.User).ID)
 		message.Accept = true
 		BroadcastToOneClient(message.User, message)
 	} else if message.ObjectOfRequest == "new group" {
@@ -317,24 +318,41 @@ func insertNewMessageGroup(db *sql.DB, userID int, groupName, content string) {
 }
 
 func userSeeMessageGroup(message structures.Request) {
-    db := dbFunc.Open_db()
-    user := dbFunc.SelectUserByToken(db, message.User)
-    group := message.ToUser
+	db := dbFunc.Open_db()
+	user := dbFunc.SelectUserByToken(db, message.User)
+	group := message.ToUser
 
-    messageGroupSee(db, user.ID, group)
+	var group1 structures.Group
+
+	messageGroupSee(db, user.ID, group)
+
+	var response structures.Request
+	response.Nature = message.Nature
+	response.ObjectOfRequest = message.ObjectOfRequest
+	response.Accept = true
+	groups := dbFunc.GetsGroups(db, user.ID)
+
+	for i := 0; i < len(groups); i++ {
+		if groups[i].Name == group {
+			group1 = groups[i]
+		}
+	}
+	response.Tchat.Group = append(response.Tchat.Group, group1)
+
+	BroadcastToOneClient(user.UUID, response)
 }
 
 func messageGroupSee(db *sql.DB, userID int, groupName string) {
-    // Requête pour obtenir l'ID du groupe à partir du nom du groupe
-    var groupID int
-    err := db.QueryRow("SELECT ID FROM GroupChat WHERE GroupName = ?", groupName).Scan(&groupID)
-    if err != nil {
-        fmt.Println("Error fetching group ID:", err)
-        return
-    }
+	// Requête pour obtenir l'ID du groupe à partir du nom du groupe
+	var groupID int
+	err := db.QueryRow("SELECT ID FROM GroupChat WHERE GroupName = ?", groupName).Scan(&groupID)
+	if err != nil {
+		fmt.Println("Error fetching group ID:", err)
+		return
+	}
 
-    // Requête pour mettre à jour les messages non vus pour cet utilisateur dans ce groupe
-    updateQuery := `
+	// Requête pour mettre à jour les messages non vus pour cet utilisateur dans ce groupe
+	updateQuery := `
         UPDATE GroupChatSee 
         SET Seen = 1 
         WHERE ChatID IN (
@@ -344,9 +362,8 @@ func messageGroupSee(db *sql.DB, userID int, groupName string) {
         )
         AND UserID = ?`
 
-    _, err = db.Exec(updateQuery, groupID, userID)
-    if err != nil {
-        fmt.Println("Error updating GroupChatSee:", err)
-    }
+	_, err = db.Exec(updateQuery, groupID, userID)
+	if err != nil {
+		fmt.Println("Error updating GroupChatSee:", err)
+	}
 }
-

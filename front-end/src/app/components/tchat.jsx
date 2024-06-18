@@ -22,8 +22,7 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
     const [groups, setGroups] = useState([])
     const [seeGroup, setSeeGroup] = useState({
         Name:"",
-        Members :[],
-        Conv:[],
+        exist:false,
     });
 
     useEffect(() => {
@@ -57,6 +56,7 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     if (receivedMessage.ObjectOfRequest == "see users connect"){
                         setChats(receivedMessage.Tchat.Messages)
                         setGroups(receivedMessage.Tchat.Group)
+                        console.log("ici:",receivedMessage.Tchat.Group)
                     }
                     console.log(receivedMessage.Tchat.Clients.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
                 }else if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "message save")){
@@ -80,6 +80,8 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     }
                 }else if (!receivedMessage.Accept && receivedMessage.ObjectOfRequest === "You're not following this user or he don't follow you"){
                     setNotSub(receivedMessage.ToUser)
+                }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "new message group" && groups.find((value)=> value.Name == receivedMessage.Tchat.Messages[0].Groupe)) {
+                    setNotification(receivedMessage.Tchat.Messages[0].Groupe)
                 }
                 console.log("Réponse du serveur (ws):", receivedMessage)
             }
@@ -144,20 +146,21 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
     const creaGroupSet=()=>{
         setCreaGroup(!creaGroup)
     }
-
-    const seeGroupSet = (group) => {
-        if (group && seeGroup.Name === "") {
-            console.log("Group selected:", group);
-            setSeeGroup(group);
-        } else {
-            console.log(seeGroup)
+    
+    const seeGroupOnClick=(name)=>{
+        if (!seeGroup.exist){
             setSeeGroup({
-                Name:"",
-                Members:[],
-                Conv:[]
-            });
+                exist:true,
+                Name: name
+            })
+        }else{
+
+            setSeeGroup({
+                exist:false,
+                Name: ""
+            })
         }
-    };
+    }
 
 
     onMessageWS()
@@ -177,13 +180,18 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                                 <>
                                     <div className={styles.center}>Groups:</div>
                                     {groups.map((group, groupIndex) => (
-                                        <div key={groupIndex} className={styles.groupContainer} onClick={() => seeGroupSet(group)}>
-                                            <button className={styles.groupName}>{group.Name}</button>
+                                        <div key={groupIndex} className={styles.groupContainer}>
+                                        <button className={styles.groupName} onClick={() => seeGroupOnClick(group.Name)}>{group.Name}</button>
+                                            {notification && notification.filter((value) => value.nickname === group.Name).length > 0 ? (
+                                                <div className={styles.newMessages}>
+                                                    New message({notification.find((value) => value.nickname === group.Name).num})!!!
+                                                </div>
+                                            ) : null}
                                         </div>
                                     ))}
 
                                     {seeGroup.Name !== "" && ws && (
-                                        <ChatWindowGroup user={user} ws={ws} group={seeGroup} />
+                                        <ChatWindowGroup user={user} ws={ws} groupSelect={seeGroup} setNotification={setNotification}/>
                                     )}
 
                                 </>

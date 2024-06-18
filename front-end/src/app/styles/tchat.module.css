@@ -291,17 +291,21 @@
 }
 
 .groupContainer {
-    background-color: #f0f0f0;
-    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px;
-    margin-bottom: 15px;
+    border-radius: 4px;
+    margin-bottom: 10px;
 }
 
 .groupName {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px;
+    background-color: #2f90ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .memberList {

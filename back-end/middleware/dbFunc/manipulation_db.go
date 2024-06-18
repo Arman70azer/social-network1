@@ -1007,13 +1007,12 @@ func GetsGroups(db *sql.DB, userID int) []structures.Group {
 	var allGroups []structures.Group
 	groups := getsGroupsNames(db, userID)
 
-	fmt.Println("groups:", groups)
 	if len(groups) > 0 {
 		for i := 0; i < len(groups); i++ {
 			var group structures.Group
 			group.Name = groups[i]
 			group.Members = GetGroupMembers(db, groups[i])
-			group.Conv = getsChatsGroup(db, groups[i], userID)
+			group.Conv, group.NoSeeMessages = getsChatsGroup(db, groups[i], userID)
 
 			allGroups = append(allGroups, group)
 		}
@@ -1056,8 +1055,9 @@ func getsGroupsNames(db *sql.DB, userID int) []string {
 }
 
 // Récupère les messages d'un groupe de chat et vérifie si chaque message a été vu par l'utilisateur
-func getsChatsGroup(db *sql.DB, groupName string, userID int) []structures.Message {
+func getsChatsGroup(db *sql.DB, groupName string, userID int) ([]structures.Message, int) {
 	var messages []structures.Message
+	count := 0
 
 	query := `
         SELECT gcc.ID, u.Nickname, gcc.Content, gcc.Date
@@ -1069,7 +1069,7 @@ func getsChatsGroup(db *sql.DB, groupName string, userID int) []structures.Messa
 	rows, err := db.Query(query, groupName)
 	if err != nil {
 		fmt.Println("Query execution error:", err)
-		return messages
+		return messages, count
 	}
 	defer rows.Close()
 
@@ -1078,10 +1078,13 @@ func getsChatsGroup(db *sql.DB, groupName string, userID int) []structures.Messa
 		var chatID int
 		if err := rows.Scan(&chatID, &message.Author, &message.Content, &message.Date); err != nil {
 			fmt.Println("Row scan error:", err)
-			return messages
+			return messages, count
 		}
 
 		message.See = chatGroupHasBeenSeeByUser(db, chatID, userID)
+		if !message.See {
+			count++
+		}
 		messages = append(messages, message)
 	}
 
@@ -1089,7 +1092,7 @@ func getsChatsGroup(db *sql.DB, groupName string, userID int) []structures.Messa
 		fmt.Println("Rows iteration error:", err)
 	}
 
-	return messages
+	return messages, count
 }
 
 // Vérifie si un message de groupe a été vu par l'utilisateur
@@ -1103,10 +1106,13 @@ func chatGroupHasBeenSeeByUser(db *sql.DB, chatID, userID int) bool {
 	err := db.QueryRow(query, chatID, userID).Scan(&seen)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return false // Message non vu
+			fmt.Println("chats:", chatID, userID)
+
+		} else {
+			fmt.Println("QueryRow error:", err)
+
+			return false
 		}
-		fmt.Println("QueryRow error:", err)
-		return false
 	}
 
 	return seen

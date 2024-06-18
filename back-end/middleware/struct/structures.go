@@ -105,9 +105,10 @@ type Tchat struct {
 }
 
 type Group struct {
-	Name    string
-	Members []User
-	Conv    []Message
+	Name          string
+	Members       []User
+	Conv          []Message
+	NoSeeMessages int
 }
 
 type Message struct {

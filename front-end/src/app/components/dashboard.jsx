@@ -170,14 +170,28 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
 
                     if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "message save"){
                         setNotif(receivedMessage.Tchat.Messages[0].Author)
-                    }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "notifications" && receivedMessage.Tchat && receivedMessage.Tchat.AuthorNotSee && !timout){
+                    }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "notifications" && receivedMessage.Tchat && (receivedMessage.Tchat.AuthorNotSee || receivedMessage.Tchat.Group) && !timout){
 
+                        console.log("ggg")
+                        console.log(receivedMessage.Tchat.Group)
                         timout = setTimeout(()=>{
-                            console.log("hhhhh:",receivedMessage.Tchat.AuthorNotSee)
-                            for (let i = 0; i<receivedMessage.Tchat.AuthorNotSee.length; i++ ){
-                                setNotif(receivedMessage.Tchat.AuthorNotSee[i])
+                            if (receivedMessage.Tchat.AuthorNotSee){
+                                for (let i = 0; i<receivedMessage.Tchat.AuthorNotSee.length; i++ ){
+                                    setNotif(receivedMessage.Tchat.AuthorNotSee[i])
+                                }
                             }
+                            if (receivedMessage.Tchat && receivedMessage.Tchat.Group) {
+                                receivedMessage.Tchat.Group.forEach(group => {
+                                    if (group.NoSeeMessages > 0) {
+                                        for (let i = 0; i < group.NoSeeMessages; i++) {
+                                            setNotif(group.Name);
+                                        }
+                                    }
+                                });
+                            }                            
                         },200)
+                    }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "new message group"){
+                        setNotif(receivedMessage.Tchat.Messages[0].Groupe)
                     }
                 }
             }
