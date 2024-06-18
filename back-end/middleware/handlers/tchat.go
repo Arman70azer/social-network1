@@ -38,7 +38,7 @@ func Tchat(clients *Clients, message structures.Request) {
 	} else if message.ObjectOfRequest == "notifications" {
 		db := dbFunc.Open_db()
 		message.Tchat.AuthorNotSee = dbFunc.SelectAuthorNotSee(db, dbFunc.SelectUserByToken(db, message.User).ID)
-		message.Tchat.Group= dbFunc.GetsGroups(db, dbFunc.SelectUserByToken(db, message.User).ID)
+		message.Tchat.Group = dbFunc.GetsGroups(db, dbFunc.SelectUserByToken(db, message.User).ID)
 		message.Accept = true
 		BroadcastToOneClient(message.User, message)
 	} else if message.ObjectOfRequest == "new group" {
@@ -152,16 +152,23 @@ func updateChatSee2(db *sql.DB, userID, authorID int, see bool) {
 func newGroup(message structures.Request) {
 	db := dbFunc.Open_db()
 	user := dbFunc.SelectUserByToken(db, message.User)
+	var response structures.Request
+	response.Nature = message.Nature
+	response.ObjectOfRequest = message.ObjectOfRequest
+
 	if VerifGroupNotExist(db, message.Message) {
 		pushNewGroup(db, user.ID, message.Users, message.Message)
+		response.Accept = true
+
+		response.Tchat.Group = dbFunc.GetsGroups(db, user.ID)
+
+		response.Message = "Group register"
+
 	} else {
-		var response structures.Request
-		response.Nature = message.Nature
-		response.ObjectOfRequest = message.ObjectOfRequest
 		response.Accept = false
 		response.Message = "Group already exist"
-		BroadcastToOneClient(message.User, response)
 	}
+	BroadcastToOneClient(message.User, response)
 }
 
 func VerifGroupNotExist(db *sql.DB, nameGroup string) bool {

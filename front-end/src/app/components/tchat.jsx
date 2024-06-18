@@ -173,7 +173,7 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     <button className={styles.createGroup} onClick={creaGroupSet}>Create a group</button>
                 </div>
                 <div className={styles.center}>
-                    {creaGroup && users && (<CreateGroup users={users} ws={ws} />)}
+                    {creaGroup && users && (<CreateGroup users={users} ws={ws} setGroups={setGroups} />)}
                     <div className={styles.usersList}>
                         <>
                             {groups && groups.length > 0 ? (
