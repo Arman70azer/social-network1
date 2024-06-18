@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import eventUpdate from "../utils/eventUpdate";
 import fetchUsersAndPosts from "../lib/fetchDataHome"
 import openWebSocketConnexion from "../lib/websocket";
-import sendRequestToWebsocket from "../lib/wsSendMessage"
 import sendFormToBack from "../lib/sendFormToBack";
 import cookieExist from "../utils/cookieUserExist";
 import sendAndReceiveData from "../lib/sendForm&ReceiveData";
@@ -16,6 +15,7 @@ let wssocket;
 export default function Page(){
 
     const [data, setData] = useState([]);
+    const [isLoading, setLoading]=useState(true)
 
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
@@ -55,9 +55,10 @@ export default function Page(){
         fetchUserInfo()
 
         wssocket = openWebSocketConnexion()
-        setTimeout(() => {
-            sendRequestToWebsocket(wssocket, { Origin: "creationPost", Nature: "enterToCreationPost", User:cookieExist() });
-        }, 200);
+
+        setTimeout(()=>{
+            setLoading(false)
+        }, 500)
      
           // Mettre à jour les suggestions une seule fois
     }, []);
@@ -223,82 +224,92 @@ export default function Page(){
 
     return (
         <div className={styles.background}>
-          {data.Events && wssocket!= null ?<DashboardTop events={data.Events} ws={wssocket} setData={setData} userComplete={user}/> : <DashboardTop ws={wssocket} setData={data} userComplete={user} />}
-            <div className={styles.center}>
-                <form className={styles.menuNewPost}>
-                    <label htmlFor="nature">Write New {formData.nature}:</label>
-                    <select name="nature" id="nature" value={formData.nature} onChange={handleChange}>
-                        <option value="Post">Post</option>
-                        <option value="Event">Event</option>
-                    </select>
-                    {formData.nature === 'Event' && (
-                        <div>
-                        <input
-                            type="text"
-                            id="title"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
-                            style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
-                            placeholder="Title"
-                        />
-                        <input 
-                            type="datetime-local"
-                            id="eventDate"
-                            name="eventDate"
-                            value={formData.eventDate}
-                            onChange={handleChange}
-                            style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
-                        />
-                    </div>
-                )}
-
-                    <input type="file" className={styles.file} name="file" onChange={handleFile}/>
-                    {!fileValid && <span id="errorTypeFile" className={styles.error}>This file is not a image</span>}
-                    <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>
-                    <label className={styles.select} htmlFor="type">Type de publication :</label>
-                    <select name="type" id="type" value={formData.type} onChange={handleChange}>
-                        {formData.nature != "Event" && formData.nature ==="Post" ? (
-                            <>
-                                <option value="Public">Public</option>
-                                <option value="Private">Private (followers only)</option>
-                            </>
-                        ) : null}
-                        <option value="Private++">Private++ (users of your choose)</option>
-                    </select>
-                    {(formData.type === 'Private++' || formData.nature === "Event") && (
-                        <div className={styles.allUserForPrivate}>
+            {!isLoading && user ?(
+                <>
+                {data.Events && wssocket!= null ?<DashboardTop events={data.Events} ws={wssocket} setData={setData} userComplete={user}/> : <DashboardTop ws={wssocket} setData={data} userComplete={user} />}
+                <div className={styles.center}>
+                    <form className={styles.menuNewPost}>
+                        <label htmlFor="nature">Write New {formData.nature}:</label>
+                        <select name="nature" id="nature" value={formData.nature} onChange={handleChange}>
+                            <option value="Post">Post</option>
+                            <option value="Event">Event</option>
+                        </select>
+                        {formData.nature === 'Event' && (
+                            <div>
                             <input
-                            type="text"
-                            placeholder="user"
-                            id="searchPrivate"
-                            value={searchTerm}
-                            onChange={handleSearchChange}
+                                type="text"
+                                id="title"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleChange}
+                                style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
+                                placeholder="Title"
                             />
-                            <button onClick={(e) => handleAddUser(e)}>Add</button>
-                            <label htmlFor="searchPrivate">
-                                <ul>
-                                    {suggestions.slice(0, 5).map((user, index) => (
-                                        <li key={index}>-{user.Nickname}</li>
-                                    ))}
-                                </ul>
-                            </label>
-                            {formData.users && formData.users.map((user) => (
-                            <div key={user} className={styles.margeCrossUser}>
-                                {user}
-                                <button onClick={() => handleRemoveUser(user)}>X</button>
-                            </div>
-                            ))}
+                            <input 
+                                type="datetime-local"
+                                id="eventDate"
+                                name="eventDate"
+                                value={formData.eventDate}
+                                onChange={handleChange}
+                                style={{ border: '2px solid black', padding: '5px', borderRadius: '4px', marginTop: '20px' }}
+                            />
                         </div>
                     )}
 
-                    <br />
+                        <input type="file" className={styles.file} name="file" onChange={handleFile}/>
+                        {!fileValid && <span id="errorTypeFile" className={styles.error}>This file is not a image</span>}
+                        <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>
+                        <label className={styles.select} htmlFor="type">Type de publication :</label>
+                        <select name="type" id="type" value={formData.type} onChange={handleChange}>
+                            {formData.nature != "Event" && formData.nature ==="Post" ? (
+                                <>
+                                    <option value="Public">Public</option>
+                                    <option value="Private">Private (followers only)</option>
+                                </>
+                            ) : null}
+                            <option value="Private++">Private++ (users of your choose)</option>
+                        </select>
+                        {(formData.type === 'Private++' || formData.nature === "Event") && (
+                            <div className={styles.allUserForPrivate}>
+                                <input
+                                type="text"
+                                placeholder="user"
+                                id="searchPrivate"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                />
+                                <button onClick={(e) => handleAddUser(e)}>Add</button>
+                                <label htmlFor="searchPrivate">
+                                    <ul>
+                                        {suggestions.slice(0, 5).map((user, index) => (
+                                            <li key={index}>-{user.Nickname}</li>
+                                        ))}
+                                    </ul>
+                                </label>
+                                {formData.users && formData.users.map((user) => (
+                                <div key={user} className={styles.margeCrossUser}>
+                                    {user}
+                                    <button onClick={() => handleRemoveUser(user)}>X</button>
+                                </div>
+                                ))}
+                            </div>
+                        )}
 
-                    <button className={styles.buttonForm} type="submit" onClick={handleSubmit}>Publish</button>
-                    {!contentPresent && <span id="errorTypeFile" className={styles.error}>No content</span>}
-                    {!correctForm && <span id="errorForm" className={styles.error}>Bad information or formulaire not complete {formData.eventDate}</span>}
-                </form>
-            </div>
+                        <br />
+
+                        <button className={styles.buttonForm} type="submit" onClick={handleSubmit}>Publish</button>
+                        {!contentPresent && <span id="errorTypeFile" className={styles.error}>No content</span>}
+                        {!correctForm && <span id="errorForm" className={styles.error}>Bad information or formulaire not complete {formData.eventDate}</span>}
+                    </form>
+                </div>
+                </>
+            ):
+            (<div>
+                <div className={styles.overlay}>
+                    <div className={styles.loader}></div>
+                    <p>Load of profile data...</p>
+                </div>
+             </div>)}
         </div>
     );
 }
