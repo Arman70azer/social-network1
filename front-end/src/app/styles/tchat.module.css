@@ -69,6 +69,7 @@
 
 .usersList {
     max-height: 400px;
+    min-width: 300px;
     overflow-y: auto;
 }
 
@@ -205,6 +206,10 @@
     gap: 15px;
 }
 
+.containGroup{
+    margin: 20px;
+}
+
 .contains_creaGroup div {
     display: flex;
     flex-direction: column;
@@ -319,3 +324,73 @@
     color: #666;
 }
 
+/* styles/tchat.module.css */
+.invitationContainer {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.invitationTitle {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.invitationItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.invitationItem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.invitationGroupName {
+    font-size: 1em;
+    color: #555;
+    margin: 15px;
+}
+
+.invitationButtons {
+    display: flex;
+    gap: 10px;
+}
+
+.invitationButton {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.acceptButton {
+    background-color: #4CAF50;
+}
+
+.acceptButton:hover {
+    background-color: #45a049;
+}
+
+.declineButton {
+    background-color: #f44336;
+}
+
+.declineButton:hover {
+    background-color: #e53935;
+}

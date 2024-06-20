@@ -16,6 +16,8 @@ export default function Page(){
     const [seeThisPostCommentaries, setCommentaries] = useState("")
     const [enterComment, setEnterComment] = useState("")
     const [newPosts, setNewPosts] = useState([])
+    const [groups, setGroups] = useState([])
+    const [selectValue, setSelectValue] = useState("")
     const [user, setUser] = useState({
         ID:0,
         Nickname:"",
@@ -31,7 +33,6 @@ export default function Page(){
         UUID: "",
     })
     const [isLoading, setLoading]=useState(true)
-
 
     const onlyPublicPosts = () => {
         if (data.Posts) {
@@ -60,6 +61,24 @@ export default function Page(){
             setData((prevState) => ({ ...prevState, Posts: newData }));
         }
     };
+
+    const onlyGroupPosts = () =>{
+        if (data.Posts) {
+            let newData = [];
+            for (let i = 0; i < allData.Posts.length; i++) {
+                if (allData.Posts[i].Type !== "Private" && allData.Posts[i].Type !== "Private++" && allData.Posts[i].Type !== "Public") {
+                    if (selectValue){
+                        if (selectValue === allData.Posts[i].Type){
+                            newData.push(allData.Posts[i]);
+                        }
+                    }else{
+                        newData.push(allData.Posts[i]);
+                    }
+                }
+            }
+            setData((prevState) => ({ ...prevState, Posts: newData }));
+        }
+    }
     
     useEffect(() => {
 
@@ -79,15 +98,15 @@ export default function Page(){
             const data = await sendAndReceiveData("/api/profil", formToken);
 
             setUser(data.Users[0])
+            setGroups(data.Groups)
 
         }
+
+        wssocket = openWebSocketConnexion();
 
         // Appeler la fonction qui effectue le fetch et la gestion du WebSocket
         fetchUserInfo()
         fetchData();
-
-        
-        wssocket = openWebSocketConnexion();
 
         setTimeout(()=>{
             setLoading(false)
@@ -102,7 +121,7 @@ export default function Page(){
         }
     }
 
-    const submitCommentary = (event)=>{
+    const submitCommentary = async (event)=>{
         if (event.key === 'Enter') {
             console.log("enter")
             setEnterComment("")
@@ -115,7 +134,11 @@ export default function Page(){
                 formNewCommentary.append("content", enterComment)
                 formNewCommentary.append("origin", "home")
                 formNewCommentary.append("nature", "comment")
-                sendFormToBack("/api/home", formNewCommentary)
+                if (file && fileValid){
+                    formNewCommentary.append("file", file)
+                }
+                const receivedMessage = await sendAndReceiveData("/api/home", formNewCommentary)
+                whatToDo(receivedMessage)
                 
             }
         }
@@ -123,97 +146,92 @@ export default function Page(){
 
     //Cette function va push dans data les ajouts de commentaires et autres... dans la base de données 
     //qui ont été valider par celle-ci  
-    const onMessageWS = () => {
-        if (data && wssocket!= null) {
-            // Gérer les messages reçus du serveur WebSocket
-            wssocket.onmessage = (event) => {
-                const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
-                if (receivedMessage.Accept && receivedMessage.Post) {
+    const whatToDo = (receivedMessage) => {
+        if (receivedMessage.Accept && receivedMessage.Post) {
 
-                    console.log("Message reçu du serveur WebSocket:", receivedMessage);
-                    // Filtrer les posts pour trouver celui qui correspond au post reçu
-                    let postTarget;
-                    if (data.Posts){
-                        postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
+            console.log("Message reçu du serveur WebSocket:", receivedMessage);
+            // Filtrer les posts pour trouver celui qui correspond au post reçu
+            let postTarget;
+            if (data.Posts){
+                postTarget = data.Posts.find((post) => post.Titre === receivedMessage.Post);
+            }
+            if (postTarget) {
+                if (receivedMessage.Nature === "New-comment" ) {
+                    if (!postTarget.Commentaries) {
+                        // Si Commentaires n'existe pas, le créer comme un tableau vide
+                        postTarget.Commentaries = [];
                     }
-                    if (postTarget) {
-                        if (receivedMessage.Nature === "New-comment" ) {
-                            if (!postTarget.Commentaries) {
-                                // Si Commentaires n'existe pas, le créer comme un tableau vide
-                                postTarget.Commentaries = [];
-                            }
-                            // Ajouter un nouveau commentaire au post cible
-                            postTarget.Commentaries.push({
-                                Content: receivedMessage.ObjectOfRequest,
-                                Author: { Nickname: receivedMessage.User },
-                                Post: { Titre: receivedMessage.Post },
-                                Date: receivedMessage.Date
-                            });
-                        }
-                        if (receivedMessage.Nature==="New-like"){
-                            if (!postTarget.Likes) {
-                                // Si Likes n'existe pas, le créer comme un tableau vide
-                                postTarget.Likes = [];
-                            }
-                            if (receivedMessage.ObjectOfRequest === "add") {
-                                // Ajouter un like à postTarget.Likes
-                                postTarget.Likes.push({
-                                    Type: "like",
-                                    User: receivedMessage.User,
-                                    Post: receivedMessage.Post
-                                });
-                            
-                                // Si receivedMessage.OtherLikeDislike est vrai, supprimer les dislikes de l'utilisateur spécifié
-                                if (receivedMessage.OtherLikeDislike) {
-                                    postTarget.Dislikes = postTarget.Dislikes.filter(dislikePost => dislikePost.User !== receivedMessage.User);
-                                }
-                            
-                            } else if (receivedMessage.ObjectOfRequest === "remove") {
-                                postTarget.Likes = postTarget.Likes.filter(like => like.User !== receivedMessage.User);
-                            }                            
-                        }else if (receivedMessage.Nature ==="New-dislike"){
-                            if (!postTarget.Dislikes) {
-                                // Si Dislikes n'existe pas, le créer comme un tableau vide
-                                postTarget.Dislikes = [];
-                            }
-                            if (receivedMessage.ObjectOfRequest === "add") {
-                                postTarget.Dislikes.push({
-                                    Type: "dislike",
-                                    User: receivedMessage.User,
-                                    Post: receivedMessage.Post
-                                });
-                                if (receivedMessage.OtherLikeDislike) {
-                                    postTarget.Likes = postTarget.Likes.filter(likePost => likePost.User !== receivedMessage.User);
-                                }
-                            } else if (receivedMessage.ObjectOfRequest === "remove") {
-                                postTarget.Dislikes = postTarget.Dislikes.filter(like => like.User !== receivedMessage.User);
-                            }                            
-                        }
-                         // Mettre à jour toutes les données des posts avec le post modifié
-                        setAllData(prevData => {
-                            const updatedPosts = prevData.Posts.map(post => {
-                                if (post.Titre === postTarget.Titre) {
-                                    return postTarget;
-                                } else {
-                                    return post;
-                                }
-                            });
-                            return { ...prevData, Posts: updatedPosts };
-                        });
-                        setData(allData)
-                    }else if (receivedMessage.Nature = "New-post"){
-                        console.log("new post websocket")
-                        const newposty = {
-                            Date : receivedMessage.Date,
-                            User : receivedMessage.User,
-                            Content : receivedMessage.Content
-                        }
-                        setNewPosts((prevState)=>[...prevState, newposty])
-                    } else {
-                        console.log("Aucune donnée des posts trouvée.");
-                    }
+                    console.log(receivedMessage.Image)
+                    // Ajouter un nouveau commentaire au post cible
+                    postTarget.Commentaries.push({
+                        Content: receivedMessage.ObjectOfRequest,
+                        Author: { Nickname: receivedMessage.User },
+                        Post: { Titre: receivedMessage.Post },
+                        Date: receivedMessage.Date,
+                        UrlImage: receivedMessage.image
+                    });
                 }
-            };
+                if (receivedMessage.Nature==="New-like"){
+                    if (!postTarget.Likes) {
+                        // Si Likes n'existe pas, le créer comme un tableau vide
+                        postTarget.Likes = [];
+                    }
+                    if (receivedMessage.ObjectOfRequest === "add") {
+                        // Ajouter un like à postTarget.Likes
+                        postTarget.Likes.push({
+                            Type: "like",
+                            User: receivedMessage.User,
+                            Post: receivedMessage.Post
+                        });
+                    
+                        // Si receivedMessage.OtherLikeDislike est vrai, supprimer les dislikes de l'utilisateur spécifié
+                        if (receivedMessage.OtherLikeDislike) {
+                            postTarget.Dislikes = postTarget.Dislikes.filter(dislikePost => dislikePost.User !== receivedMessage.User);
+                        }
+                    
+                    } else if (receivedMessage.ObjectOfRequest === "remove") {
+                        postTarget.Likes = postTarget.Likes.filter(like => like.User !== receivedMessage.User);
+                    }                            
+                }else if (receivedMessage.Nature ==="New-dislike"){
+                    if (!postTarget.Dislikes) {
+                        // Si Dislikes n'existe pas, le créer comme un tableau vide
+                        postTarget.Dislikes = [];
+                    }
+                    if (receivedMessage.ObjectOfRequest === "add") {
+                        postTarget.Dislikes.push({
+                            Type: "dislike",
+                            User: receivedMessage.User,
+                            Post: receivedMessage.Post
+                        });
+                        if (receivedMessage.OtherLikeDislike) {
+                            postTarget.Likes = postTarget.Likes.filter(likePost => likePost.User !== receivedMessage.User);
+                        }
+                    } else if (receivedMessage.ObjectOfRequest === "remove") {
+                        postTarget.Dislikes = postTarget.Dislikes.filter(like => like.User !== receivedMessage.User);
+                    }                            
+                }
+                    // Mettre à jour toutes les données des posts avec le post modifié
+                setAllData(prevData => {
+                    const updatedPosts = prevData.Posts.map(post => {
+                        if (post.Titre === postTarget.Titre) {
+                            return postTarget;
+                        } else {
+                            return post;
+                        }
+                    });
+                    return { ...prevData, Posts: updatedPosts };
+                });
+                setData(allData)
+            }else if (receivedMessage.Nature === "New-post"){
+                const newposty = {
+                    Date : receivedMessage.Date,
+                    User : receivedMessage.User,
+                    Content : receivedMessage.Content
+                }
+                setNewPosts((prevState)=>[...prevState, newposty])
+            } else {
+                console.log("Aucune donnée des posts trouvée.");
+            }
         }
     };
 
@@ -225,31 +243,55 @@ export default function Page(){
         setNewPosts([])
     }
 
-    const like = (titrePost)=>{
+    const like = async (titrePost)=>{
         const formLikePost = new FormData();
         formLikePost.append("post", titrePost)
         formLikePost.append("token", user.UUID)
         formLikePost.append("nature", "like")
         formLikePost.append("origin", "home")
 
-        sendFormToBack("/api/home",formLikePost)
+        const receivedMessage = await sendAndReceiveData("/api/home",formLikePost)
+        whatToDo(receivedMessage)
     }
 
-    const dislike = (titrePost)=>{
+    const dislike = async (titrePost)=>{
         const formDislikePost = new FormData();
         formDislikePost.append("post", titrePost)
         formDislikePost.append("token", user.UUID)
         formDislikePost.append("nature", "dislike")
         formDislikePost.append("origin", "home")
 
-        sendFormToBack("/api/home",formDislikePost)
+        const receivedMessage = await sendAndReceiveData("/api/home",formDislikePost)
+        whatToDo(receivedMessage)
     } 
-    
-    onMessageWS()
+
+    const [file, setFile] = useState(null);  // Utilisation d'un tableau pour gérer plusieurs fichiers
+    const [fileValid, setFileValid] = useState(true);  // État pour vérifier si le fichier est valide
+
+    const handleFile = (event) => {
+        const fileImage = event.target.files[0]; // Obtenir le fichier
+
+        // Vérifier le type de fichier
+        if (fileImage) {
+            const fileType = fileImage.type;
+            if (fileType.startsWith('image/')) {
+                setFileValid(true);
+                setFile(fileImage); // Stocker le fichier dans le tablea
+            } else {
+                setFileValid(false);
+            }
+        }
+    };
+
+    const handleSelectChange = (e) => {
+        setSelectValue(e.target.value);
+        // Logique supplémentaire si nécessaire
+    };
+
     //post.map va parcourir tout les posts dans "posts" et les afficher
     return (
         <div className={styles.background}>
-            {data && !isLoading ? 
+            {data && !isLoading && wssocket? 
             <>
                 {data.Events && wssocket!= null ? <DashboardTop events={data.Events} ws={wssocket} setAllData={setAllData} setData={setData} userComplete={user}/> : <DashboardTop ws={wssocket} setData={data} setAllData={allData} userComplete={user} />}
                 <div className={styles.centerElementChilds}>
@@ -314,6 +356,9 @@ export default function Page(){
                                         <input type="text" placeholder="Add commentary" onKeyDown={(event) => submitCommentary(event)} 
                                         value={enterComment} 
                                         onChange={(event) => setEnterComment(event.target.value)} />
+
+                                        <input type="file" className={styles.file} name="file" onChange={handleFile}/>
+                                        {!fileValid && (<div className={styles.error}> File not valid </div>)}
                                     </div>
 
                                     {post.Commentaries && post.Commentaries.map((comment, index)=>(
@@ -321,6 +366,7 @@ export default function Page(){
                                             <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }}>{comment.Author.Nickname}: </Link>
                                             {comment.Content}
                                             <div className={styles.dateComment}>{comment.Date}</div>
+                                            {comment.UrlImage && <img className={styles.imagePost} src={`${comment.UrlImage}`}/>}
                                         </div>
                                     ))
                                     }
@@ -328,6 +374,27 @@ export default function Page(){
                             }
                         </div>
                     ))}
+                </div>
+                    <div className={styles.dashboardBottomPage}>
+                    <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
+                    <button className={styles.buttonPostPrivates} onClick={onlyPrivatePosts}>Privates Posts</button>
+                    <button className={styles.buttonPostsAll} onClick={resetDataToOrigine}> All Posts </button>
+                    {groups && groups.length >0 && (
+                        <>
+                            <button className={styles.buttonGroup} onClick={onlyGroupPosts}>
+                                Group Posts {selectValue ? selectValue : 'All'}
+                            </button>
+                            <select className={styles.select} value={selectValue} onChange={handleSelectChange}>
+                                <option value=""></option>
+                                {groups.map((group, index) => (
+                                        <option key={index} value={group.Name}>
+                                            {group.Name}
+                                        </option>
+                                    ))}
+                            </select>
+                        </>
+                    )}
+                    <Link href="/createPost" className={styles.buttonCreatePost}>Add New Post or Event [+]</Link>
                 </div>
             </>
              :
@@ -338,12 +405,6 @@ export default function Page(){
                 </div>
              </div>
              }
-            <div className={styles.dashboardBottomPage}>
-                <button className={styles.buttonPostPublic} onClick={onlyPublicPosts} >Publics Posts</button>
-                <button className={styles.buttonPostPrivates} onClick={onlyPrivatePosts}>Privates Posts</button>
-                <button className={styles.buttonPostsAll} onClick={resetDataToOrigine}> All Posts </button>
-                <Link href="/createPost" className={styles.buttonCreatePost}>Add New Post or Event [+]</Link>
-            </div>
         </div>
     );
 }

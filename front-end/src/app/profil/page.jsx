@@ -10,6 +10,7 @@ import sendAndReceiveData from "../lib/sendForm&ReceiveData"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import SettingsProfil from "../components/settingsProfil"
+import Link from "next/link";
 
 let wssocket;
 export default function page(){
@@ -29,6 +30,7 @@ export default function page(){
         AboutMe: "",
     })
     const [nbrSub, setNewFollow]= useState(0)
+    const [sub, setSub]=useState([])
     const [isFollowing, setIsFollowing] = useState(false);
     const [waitResponse, setWaitResponse]=useState("")
     const [usersWantFollowYou, setUsersWantFollowYou]=useState([])
@@ -49,6 +51,7 @@ export default function page(){
 
     const [settings, setSettings]= useState(false)
     const [postsUser, setPostsUser] = useState([])
+    const [userIFollow, setUserIFollow]= useState([])
 
     useEffect(() => {
         const cookieUser = cookieExist()
@@ -84,18 +87,21 @@ export default function page(){
 
             if (dataReceved.userProfil.PeopleWhoFollowMe){
                 setNewFollow(dataReceved.userProfil.PeopleWhoFollowMe.length)
+                setSub(dataReceved.userProfil.PeopleWhoFollowMe)
                 if (dataReceved.userProfil.PeopleWhoFollowMe.some((userSub) => userSub.Nickname === userName)){
                     setIsFollowing(true);
                 }
             }     
-
-
             if (dataReceved.privateSub){
                 setWaitResponse("Wait for a response of profil")
             }
 
             if (dataReceved.userProfil.PrivateSub){
                 setUsersWantFollowYou(dataReceved.userProfil.PrivateSub)
+            }
+
+            if (dataReceved.userProfil.PeopleIFollow){
+                setUserIFollow(dataReceved.userProfil.PeopleIFollow)
             }
 
         }
@@ -200,6 +206,20 @@ export default function page(){
         }
     }
 
+    const [seeSub, setSeeSub] = useState(false)
+    const handleSeeSub=()=>{
+        setSeeSub(!seeSub)
+    }
+
+    const goToProfilSub =(nickname)=>{
+        window.location.href=`/profil?user=${nickname}`
+    }
+
+    const [seeSubscription, setSeeSunscriptions] = useState(false)
+    const seeSubscriptions=()=>{
+        setSeeSunscriptions(!seeSubscription)
+    }
+
 
     onMessageWS()
 
@@ -276,6 +296,53 @@ export default function page(){
                                         Number of posts: {postsUser && postsUser.length > 0 ? postsUser.length : 0}
                                     </span>
                                 </div>
+                                {userIFollow && userIFollow.length>0 &&(
+                                    <div className={styles.subscribersContainer}>
+                                        <div className={styles.subscribersTitle}>Subscriptions</div>
+                                        <div className={styles.subscriberList}>
+                                            {seeSubscription && userIFollow.map((subscriber, index) => (
+                                            <div key={index} className={styles.subscriberItem}>
+                                                <img
+                                                src={subscriber.UrlImage}
+                                                alt={`Avatar de ${subscriber.Nickname}`}
+                                                className={styles.subscriberAvatar}
+                                                />
+                                                <Link href={`/profil?user=${subscriber.Nickname}`} className={styles.subscriberName} onClick={() => goToProfilSub(subscriber.Nickname)}>
+                                                    {subscriber.Nickname}
+                                                </Link>
+                                            </div>
+                                            ))}
+                                        </div>
+                                        <button onClick={seeSubscriptions} className={styles.seeSubButton}>
+                                            {seeSubscription ? 'Hide Subscriptions' : 'See Subscriptions'}
+                                        </button>
+                                    </div>
+                                )}
+                                {nbrSub > 0 && (
+                                    <div className={styles.subscribersContainer}>
+                                        <>
+                                        <div className={styles.subscribersTitle}>Subscribers</div>
+                                        <div className={styles.subscriberList}>
+                                            {seeSub &&
+                                            sub.map((subscriber, index) => (
+                                                <div key={index} className={styles.subscriberItem}>
+                                                <img
+                                                    src={subscriber.UrlImage}
+                                                    alt={`Avatar de ${subscriber.Nickname}`}
+                                                    className={styles.subscriberAvatar}
+                                                />
+                                                <Link href={`/profil?user=${subscriber.Nickname}`} className={styles.subscriberName} onClick={()=>goToProfilSub(subscriber.Nickname)}>
+                                                    {subscriber.Nickname}
+                                                </Link>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button onClick={handleSeeSub} className={styles.seeSubButton}>
+                                            {seeSub ? 'Hide Subscribers' : 'See Subscribers'}
+                                        </button>
+                                        </>
+                                    </div>
+                                )}
                                 <div>Bio:</div>
                                 <div className={styles.bio}>
                                     {userInfo.AboutMe ? userInfo.AboutMe : "Give some information about you!!!"}

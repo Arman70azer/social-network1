@@ -23,9 +23,10 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 
 		if user.Nickname != "" {
 			if r.FormValue("nature") == "comment" {
-				comment(r, user)
+				filename := middleware.StockeImage(w, r, user)
+				comment(r, user, filename, w)
 			} else if r.FormValue("nature") == "like" || r.FormValue("nature") == "dislike" {
-				likeDislike(r, user)
+				likeDislike(w, r, user)
 			} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
 				event(db, r, user, w)
 
@@ -39,6 +40,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 				data.Posts = commentAndLikeToPost(posts, db)
 				data.Users = dbFunc.SelectAllUsers_db(db)
 				data.Events = events
+				data.Groups = dbFunc.GetsGroups(db, user.ID)
 
 				middleware.ReturnWithW(w, data)
 			}
@@ -144,7 +146,7 @@ func alreadyLike(like structures.LikeOrDislike) (bool, bool) {
 	}
 }
 
-func likeDislike(r *http.Request, user structures.User) {
+func likeDislike(w http.ResponseWriter, r *http.Request, user structures.User) {
 	var like structures.LikeOrDislike
 
 	like.Post = r.FormValue("post")
@@ -169,15 +171,16 @@ func likeDislike(r *http.Request, user structures.User) {
 		request.ObjectOfRequest = "add"
 		fmt.Println("like add")
 	}
-	BroadcastToOneClient(user.UUID, request)
+	middleware.ReturnWithW(w, request)
 }
 
-func comment(r *http.Request, user structures.User) {
+func comment(r *http.Request, user structures.User, fileName string, w http.ResponseWriter) {
 	var commentary structures.Commentary
 	commentary.Post.Titre = r.FormValue("post")
 	commentary.Author = user
 	commentary.Content = r.FormValue("content")
 	commentary.Date = time.Now().Format("02/01/2006 15:04:05")
+	commentary.Image = fileName
 
 	//Dès que le commentaire est passé dans la db
 	if verifieNewComment(commentary) {
@@ -189,7 +192,8 @@ func comment(r *http.Request, user structures.User) {
 		request.ObjectOfRequest = commentary.Content
 		request.Accept = true
 		request.Date = commentary.Date
-		BroadcastToOneClient(user.UUID, request)
+		request.Image = "http://localhost:8000/images/" + fileName
+		middleware.ReturnWithW(w, request)
 	} else {
 		fmt.Println("Error dans la func verifieNewComment dans AllPost.go")
 	}
@@ -273,13 +277,13 @@ func sortPrivatePlus(db *sql.DB, user structures.User, posts []structures.Post) 
 	}
 
 	for i := 0; i < len(posts); i++ {
+		var privateViewers []structures.PrivatesViewer
+		if postEvent {
+			privateViewers = dbFunc.SelectPrivatesEvent(db, posts[i])
+		} else {
+			privateViewers = dbFunc.SelectPrivateViewers(db, posts[i])
+		}
 		if posts[i].Type == "Private++" {
-			var privateViewers []structures.PrivatesViewer
-			if postEvent {
-				privateViewers = dbFunc.SelectPrivatesEvent(db, posts[i])
-			} else {
-				privateViewers = dbFunc.SelectPrivateViewers(db, posts[i])
-			}
 			for a := 0; a < len(privateViewers); a++ {
 				if privateViewers[a].Viewer == user.ID {
 					if postEvent {
@@ -290,6 +294,22 @@ func sortPrivatePlus(db *sql.DB, user structures.User, posts []structures.Post) 
 						posts[i].PrivateViewers = selectUserPrivatesPost(db, privateViewers)
 					}
 					finalsPosts = append(finalsPosts, posts[i])
+				}
+			}
+		} else if posts[i].Type != "Public" && posts[i].Type != "Private" {
+			groups := dbFunc.GetsGroups(db, user.ID)
+
+			if len(groups) > 0 {
+				for a := 0; a < len(groups); a++ {
+					if groups[a].Name == posts[i].Type {
+						if postEvent {
+							follow, noFollow := selectFollowersEvents(db, privateViewers)
+							posts[i].Followers = follow
+							posts[i].NoFollowers = noFollow
+						}
+						finalsPosts = append(finalsPosts, posts[i])
+						break
+					}
 				}
 			}
 		} else {

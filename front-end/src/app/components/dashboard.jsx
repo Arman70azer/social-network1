@@ -19,6 +19,8 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
 
     const [user, setUser] = useState("");
     const [userInfo, setUserInfo] = useState("")
+    const [notifProfil, setNotifProfil]=useState([])
+    const [notifNewGroup, setNotifNewGroup]=useState([])
     useEffect(() => {
 
         const userFromCookie= cookieExist()
@@ -32,7 +34,12 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
         
             const data = await sendAndReceiveData("/api/profil", formToken);
 
-            setUserInfo(data.Users[0].Nickname)
+            formToken.append("userProfil", userFromCookie)
+
+            setUserInfo(data.Users[0].Nickname)   
+
+            const data2 = await sendAndReceiveData("/api/follow", formToken);
+            setNotifProfil(data2.userProfil.PrivateSub)
         }
         const notific= async ()=>{
             const request = {
@@ -79,8 +86,6 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
             formEventPost.append("origin", origin)
 
             const receivedMessage = await sendAndReceiveData("/api/home",formEventPost)
-
-            console.log("ici regarde:", receivedMessage.User)
 
             setEvents(receivedMessage)
         }
@@ -131,7 +136,6 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
     }
 
     function handleTchat(){
-        console.log("gggjjj")
         setTchat(!seeTchat)
     }
 
@@ -166,7 +170,7 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
                 ws.onmessage = (event) => {
                     const receivedMessage = JSON.parse(event.data); // Convertir la chaîne JSON en objet JavaScript
 
-                    console.log(receivedMessage)
+                    console.log("cc:",receivedMessage)
 
                     if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "message save"){
                         setNotif(receivedMessage.Tchat.Messages[0].Author)
@@ -192,10 +196,20 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
                         },200)
                     }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "new message group"){
                         setNotif(receivedMessage.Tchat.Messages[0].Groupe)
+                    }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "actualise notif profil"){
+                        updateProfilNotif()
                     }
                 }
             }
         }
+    }
+
+    const updateProfilNotif = async ()=>{
+        const formToken = new FormData
+        formToken.append("token", cookieExist())
+        formToken.append("userProfil", cookieExist())
+        const data2 = await sendAndReceiveData("/api/follow", formToken);
+        setNotifProfil(data2.userProfil.PrivateSub)
     }
 
 
@@ -226,7 +240,7 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
                         {events.map((event, index) => (
                             <div key={index}>
                                 <button className={styles.extraButton} onClick={() => handleEventContent(index)}>
-                                    {event.Titre}
+                                    {event.Titre}({event.Type})
                                 </button>
                                 {showContentEvent.index === index && showContentEvent.show && (
                                     <div>
@@ -262,7 +276,7 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
                     </div>
                 )}
             </div>
-            <Link href={{ pathname: "/profil", query: { user: userInfo } }} className={styles.buttonProfil} onClick={redirection}>Profil</Link>
+            <Link href={{ pathname: "/profil", query: { user: userInfo } }} className={styles.buttonProfil} onClick={redirection}>Profil {notifProfil ? `(${notifProfil.length})` : null}</Link>
             <Link href="/" className={styles.buttonLogout} onClick={logout}>Logout</Link>
         </div>
         {seeTchat && userComplete && ws && (<Tchat onClose={handleTchat} ws={ws} user={userComplete} setNotification={setNotif} notification={notification}/>)}

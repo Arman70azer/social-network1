@@ -278,6 +278,9 @@
     flex-direction: row;
     justify-content: center;
 }
+.error{
+    color: red;
+}
 
 @media screen and (max-width: 1200px) {
     .buttonPostsAll,
@@ -520,4 +523,28 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.buttonGroup {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.buttonGroup:hover {
+    background-color: #0056b3;
+}
+
+.select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 200px;
+    margin-left: 10px; /* Marge à gauche pour séparer le bouton et le select */
+    color: #000;
 }

@@ -16,6 +16,7 @@ export default function Page(){
 
     const [data, setData] = useState([]);
     const [isLoading, setLoading]=useState(true)
+    const [groups, setGroups] = useState([])
 
     const [searchTerm, setSearchTerm] = useState('');
     const [suggestions, setSuggestions] = useState([]);
@@ -43,6 +44,7 @@ export default function Page(){
             const data = await sendAndReceiveData("/api/profil", formToken);
 
             setUser(data.Users[0])
+            setGroups(data.Groups)
 
         }
         const fetchData = async () => {
@@ -132,7 +134,7 @@ export default function Page(){
                     }else{
                         correct = false
                     }
-                    formDataToSend.append('type', "Private++");
+                    formDataToSend.append('type', formData.type);
                     formDataToSend.append('users', formData.users)
 
                 }else{
@@ -268,8 +270,11 @@ export default function Page(){
                                 </>
                             ) : null}
                             <option value="Private++">Private++ (users of your choose)</option>
+                            {groups && groups.length>0 && groups.map((group, index) => (
+                                <option key={index} value={group.Name}>{group.Name} (group)</option>
+                            ))}
                         </select>
-                        {(formData.type === 'Private++' || formData.nature === "Event") && (
+                        {(formData.type === 'Private++') && (
                             <div className={styles.allUserForPrivate}>
                                 <input
                                 type="text"

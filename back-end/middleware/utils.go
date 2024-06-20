@@ -125,3 +125,36 @@ func HashedPassword(password string) string {
 	}
 	return string(hashedPassword)
 }
+
+func StockeImage(w http.ResponseWriter, r *http.Request, author structures.User) string{
+	var fileName string
+	// Récupérer le fichier image
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		fileName = "nothing"
+	} else {
+		defer file.Close()
+		// Stocker le fichier sur le serveur
+		fileName = handler.Filename
+		_, err1 := os.Stat(`./db/images/` + fileName)
+
+		if os.IsNotExist(err1) {
+			out, err := os.Create("./db/images/" + fileName)
+			if err != nil {
+				http.Error(w, "Erreur lors de la création du fichier sur le serveur", http.StatusInternalServerError)
+				fmt.Println("1 erreur lors de la création du fichier pour le post de " + author.Nickname)
+				return fileName
+			}
+			defer out.Close()
+
+			_, err = io.Copy(out, file)
+			if err != nil {
+				http.Error(w, "Erreur lors de la copie du fichier sur le serveur", http.StatusInternalServerError)
+				fmt.Println("2 erreur lors de la création du fichier pour le post de " + author.Nickname)
+				return fileName
+			}
+		}
+
+	}
+	return fileName
+}

@@ -57,6 +57,7 @@ func HandlerProfil(w http.ResponseWriter, r *http.Request) {
 			middleware.ReturnWithW(w, request)
 		} else {
 			data.Users = append(data.Users, user)
+			data.Groups = dbFunc.GetsGroups(db, user.ID)
 
 			middleware.ReturnWithW(w, data)
 		}

@@ -359,3 +359,65 @@
     transition: background-color;
     margin-left: 5px;
 }
+
+/* styles.module.css */
+
+.subscribersContainer {
+    margin: 1rem;
+    padding: 1rem;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .subscribersTitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subscriberList {
+    margin-top: 0.5rem;
+  }
+  
+  .subscriberItem {
+    padding: 0.5rem 1rem;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .subscriberName {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+  }
+  
+  .seeSubButton {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .seeSubButton:hover {
+    background-color: #0056b3;
+  }
+  
+  /* styles.module.css */
+
+.subscriberAvatar {
+    width: 40px; /* Largeur souhaitée */
+    height: 40px; /* Hauteur souhaitée */
+    border-radius: 50%; /* Pour arrondir l'image si elle est carrée */
+    object-fit: cover; /* Pour s'assurer que l'image couvre correctement la zone */
+  }
+  

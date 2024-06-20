@@ -3,7 +3,7 @@ import styles from '../styles/tchat.module.css';
 import cookieExist from '../utils/cookieUserExist';
 import sendMessageToWebsocket from '../lib/wsSendMessage';
 
-function CreateGroup({ users, ws, setGroups }) {
+function CreateGroup({ users, ws, setGroups, close }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedUsers, setSelectedUsers] = useState([]);
     const [error, setErr] = useState("")
@@ -74,6 +74,7 @@ function CreateGroup({ users, ws, setGroups }) {
                     }, 5000)
                 }else if (receivedMessage.Accept && receivedMessage.ObjectOfRequest === "new group"){
                     setGroups(receivedMessage.Tchat.Group)
+                    close()
                 }
             }
         }

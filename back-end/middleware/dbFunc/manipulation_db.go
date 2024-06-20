@@ -49,6 +49,7 @@ func FollowedUsers(db *sql.DB, user structures.User) []structures.User {
 		if err := rows.Scan(&userFollowed.Nickname, &userFollowed.ID, &userFollowed.Age, &userFollowed.ImageName); err != nil {
 			log.Fatal(err)
 		}
+		userFollowed.UrlImage = "http://localhost:8000/images/" + user.ImageName
 		followedUsers = append(followedUsers, userFollowed)
 	}
 	// Vérifier s'il y a des erreurs après avoir parcouru les résultats
@@ -80,6 +81,7 @@ func SelectSubscribers(db *sql.DB, user structures.User) []structures.User {
 			log.Fatal(err)
 		}
 		if !uniqueUsers[userSub.ID] {
+			userSub.UrlImage = "http://localhost:8000/images/" + user.ImageName
 			userSubscribers = append(userSubscribers, userSub)
 			uniqueUsers[userSub.ID] = true
 		}
@@ -186,11 +188,15 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 			log.Println("Erreur lors du scan des lignes:", err)
 			continue // Continuer à la prochaine ligne en cas d'erreur de scan
 		}
+
 		post.UrlImage = "http://localhost:8000/images/" + post.ImageName
 		post.Author.UrlImage = "http://localhost:8000/images/" + post.Author.ImageName
 
 		if post.ImageName == "nothing" {
 			post.ImageName = ""
+		}
+		if post.Author.ImageName == "noting" {
+			post.Author.ImageName = ""
 		}
 		result = append(result, post)
 	}
@@ -455,8 +461,9 @@ func SelectAllUsers_db(db *sql.DB) []structures.User {
 			continue // Continuer à la prochaine ligne en cas d'erreur de scan
 		}
 		// Construire l'URL de l'image
-		user.UrlImage = "http://localhost:8000/images/" + user.ImageName
-
+		if user.ImageName != "noting" {
+			user.UrlImage = "http://localhost:8000/images/" + user.ImageName
+		}
 		// Ajouter l'utilisateur à la slice users
 		users = append(users, user)
 	}
@@ -472,7 +479,7 @@ func SelectAllUsers_db(db *sql.DB) []structures.User {
 
 func PushCommentary_db(comment structures.Commentary, db *sql.DB) {
 	// Préparer la requête SQL pour insérer un nouveau post
-	stmt, err := db.Prepare("INSERT INTO Commentary(Content, Author, Date, Post) VALUES (?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO Commentary(Content, Author, Date, Post, Image) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
@@ -485,7 +492,7 @@ func PushCommentary_db(comment structures.Commentary, db *sql.DB) {
 	postID := SelectIdReferencePost_db(comment.Post.Titre, db)
 
 	// Exécuter la requête SQL pour insérer le nouveau post
-	_, err = stmt.Exec(comment.Content, authorID, comment.Date, postID)
+	_, err = stmt.Exec(comment.Content, authorID, comment.Date, postID, comment.Image)
 	if err != nil {
 		// Gérer l'erreur
 		fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
@@ -498,7 +505,7 @@ func SelectAllCommentary(db *sql.DB) []structures.Commentary {
 
 	// p. représente les colonnes de Posts tandis que u. représente les colonnes de Users
 	query := `
-	SELECT c.Content, u.Nickname AS CommentaryAuthor, p.Titre AS CommentaryPost, c.Date 
+	SELECT c.Content, u.Nickname AS CommentaryAuthor, p.Titre AS CommentaryPost, c.Date, c.Image 
 	FROM Commentary c 
 	JOIN Users u ON c.Author = u.ID 
 	JOIN Posts p ON c.Post = p.ID`
@@ -512,9 +519,12 @@ func SelectAllCommentary(db *sql.DB) []structures.Commentary {
 
 	for rows.Next() {
 		var comment structures.Commentary
-		if err := rows.Scan(&comment.Content, &comment.Author.Nickname, &comment.Post.Titre, &comment.Date); err != nil {
+		if err := rows.Scan(&comment.Content, &comment.Author.Nickname, &comment.Post.Titre, &comment.Date, &comment.Image); err != nil {
 			log.Println("Erreur lors du scan des lignes:", err)
 			continue // Continuer à la prochaine ligne en cas d'erreur de scan
+		}
+		if comment.Image != "noting" {
+			comment.UrlImage = "http://localhost:8000/images/" + comment.Image
 		}
 		result = append(result, comment)
 	}
@@ -679,11 +689,37 @@ func PushInEvents_db(event structures.Post, db *sql.DB) {
 	} else {
 		if event.Type == "Private++" {
 			pushInPrivatesEvents(db, event)
+		} else {
+			pushGroupMembersPrivatesEvents(db, event)
 		}
 	}
 
 	// Le post a été inséré avec succès
 	fmt.Println("L'event a été inséré avec succès.")
+}
+func pushGroupMembersPrivatesEvents(db *sql.DB, event structures.Post) {
+
+	stmt, err := db.Prepare("INSERT INTO PrivatesEvents (Event, Author, Date, Type, User) VALUES (?,?,?,?,?)")
+	if err != nil {
+		// Gérer l'erreur
+		fmt.Println("Erreur lors de la préparation de l'instruction SQL for pushInPosts :", err)
+		return
+	}
+	defer stmt.Close()
+
+	groupMembers := GetGroupMembers(db, event.Type)
+
+	// Exécuter la requête SQL pour insérer le nouveau post
+	for i := 0; i < len(groupMembers); i++ {
+
+		_, err = stmt.Exec(SelectIdReferenceEvent_db(event.Titre, db), event.Author.ID, event.EventDate, event.Type, groupMembers[i].ID)
+		if err != nil {
+			// Gérer l'erreur
+			fmt.Println("Erreur lors de l'exécution de l'instruction SQL for pushInPosts :", err)
+			return
+		}
+	}
+
 }
 
 func pushInPrivatesEvents(db *sql.DB, event structures.Post) {
@@ -1122,4 +1158,48 @@ func chatGroupHasBeenSeeByUser(db *sql.DB, chatID, userID int) bool {
 	}
 
 	return seen
+}
+
+func GetsGroupInvitation(db *sql.DB, userID int) []string {
+	var groupsInvitations []string
+
+	query := `
+		SELECT gc.GroupName 
+		FROM GroupInvitation gi 
+		JOIN GroupChat gc ON gi.GroupID = gc.ID 
+		WHERE gi.UserID = ?`
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		fmt.Println("Error fetching group invitations:", err)
+		return groupsInvitations
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var groupName string
+		if err := rows.Scan(&groupName); err != nil {
+			fmt.Println("Error scanning group name:", err)
+			continue
+		}
+		groupsInvitations = append(groupsInvitations, groupName)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Println("Error with rows:", err)
+	}
+
+	return groupsInvitations
+}
+
+func GetGroupID(db *sql.DB, groupName string) (int, error) {
+	var groupID int
+	err := db.QueryRow("SELECT ID FROM GroupChat WHERE GroupName = ?", groupName).Scan(&groupID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("no group found with name: %s", groupName)
+		}
+		return 0, fmt.Errorf("error querying group ID: %v", err)
+	}
+	return groupID, nil
 }

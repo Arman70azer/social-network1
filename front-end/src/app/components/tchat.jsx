@@ -15,6 +15,8 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
     const [message, setMessage] = useState("")
     const chatWindowRef = useRef(null);
     const [chats, setChats] = useState([])
+
+    const [invitations, setInvitations]= useState([])
  
     const [notSub, setNotSub] = useState("")
     const [creaGroup, setCreaGroup] = useState(false)
@@ -56,7 +58,7 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     if (receivedMessage.ObjectOfRequest == "see users connect"){
                         setChats(receivedMessage.Tchat.Messages)
                         setGroups(receivedMessage.Tchat.Group)
-                        console.log("ici:",receivedMessage.Tchat.Group)
+                        setInvitations(receivedMessage.Tchat.Invitations)
                     }
                     console.log(receivedMessage.Tchat.Clients.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
                 }else if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "message save")){
@@ -162,6 +164,32 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
         }
     }
 
+    const handleAccept = (group)=>{
+        const request = {
+            User: cookieExist(),
+            Origin: "chat-home",
+            Nature: "chat",
+            ObjectOfRequest: "accept invitation",
+            toUser: group,
+        };
+
+        sendMessageToWebsocket(ws, request)
+        setInvitations(invitations.filter((value)=> value !== group))
+    }
+
+    const handleDecline=(group)=>{
+        const request = {
+            User: cookieExist(),
+            Origin: "chat-home",
+            Nature: "chat",
+            ObjectOfRequest: "decline invitation",
+            toUser: group,
+        };
+
+        sendMessageToWebsocket(ws, request)
+        setInvitations(invitations.filter((value)=> value !== group))
+    }
+
 
     onMessageWS()
 
@@ -173,11 +201,12 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     <button className={styles.createGroup} onClick={creaGroupSet}>Create a group</button>
                 </div>
                 <div className={styles.center}>
-                    {creaGroup && users && (<CreateGroup users={users} ws={ws} setGroups={setGroups} />)}
+                    {creaGroup && users && (<CreateGroup users={users} ws={ws} setGroups={setGroups} close={creaGroupSet} />)}
                     <div className={styles.usersList}>
                         <>
-                            {groups && groups.length > 0 ? (
-                                <>
+                            <div>-_--_-_--_---_-__--__-__-_--_--_-_--__--</div>
+                            {groups && !creaGroup && groups.length > 0 ? (
+                                <div className={styles.containGroup}>
                                     <div className={styles.center}>Groups:</div>
                                     {groups.map((group, groupIndex) => (
                                         <div key={groupIndex} className={styles.groupContainer}>
@@ -194,60 +223,97 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                                         <ChatWindowGroup user={user} ws={ws} groupSelect={seeGroup} setNotification={setNotification}/>
                                     )}
 
-                                </>
+                                </div>
                             ) : (
                                 null
                             )}
                         </>
 
-                        <div className={styles.center}>Users Connects:</div>
-                        {users && connectUsers && users.map((userTchat, index) => (
-                            <div key={index}>
-                                <div key={index} className={styles.connectedUser} onClick={() => openChatWithUser(userTchat.Nickname)}>
-                                    <div className={styles.userAvatar}>
-                                        {/* Placeholder for avatar, replace with actual image if available */}
-                                        <img src={userTchat.UrlImage} alt="avatar" />
-                                    </div>
-                                    <div className={styles.userNickname}>
-                                        <div className={isUserConnected(userTchat.Nickname) ? styles.pointVert : styles.pointNoir}></div>
-                                        {userTchat.Nickname}
-                                        {notification && notification.filter((value) => value.nickname === userTchat.Nickname).length > 0 ? (
-                                            <div key={index} className={styles.newMessages}>
-                                                New message({notification.find((value) => value.nickname === userTchat.Nickname).num})!!!
-                                            </div>
-                                        ) : null}
+  
+                        {invitations && !creaGroup && invitations.length > 0 ? (
+                            <>
+                            <div>-_--_-_--_---_-__--__-__-_--_--_-_--__--</div>
+                            {invitations.map((group, index) => (
+                                <div className={styles.containGroup}>
+                                <div className={styles.invitationTitle}>Group Invitations:</div>
+                                <div key={index} className={styles.invitationItem}>
+                                    <div className={styles.invitationGroupName}>{group}</div>
+                                    <div className={styles.invitationButtons}>
+                                        <button
+                                            className={`${styles.invitationButton} ${styles.acceptButton}`}
+                                            onClick={() => handleAccept(group)}
+                                        >
+                                            Accept
+                                        </button>
+                                        <button
+                                            className={`${styles.invitationButton} ${styles.declineButton}`}
+                                            onClick={() => handleDecline(group)}
+                                        >
+                                            Decline
+                                        </button>
                                     </div>
                                 </div>
+                                </div>
+                            ))}</>
+                        ): (
+                        null
+                        )}
+                  
 
-                                {openChat.open && openChat.nickname === userTchat.Nickname && (
-                                    <div>
-                                        <div className={styles.chatWindow}>
-                                            <div className={styles.header}>
-                                                <h2>Chat</h2>
-                                            </div>
-                                            <div className={styles.messages} ref={chatWindowRef}>
-                                                {chats && chats.map((message, index) => (
-                                                    message && (message.Author === openChat.nickname || message.Recipient === openChat.nickname) && (
-                                                        <div key={index} className={message.Author === user.Nickname ? styles.myMessage : styles.otherMessage}>
-                                                            <div className={styles.messageContent}>
-                                                                <p>{message.Content}</p>
-                                                                <p>{message.Date}</p>
-                                                            </div>
+                        <div>
+                            {users && connectUsers && !creaGroup && (
+                                <div>
+                                    <div>-_--_-_--_---_-__--__-__-_--_--_-_--__--</div>
+                                    <div className={styles.center}>Users:</div>
+                                    {users.map((userTchat, index) => (
+                                        <div key={index}>
+                                            <div className={styles.connectedUser} onClick={() => openChatWithUser(userTchat.Nickname)}>
+                                                <div className={styles.userAvatar}>
+                                                    <img src={userTchat.UrlImage} alt="avatar" />
+                                                </div>
+                                                <div className={styles.userNickname}>
+                                                    <div className={isUserConnected(userTchat.Nickname) ? styles.pointVert : styles.pointNoir}></div>
+                                                    {userTchat.Nickname}
+                                                    {notification && notification.filter((value) => value.nickname === userTchat.Nickname).length > 0 && (
+                                                        <div className={styles.newMessages}>
+                                                            New message({notification.find((value) => value.nickname === userTchat.Nickname).num})!!!
                                                         </div>
-                                                    )
-                                                ))}
-                                                {notSub === openChat.nickname && (
-                                                    <div className={styles.notSub}>You're not subscribed to this user Or he don't follow you</div>
-                                                )}
+                                                    )}
+                                                </div>
                                             </div>
+
+                                            {openChat.open && openChat.nickname === userTchat.Nickname && (
+                                                <div>
+                                                    <div className={styles.chatWindow}>
+                                                        <div className={styles.header}>
+                                                            <h2>Chat</h2>
+                                                        </div>
+                                                        <div className={styles.messages} ref={chatWindowRef}>
+                                                            {chats && chats.map((message, index) => (
+                                                                message && (message.Author === openChat.nickname || message.Recipient === openChat.nickname) && (
+                                                                    <div key={index} className={message.Author === user.Nickname ? styles.myMessage : styles.otherMessage}>
+                                                                        <div className={styles.messageContent}>
+                                                                            <p>{message.Content}</p>
+                                                                            <p>{message.Date.split(':').slice(0, 2).join(':')}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            ))}
+                                                            {notSub === openChat.nickname && (
+                                                                <div className={styles.notSub}>You're not subscribed to this user Or he doesn't follow you</div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className={styles.center}>
+                                                        <input type="text" className={styles.chatInput} value={message} id="message" onChange={messageIsWritting} placeholder="Type a message..." onKeyDown={handleKeyPress} />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className={styles.center}>
-                                            <input type="text" className={styles.chatInput} value={message} id="message" onChange={messageIsWritting} placeholder="Type a message..." onKeyDown={handleKeyPress} />
-                                        </div>
-                                    </div>
-                                )}
-                             </div>
-                        ))}
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

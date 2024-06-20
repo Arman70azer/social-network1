@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS Commentary (
     Author INTEGER,
     Post INTEGER,
     Date TEXT,
+    Image TEXT,
     FOREIGN KEY (Author) REFERENCES Users(ID),
     FOREIGN KEY (Post) REFERENCES Posts(ID)
 );

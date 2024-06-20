@@ -78,10 +78,22 @@ func HandlerFollow(w http.ResponseWriter, r *http.Request) {
 			acceptPrivateFollow(db, user, userProfil)
 			response.Accept = true
 			response.Action = userProfil.Nickname
+
+			var newMess structures.Request
+			newMess.Accept = true
+			newMess.ObjectOfRequest = "actualise notif profil"
+
+			BroadcastToOneClient(user.UUID, newMess)
 		} else if nature == "refuse follow" {
 			removePrivateFollow(db, user.ID, userProfil.ID)
 			response.Accept = true
 			response.Action = userProfil.Nickname
+
+			var newMess structures.Request
+			newMess.Accept = true
+			newMess.ObjectOfRequest = "actualise notif profil"
+
+			BroadcastToOneClient(user.UUID, newMess)
 		}
 
 		middleware.ReturnWithW(w, response)

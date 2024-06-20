@@ -38,16 +38,19 @@ type User struct {
 }
 
 type Data struct {
-	Posts  []Post `json:"Posts"`
-	Users  []User `json:"Users"`
-	Events []Post `json:"Events"`
+	Posts  []Post  `json:"Posts"`
+	Users  []User  `json:"Users"`
+	Events []Post  `json:"Events"`
+	Groups []Group `json:"Groups"`
 }
 
 type Commentary struct {
-	Content string
-	Author  User
-	Post    Post
-	Date    string
+	Content  string
+	Author   User
+	Post     Post
+	Date     string
+	Image    string
+	UrlImage string
 }
 
 type Request struct {
@@ -65,6 +68,7 @@ type Request struct {
 	Message          string `json:"Message"`
 	Users            []User `json:"Users"`
 	Name             string `json:"Name"`
+	Image            string `json:"image"`
 }
 
 type LikeOrDislike struct {
@@ -103,6 +107,7 @@ type Tchat struct {
 	Messages       []Message
 	AuthorNotSee   []string
 	Group          []Group
+	Invitations    []string
 }
 
 type Group struct {

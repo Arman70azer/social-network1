@@ -28,6 +28,7 @@ func Tchat(clients *Clients, message structures.Request) {
 		for i := 0; i < len(object.ClientsConnect); i++ {
 			message.Tchat.AuthorNotSee = dbFunc.SelectAuthorNotSee(db, object.ClientsConnect[i].ID)
 			message.Tchat.Group = dbFunc.GetsGroups(db, object.ClientsConnect[i].ID)
+			message.Tchat.Invitations = dbFunc.GetsGroupInvitation(db, object.ClientsConnect[i].ID)
 			BroadcastToOneClient(dbFunc.SelectUUID(db, object.ClientsConnect[i].Nickname), message)
 		}
 
@@ -47,6 +48,14 @@ func Tchat(clients *Clients, message structures.Request) {
 		newMessageGroup(message)
 	} else if message.ObjectOfRequest == "message group see" {
 		userSeeMessageGroup(message)
+	} else if message.ObjectOfRequest == "accept invitation" {
+		fmt.Println("sdsdsdqsddsqd")
+		acceptInvitation(message)
+	} else if message.ObjectOfRequest == "decline invitation" {
+		db := dbFunc.Open_db()
+		user := dbFunc.SelectUserByToken(db, message.User)
+		groupID, _ := dbFunc.GetGroupID(db, message.ToUser)
+		deleteInvitation(db, user.ID, groupID)
 	}
 }
 
@@ -230,7 +239,7 @@ func pushNewGroup(db *sql.DB, userID int, users []structures.User, nameGroupe st
 
 	// Insert the users into GroupMembers
 	for _, user := range users {
-		_, err = tx.Exec("INSERT INTO GroupMembers (GroupID, Member) VALUES (?, ?)", groupID, user.ID)
+		_, err = tx.Exec("INSERT INTO GroupInvitation (GroupID, UserID) VALUES (?, ?)", groupID, user.ID)
 		if err != nil {
 			tx.Rollback()
 			log.Fatalf("Failed to insert group member: %v", err)
@@ -372,5 +381,33 @@ func messageGroupSee(db *sql.DB, userID int, groupName string) {
 	_, err = db.Exec(updateQuery, groupID, userID)
 	if err != nil {
 		fmt.Println("Error updating GroupChatSee:", err)
+	}
+}
+
+func acceptInvitation(message structures.Request) {
+
+	db := dbFunc.Open_db()
+
+	user := dbFunc.SelectUserByToken(db, message.User)
+
+	groupID, err := dbFunc.GetGroupID(db, message.ToUser)
+	if err != nil {
+		fmt.Println("Error getting group ID:", err)
+		return
+	}
+
+	// Insérer l'utilisateur dans le groupe
+	_, err = db.Exec("INSERT INTO GroupMembers (GroupID, Member) VALUES (?, ?)", groupID, user.ID)
+	if err != nil {
+		fmt.Println("Error inserting into GroupMembers:", err)
+	}
+
+	deleteInvitation(db, user.ID, groupID)
+}
+
+func deleteInvitation(db *sql.DB, userID, groupID int) {
+	_, err := db.Exec("DELETE FROM GroupInvitation WHERE GroupID = ? AND UserID = ?", groupID, userID)
+	if err != nil {
+		fmt.Println("Error in deleteInvitation:", err)
 	}
 }
