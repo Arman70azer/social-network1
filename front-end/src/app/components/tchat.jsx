@@ -4,6 +4,7 @@ import sendMessageToWebsocket from "../lib/wsSendMessage"
 import cookieExist from "../utils/cookieUserExist"
 import CreateGroup from "../components/createGroup"
 import ChatWindowGroup from "../components/windowGroupChat"
+import EmojiPickerComponent from "./Emojies"
 
 function Tchat({ onClose, ws, user, setNotification, notification}) {
     const [connectUsers, setConnectUsers] = useState([]);
@@ -190,6 +191,10 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
         setInvitations(invitations.filter((value)=> value !== group))
     }
 
+    const setText=(value)=>{
+        setMessage(value)
+    }
+
 
     onMessageWS()
 
@@ -209,20 +214,20 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                                 <div className={styles.containGroup}>
                                     <div className={styles.center}>Groups:</div>
                                     {groups.map((group, groupIndex) => (
-                                        <div key={groupIndex} className={styles.groupContainer}>
-                                        <button className={styles.groupName} onClick={() => seeGroupOnClick(group.Name)}>{group.Name}</button>
-                                            {notification && notification.filter((value) => value.nickname === group.Name).length > 0 ? (
-                                                <div className={styles.newMessages}>
-                                                    New message({notification.find((value) => value.nickname === group.Name).num})!!!
-                                                </div>
-                                            ) : null}
-                                        </div>
+                                        <>
+                                            <div key={groupIndex} className={styles.groupContainer}>
+                                            <button className={styles.groupName} onClick={() => seeGroupOnClick(group.Name)}>{group.Name}</button>
+                                                {notification && notification.filter((value) => value.nickname === group.Name).length > 0 ? (
+                                                    <div className={styles.newMessages}>
+                                                        New message({notification.find((value) => value.nickname === group.Name).num})!!!
+                                                    </div>
+                                                ) : null}
+                                            </div>
+                                            {seeGroup.Name && seeGroup.Name == group.Name && ws && (
+                                                <ChatWindowGroup user={user} ws={ws} groupSelect={seeGroup} setNotification={setNotification}/>
+                                            )}
+                                        </>
                                     ))}
-
-                                    {seeGroup.Name !== "" && ws && (
-                                        <ChatWindowGroup user={user} ws={ws} groupSelect={seeGroup} setNotification={setNotification}/>
-                                    )}
-
                                 </div>
                             ) : (
                                 null
@@ -305,7 +310,9 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                                                         </div>
                                                     </div>
                                                     <div className={styles.center}>
+                                                        <EmojiPickerComponent text={message} setText={setText}/>
                                                         <input type="text" className={styles.chatInput} value={message} id="message" onChange={messageIsWritting} placeholder="Type a message..." onKeyDown={handleKeyPress} />
+                                                       
                                                     </div>
                                                 </div>
                                             )}

@@ -12,18 +12,24 @@ const EmojiPickerComponent = ({text, setText}) => {
 
   return (
     <div>
-      <form onSubmit={(e) => e.preventDefault()}>
+      <div className={styles.bottomPage}>
         {/* Utilisez un formulaire pour éviter la soumission par défaut */}
-        <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😄</button>
-        <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😄</button>
-        <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😄</button>
-        <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😄</button>
-        <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😄</button>
-        <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😄</button>
-        <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😄</button>
-        <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😄</button>
-        
-      </form>
+        <form onSubmit={(e) => e.preventDefault()}>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F600', e)}>😀</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F601', e)}>😁</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F606', e)}>😆</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F605', e)}>😅</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F923', e)}>🤣</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F602', e)}>😂</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F609', e)}>😉</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F607', e)}>😇</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F60D', e)}>😍</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F929', e)}>🤩</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F618', e)}>😘</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F972', e)}>🥲</button>
+          <button className={styles.margeEmojies} onClick={(e) => insertEmoji('U+1F61C', e)}>😜</button>
+        </form>
+      </div>
     </div>
   );
 };

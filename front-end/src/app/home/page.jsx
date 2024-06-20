@@ -8,6 +8,7 @@ import Link from 'next/link';
 import sendFormToBack from '../lib/sendFormToBack'
 import cookieExist from '../utils/cookieUserExist'
 import sendAndReceiveData from "../lib/sendForm&ReceiveData"
+import EmojiPickerComponent from "../components/Emojies";
 
 let wssocket;
 export default function Page(){
@@ -360,6 +361,8 @@ export default function Page(){
                                         {!fileValid && (<div className={styles.error}> File not valid </div>)}
                                     </div>
 
+                                    <EmojiPickerComponent text={enterComment} setText={setEnterComment}/>
+
                                     {post.Commentaries && post.Commentaries.map((comment, index)=>(
                                         <div className={styles.commentsContent} key={index}>
                                             <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }}>{comment.Author.Nickname}: </Link>
@@ -384,7 +387,7 @@ export default function Page(){
                                 Group Posts {selectValue ? selectValue : 'All'}
                             </button>
                             <select className={styles.select} value={selectValue} onChange={handleSelectChange}>
-                                <option value=""></option>
+                                <option value="">All</option>
                                 {groups.map((group, index) => (
                                         <option key={index} value={group.Name}>
                                             {group.Name}

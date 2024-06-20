@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import styles from "../styles/tchat.module.css";
 import sendMessageToWebsocket from "../lib/wsSendMessage";
+import EmojiPickerComponent from "./Emojies";
 
 function ChatWindowGroup({ ws, user, groupSelect, setNotification }) {
     const [message, setMessage]= useState("")
@@ -110,6 +111,10 @@ function ChatWindowGroup({ ws, user, groupSelect, setNotification }) {
         }
     }
 
+    const setText = (value)=>{
+        setMessage(value)
+    }
+
     onMessageWS()
 
     return (
@@ -144,7 +149,8 @@ function ChatWindowGroup({ ws, user, groupSelect, setNotification }) {
             </div>
 
             <div className={styles.center}>
-            <input type="text" className={styles.chatInput} value={message} id="message" onChange={messageIsWritting} placeholder="Type a message..."  onKeyDown={handleKeyPress}/>
+                <EmojiPickerComponent setText={setText} text={message}/>
+                <input type="text" className={styles.chatInput} value={message} id="message" onChange={messageIsWritting} placeholder="Type a message..."  onKeyDown={handleKeyPress}/>
             </div>
         </>
     );
