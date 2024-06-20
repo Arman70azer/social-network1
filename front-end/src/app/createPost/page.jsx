@@ -8,6 +8,7 @@ import openWebSocketConnexion from "../lib/websocket";
 import sendFormToBack from "../lib/sendFormToBack";
 import cookieExist from "../utils/cookieUserExist";
 import sendAndReceiveData from "../lib/sendForm&ReceiveData";
+import EmojiPickerComponent from "../components/Emojies";
 
 //permet de retourner sur la page d'acceuil
 
@@ -222,6 +223,13 @@ export default function Page(){
         }
     }
 
+    const setText = (value)=>{
+        setFormData({
+            ...formData,
+            ["content"]: value
+        });
+    }
+
     onMessageWS()
 
     return (
@@ -261,6 +269,7 @@ export default function Page(){
                         <input type="file" className={styles.file} name="file" onChange={handleFile}/>
                         {!fileValid && <span id="errorTypeFile" className={styles.error}>This file is not a image</span>}
                         <textarea className={styles.textarea} name="content" id="content" cols="30" rows="10" placeholder="Description and Hashtags(#)" value={formData.content} onChange={handleChange}></textarea>
+                        <EmojiPickerComponent text={formData.content} setText={setText}/>
                         <label className={styles.select} htmlFor="type">Type de publication :</label>
                         <select name="type" id="type" value={formData.type} onChange={handleChange}>
                             {formData.nature != "Event" && formData.nature ==="Post" ? (
