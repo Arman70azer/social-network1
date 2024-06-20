@@ -168,6 +168,7 @@
 }
 
 .settings {
+    margin-top: 20px;
     display: flex;
     justify-content: flex-start; /* Aligner à gauche */
     padding: 10px;

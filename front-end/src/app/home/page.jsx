@@ -161,7 +161,7 @@ export default function Page(){
                         // Si Commentaires n'existe pas, le créer comme un tableau vide
                         postTarget.Commentaries = [];
                     }
-                    console.log(receivedMessage.Image)
+             
                     // Ajouter un nouveau commentaire au post cible
                     postTarget.Commentaries.push({
                         Content: receivedMessage.ObjectOfRequest,
@@ -221,7 +221,6 @@ export default function Page(){
                     });
                     return { ...prevData, Posts: updatedPosts };
                 });
-                setData(allData)
             }else if (receivedMessage.Nature === "New-post"){
                 const newposty = {
                     Date : receivedMessage.Date,
@@ -366,7 +365,7 @@ export default function Page(){
                                             <Link href={{ pathname: "/profil", query: { user: post.Author.Nickname } }}>{comment.Author.Nickname}: </Link>
                                             {comment.Content}
                                             <div className={styles.dateComment}>{comment.Date}</div>
-                                            {comment.UrlImage && <img className={styles.imagePost} src={`${comment.UrlImage}`}/>}
+                                            {comment.UrlImage && comment.UrlImage !== "http://localhost:8000/images/nothing" && comment.Image!= "nothing" ? (<img className={styles.imagePost} src={`${comment.UrlImage}`}/>):(null)}
                                         </div>
                                     ))
                                     }

@@ -42,6 +42,7 @@ type Data struct {
 	Users  []User  `json:"Users"`
 	Events []Post  `json:"Events"`
 	Groups []Group `json:"Groups"`
+	Tchat  Tchat   `json:"Tchat"`
 }
 
 type Commentary struct {

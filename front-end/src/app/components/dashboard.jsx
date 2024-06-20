@@ -20,7 +20,7 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
     const [user, setUser] = useState("");
     const [userInfo, setUserInfo] = useState("")
     const [notifProfil, setNotifProfil]=useState([])
-    const [notifNewGroup, setNotifNewGroup]=useState([])
+    const [inviationsGroup, setInvitationsGroup]=useState([])
     useEffect(() => {
 
         const userFromCookie= cookieExist()
@@ -37,6 +37,10 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
             formToken.append("userProfil", userFromCookie)
 
             setUserInfo(data.Users[0].Nickname)   
+            if (data.Tchat && data.Tchat.Invitations){
+                setInvitationsGroup(data.Tchat.Invitations)
+            }
+            console.log("ici regarde:",data.Tchat.Invitations)
 
             const data2 = await sendAndReceiveData("/api/follow", formToken);
             setNotifProfil(data2.userProfil.PrivateSub)
@@ -231,7 +235,7 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
                         </span>
                     ))}
                 </div>
-            ) : null}</button>
+            ) : null}{inviationsGroup && inviationsGroup.length>0 ? (<div> Invitations: {inviationsGroup.length} </div>) : null}</button>
             <div className={styles.eventContainer} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                 <button className={styles.buttonNotif}>{events.length>0 ? "Events("+events.length+")" : "Events"}</button>
                 {showExtraButtons && (

@@ -58,6 +58,7 @@ func HandlerProfil(w http.ResponseWriter, r *http.Request) {
 		} else {
 			data.Users = append(data.Users, user)
 			data.Groups = dbFunc.GetsGroups(db, user.ID)
+			data.Tchat.Invitations = dbFunc.GetsGroupInvitation(db, user.ID)
 
 			middleware.ReturnWithW(w, data)
 		}

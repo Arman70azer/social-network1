@@ -181,6 +181,8 @@
 }
 
 .windowPost {
+    display: flex;
+    max-width: 50%;
     border-radius: 5px;
     padding: 10px;
     min-width: 600px;
