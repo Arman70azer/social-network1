@@ -56,6 +56,11 @@ func Tchat(clients *Clients, message structures.Request) {
 		user := dbFunc.SelectUserByToken(db, message.User)
 		groupID, _ := dbFunc.GetGroupID(db, message.ToUser)
 		deleteInvitation(db, user.ID, groupID)
+	} else if message.ObjectOfRequest == "new member" {
+		db := dbFunc.Open_db()
+		user := dbFunc.SelectUserByNickname_db(db, message.ToUser)
+		groupID, _ := dbFunc.GetGroupID(db, message.Message)
+		newInvitation(db, groupID, user.ID)
 	}
 }
 
@@ -409,5 +414,13 @@ func deleteInvitation(db *sql.DB, userID, groupID int) {
 	_, err := db.Exec("DELETE FROM GroupInvitation WHERE GroupID = ? AND UserID = ?", groupID, userID)
 	if err != nil {
 		fmt.Println("Error in deleteInvitation:", err)
+	}
+}
+
+func newInvitation(db *sql.DB, groupID, userID int) {
+	// Insert the users into GroupMembers
+	_, err := db.Exec("INSERT INTO GroupInvitation (GroupID, UserID) VALUES (?, ?)", groupID, userID)
+	if err != nil {
+		log.Fatalf("Failed to insert group member: %v", err)
 	}
 }

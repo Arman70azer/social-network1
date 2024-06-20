@@ -83,7 +83,7 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if post.Content != "" && middleware.RegexSpaceAndScript(post.Content) {
-			if postNotExist(post, dbOpen) && nature == "Post" {
+			if postNotExist(post, dbOpen, author.ID) && nature == "Post" {
 				post.Titre = author.Nickname + "-" + formatDate
 				dbFunc.PushInPosts_db(post, dbOpen)
 				var request structures.Request
@@ -119,8 +119,8 @@ func CreationPost(w http.ResponseWriter, r *http.Request) {
 }
 
 // Empeche l'user de poster deux fois le même post
-func postNotExist(post structures.Post, db *sql.DB) bool {
-	postOfdb := dbFunc.SelectAllPosts_db(db)
+func postNotExist(post structures.Post, db *sql.DB, userID int) bool {
+	postOfdb := dbFunc.SelectAllPosts_db(db, userID)
 
 	for i := 0; i < len(postOfdb); i++ {
 		if postOfdb[i].Titre == post.Titre && postOfdb[i].Author.ID == post.Author.ID {

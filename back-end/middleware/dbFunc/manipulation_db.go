@@ -169,7 +169,7 @@ func SelectAllsSameValuesUsers_db(db *sql.DB, column, value string) []string {
 }
 
 // Sélèctionne tout les posts de la db et return dans la structure Posts
-func SelectAllPosts_db(db *sql.DB) []structures.Post {
+func SelectAllPosts_db(db *sql.DB, userID int) []structures.Post {
 	var result []structures.Post
 
 	// p. représente les colonnes de Posts tandis que u. représente les colonnes de Users
@@ -198,7 +198,13 @@ func SelectAllPosts_db(db *sql.DB) []structures.Post {
 		if post.Author.ImageName == "noting" {
 			post.Author.ImageName = ""
 		}
-		result = append(result, post)
+		if post.Type == "Private" {
+			if CheckIfFollowing(db, userID, post.Author.ID) || userID == post.Author.ID {
+				result = append(result, post)
+			}
+		} else {
+			result = append(result, post)
+		}
 	}
 	if err := rows.Err(); err != nil {
 		log.Println("Erreur lors du parcours des lignes:", err)

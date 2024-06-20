@@ -6,7 +6,7 @@ import CreateGroup from "../components/createGroup"
 import ChatWindowGroup from "../components/windowGroupChat"
 import EmojiPickerComponent from "./Emojies"
 
-function Tchat({ onClose, ws, user, setNotification, notification}) {
+function Tchat({ onClose, ws, user, setNotification, notification, invitations, setInvitations}) {
     const [connectUsers, setConnectUsers] = useState([]);
     const [users, setUsers]=useState([])
     const [openChat, setOpenChat] = useState({
@@ -17,7 +17,6 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
     const chatWindowRef = useRef(null);
     const [chats, setChats] = useState([])
 
-    const [invitations, setInvitations]= useState([])
  
     const [notSub, setNotSub] = useState("")
     const [creaGroup, setCreaGroup] = useState(false)
@@ -209,26 +208,28 @@ function Tchat({ onClose, ws, user, setNotification, notification}) {
                     {creaGroup && users && (<CreateGroup users={users} ws={ws} setGroups={setGroups} close={creaGroupSet} />)}
                     <div className={styles.usersList}>
                         <>
-                            <div>-_--_-_--_---_-__--__-__-_--_--_-_--__--</div>
                             {groups && !creaGroup && groups.length > 0 ? (
-                                <div className={styles.containGroup}>
-                                    <div className={styles.center}>Groups:</div>
-                                    {groups.map((group, groupIndex) => (
-                                        <>
-                                            <div key={groupIndex} className={styles.groupContainer}>
-                                            <button className={styles.groupName} onClick={() => seeGroupOnClick(group.Name)}>{group.Name}</button>
-                                                {notification && notification.filter((value) => value.nickname === group.Name).length > 0 ? (
-                                                    <div className={styles.newMessages}>
-                                                        New message({notification.find((value) => value.nickname === group.Name).num})!!!
-                                                    </div>
-                                                ) : null}
-                                            </div>
-                                            {seeGroup.Name && seeGroup.Name == group.Name && ws && (
-                                                <ChatWindowGroup user={user} ws={ws} groupSelect={seeGroup} setNotification={setNotification}/>
-                                            )}
-                                        </>
-                                    ))}
-                                </div>
+                                <>
+                                <div>-_--_-_--_---_-__--__-__-_--_--_-_--__--</div>
+                                    <div className={styles.containGroup}>
+                                        <div className={styles.center}>Groups:</div>
+                                        {groups.map((group, groupIndex) => (
+                                            <>
+                                                <div key={groupIndex} className={styles.groupContainer}>
+                                                <button className={styles.groupName} onClick={() => seeGroupOnClick(group.Name)}>{group.Name}</button>
+                                                    {notification && notification.filter((value) => value.nickname === group.Name).length > 0 ? (
+                                                        <div className={styles.newMessages}>
+                                                            New message({notification.find((value) => value.nickname === group.Name).num})!!!
+                                                        </div>
+                                                    ) : null}
+                                                </div>
+                                                {seeGroup.Name && seeGroup.Name == group.Name && ws && (
+                                                    <ChatWindowGroup user={user} ws={ws} groupSelect={seeGroup} setNotification={setNotification}/>
+                                                )}
+                                            </>
+                                        ))}
+                                    </div>
+                                </>
                             ) : (
                                 null
                             )}

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import styles from "../styles/tchat.module.css";
 import sendMessageToWebsocket from "../lib/wsSendMessage";
 import EmojiPickerComponent from "./Emojies";
+import NewMember from "./newMember"
 
 function ChatWindowGroup({ ws, user, groupSelect, setNotification }) {
     const [message, setMessage]= useState("")
@@ -114,6 +115,7 @@ function ChatWindowGroup({ ws, user, groupSelect, setNotification }) {
     const setText = (value)=>{
         setMessage(value)
     }
+    const [newMember, setNewMember]=useState(false)
 
     onMessageWS()
 
@@ -124,6 +126,8 @@ function ChatWindowGroup({ ws, user, groupSelect, setNotification }) {
                     <h2>Chat: {group.Name}</h2>
                     <h3>Members: {formatMemberList()}</h3>
                 </div>
+                <button className={styles.addMembers} onClick={()=> setNewMember(!newMember)}>Add new member</button>
+                {newMember && <NewMember user={user} ws={ws} group={group}/>}
                 <div className={styles.messages} ref={chatWindowRef}>
                     {group.Conv && group.Conv.map((message, index) => (
                         message && (

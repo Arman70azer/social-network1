@@ -34,13 +34,17 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
         
             const data = await sendAndReceiveData("/api/profil", formToken);
 
+            if (!data.Users[0].Nickname){
+                window.location.href="/"
+            }
+
             formToken.append("userProfil", userFromCookie)
 
             setUserInfo(data.Users[0].Nickname)   
             if (data.Tchat && data.Tchat.Invitations){
                 setInvitationsGroup(data.Tchat.Invitations)
             }
-            console.log("ici regarde:",data.Tchat.Invitations)
+            console.log("ici regarde:",data)
 
             const data2 = await sendAndReceiveData("/api/follow", formToken);
             setNotifProfil(data2.userProfil.PrivateSub)
@@ -219,6 +223,10 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
 
     countNotifWithNoTchat()
 
+    const setInvitations =(value) =>{
+        setInvitationsGroup(value)
+    }
+
 
     return (
         <>
@@ -283,7 +291,7 @@ function DashboardTop({ events = [], ws = null, setAllData, setData, userComplet
             <Link href={{ pathname: "/profil", query: { user: userInfo } }} className={styles.buttonProfil} onClick={redirection}>Profil {notifProfil ? `(${notifProfil.length})` : null}</Link>
             <Link href="/" className={styles.buttonLogout} onClick={logout}>Logout</Link>
         </div>
-        {seeTchat && userComplete && ws && (<Tchat onClose={handleTchat} ws={ws} user={userComplete} setNotification={setNotif} notification={notification}/>)}
+        {seeTchat && userComplete && ws && (<Tchat onClose={handleTchat} ws={ws} user={userComplete} setNotification={setNotif} notification={notification} invitations={inviationsGroup} setInvitations={setInvitationsGroup}/>)}
         </>
     );
 }

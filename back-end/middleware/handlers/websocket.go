@@ -85,6 +85,7 @@ func handleWebSocket(conn *websocket.Conn) {
 	BroadcastToOneClient(userName, response)
 
 	// Handle messages from the client
+
 	for {
 		_, msgBytes, err := conn.ReadMessage()
 		if err != nil {

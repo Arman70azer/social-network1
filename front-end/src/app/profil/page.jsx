@@ -65,6 +65,9 @@ export default function page(){
             // Récupérer les données des posts
             const datafetch = await fetchDataHome();
             setData(datafetch);
+            if (!datafetch.Users){
+                 window.location.href="/"
+            }
             const userProfil =datafetch.Users.filter((client) => client.Nickname === userParam)[0]
             setUserInfo(userProfil);
 

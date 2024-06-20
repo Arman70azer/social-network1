@@ -34,7 +34,7 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 
 				var data structures.Data
 
-				posts := sortPrivatePlus(db, user, dbFunc.SelectAllPosts_db(db))
+				posts := sortPrivatePlus(db, user, dbFunc.SelectAllPosts_db(db, user.ID))
 				events := sortPrivatePlus(db, user, dbFunc.SelectAllEvents_db(db))
 
 				data.Posts = commentAndLikeToPost(posts, db)
@@ -54,10 +54,10 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // Sert à vérifier si toutes les données sont bonnes avant de push dans la db
-func verifieNewComment(commentary structures.Commentary) bool {
+func verifieNewComment(commentary structures.Commentary, userID int) bool {
 	db := dbFunc.Open_db()
 
-	posts := dbFunc.SelectAllPosts_db(db)
+	posts := dbFunc.SelectAllPosts_db(db, userID)
 	users := dbFunc.SelectAllUsers_db(db)
 
 	postsBool := false
@@ -183,7 +183,7 @@ func comment(r *http.Request, user structures.User, fileName string, w http.Resp
 	commentary.Image = fileName
 
 	//Dès que le commentaire est passé dans la db
-	if verifieNewComment(commentary) {
+	if verifieNewComment(commentary, user.ID) {
 		var request structures.Request
 		request.Origin = "home"
 		request.Nature = "New-comment"

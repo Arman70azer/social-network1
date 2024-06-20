@@ -1,5 +1,5 @@
 # Utilisation de l'image officielle de Golang
-FROM golang:latest
+FROM golang:1.21.4
 
 # Copier le code source du backend dans le conteneur
 ADD . /app
