@@ -1,13 +1,11 @@
 package handlers
 
 import (
+	"back-end/middleware"
 	"back-end/middleware/dbFunc"
 	s "back-end/middleware/struct"
 	"encoding/json"
-	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -32,7 +30,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		FirstName: r.FormValue("firstname"),
 		LastName:  r.FormValue("lastname"),
 		Birthday:  r.FormValue("birthday"),
-		ImageName: r.FormValue("imagename"),
+		ImageName: r.FormValue("file"),
 		AboutMe:   r.FormValue("aboutme"),
 		Email:     r.FormValue("email"),
 		Password:  r.FormValue("password"),
@@ -42,46 +40,11 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Connect to the SQLite database
 	db := dbFunc.Open_db()
-	defer db.Close()
+
 	var response s.Request
 	// Check if the nickname already exists
 	if !dbFunc.CheckUserExists_db(user.Nickname, db) {
-		// Handle file upload
-		file, handler, err := r.FormFile("imagename")
-		if err != nil {
-			if err == http.ErrMissingFile {
-				// If no file was uploaded, set the default image name
-				user.ImageName = "nothing.webp"
-			} else {
-				http.Error(w, "Error retrieving the file", http.StatusBadRequest)
-				return
-			}
-		} else {
-			defer file.Close()
-			// Ensure the uploads directory exists
-			uploadDir := "uploads"
-			if _, err := os.Stat(uploadDir); os.IsNotExist(err) {
-				err = os.Mkdir(uploadDir, os.ModePerm)
-				if err != nil {
-					http.Error(w, "Unable to create uploads directory", http.StatusInternalServerError)
-					return
-				}
-			}
-			// Save the file to the server
-			filePath := filepath.Join(uploadDir, handler.Filename)
-			outFile, err := os.Create(filePath)
-			if err != nil {
-				http.Error(w, "Unable to create the file on the server", http.StatusInternalServerError)
-				return
-			}
-			defer outFile.Close()
-			_, err = io.Copy(outFile, file)
-			if err != nil {
-				http.Error(w, "Unable to save the file on the server", http.StatusInternalServerError)
-				return
-			}
-			user.ImageName = handler.Filename
-		}
+		user.ImageName = middleware.StockeImage(w, r, user)
 		if calculateAge(user.Birthday) > 17 {
 			user.Age = calculateAge(user.Birthday)
 			// Save the user to the database

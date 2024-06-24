@@ -126,12 +126,13 @@ func HashedPassword(password string) string {
 	return string(hashedPassword)
 }
 
-func StockeImage(w http.ResponseWriter, r *http.Request, author structures.User) string{
+func StockeImage(w http.ResponseWriter, r *http.Request, author structures.User) string {
 	var fileName string
 	// Récupérer le fichier image
 	file, handler, err := r.FormFile("file")
 	if err != nil {
 		fileName = "nothing"
+		fmt.Println("gggg")
 	} else {
 		defer file.Close()
 		// Stocker le fichier sur le serveur

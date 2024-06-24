@@ -14,17 +14,17 @@ export default function Register() {
     firstname: "",
     lastname: "",
     birthday: "",
-    imagename: "",
+    file: "",
     aboutme: "",
     email: "",
     password: "",
   });
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === "imagename") {
+    if (files && files[0].type.split("/")[0] === "image") {
       setFormData({
         ...formData,
-        [name]: files[0], // Si c'est une image, utilisez files[0]
+        ["file"]: files[0], // Si c'est une image, utilisez files[0]
       });
     } else {
       setFormData({
@@ -41,7 +41,7 @@ export default function Register() {
     form.append("firstname", formData.firstname);
     form.append("lastname", formData.lastname);
     form.append("birthday", formData.birthday);
-    form.append("imagename", formData.imagename);
+    form.append("file", formData.file);
     form.append("aboutme", formData.aboutme);
     form.append("email", formData.email);
     form.append("password", formData.password);
@@ -118,13 +118,13 @@ export default function Register() {
               />
             </div>
             <div className={styles.formGroup}>
-              <label htmlFor="imagename" className={styles.label}>
+              <label htmlFor="file" className={styles.label}>
                 Image
               </label>
               <input
                 type="file"
-                id="imagename"
-                name="imagename"
+                id="file"
+                name="file"
                 onChange={handleChange}
                 className={styles.input}
               />
