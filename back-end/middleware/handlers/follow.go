@@ -116,16 +116,15 @@ func intersectUsers(list1, list2 []structures.User) []structures.User {
 }
 
 func checkPrivateSub(db *sql.DB, userProfilID, userID int) bool {
-    query := `SELECT COUNT(*) FROM PrivateSub WHERE RecipientID = ? AND SenderID = ?`
-    var count int
-    err := db.QueryRow(query, userProfilID, userID).Scan(&count)
-    if err != nil {
-        fmt.Println("Error checking private subscription:", err)
-        return false
-    }
-    return count > 0
+	query := `SELECT COUNT(*) FROM PrivateSub WHERE RecipientID = ? AND SenderID = ?`
+	var count int
+	err := db.QueryRow(query, userProfilID, userID).Scan(&count)
+	if err != nil {
+		fmt.Println("Error checking private subscription:", err)
+		return false
+	}
+	return count > 0
 }
-
 
 // ---------------------ici---------------------
 func addPrivateSub(db *sql.DB, recipientID, senderID int) {

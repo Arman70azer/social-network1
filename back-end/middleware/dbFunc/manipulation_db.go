@@ -49,7 +49,7 @@ func FollowedUsers(db *sql.DB, user structures.User) []structures.User {
 		if err := rows.Scan(&userFollowed.Nickname, &userFollowed.ID, &userFollowed.Age, &userFollowed.ImageName); err != nil {
 			log.Fatal(err)
 		}
-		userFollowed.UrlImage = "http://localhost:8000/images/" + user.ImageName
+		userFollowed.UrlImage = "http://localhost:8000/images/" + userFollowed.ImageName
 		followedUsers = append(followedUsers, userFollowed)
 	}
 	// Vérifier s'il y a des erreurs après avoir parcouru les résultats
@@ -81,7 +81,7 @@ func SelectSubscribers(db *sql.DB, user structures.User) []structures.User {
 			log.Fatal(err)
 		}
 		if !uniqueUsers[userSub.ID] {
-			userSub.UrlImage = "http://localhost:8000/images/" + user.ImageName
+			userSub.UrlImage = "http://localhost:8000/images/" + userSub.ImageName
 			userSubscribers = append(userSubscribers, userSub)
 			uniqueUsers[userSub.ID] = true
 		}

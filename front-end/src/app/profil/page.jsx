@@ -105,6 +105,7 @@ export default function page(){
 
             if (dataReceved.userProfil.PeopleIFollow){
                 setUserIFollow(dataReceved.userProfil.PeopleIFollow)
+                console.log(dataReceved.userProfil.PeopleIFollow)
             }
 
         }
