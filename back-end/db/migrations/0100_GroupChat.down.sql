@@ -43,3 +43,12 @@ CREATE TABLE IF NOT EXISTS GroupInvitation (
     FOREIGN KEY (GroupID) REFERENCES GroupChat(ID),
     FOREIGN KEY (UserID) REFERENCES Users(ID)
 );
+
+-- Table for group invitations
+CREATE TABLE IF NOT EXISTS GroupInvitation2 (
+    ID INTEGER PRIMARY KEY,
+    GroupID INTEGER NOT NULL,
+    UserID INTEGER NOT NULL,
+    FOREIGN KEY (GroupID) REFERENCES GroupChat(ID),
+    FOREIGN KEY (UserID) REFERENCES Users(ID)
+);

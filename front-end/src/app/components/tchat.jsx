@@ -5,6 +5,8 @@ import cookieExist from "../utils/cookieUserExist"
 import CreateGroup from "../components/createGroup"
 import ChatWindowGroup from "../components/windowGroupChat"
 import EmojiPickerComponent from "./Emojies"
+import sendAndReceiveData from "../lib/sendForm&ReceiveData"
+import sendFormToBack from "../lib/sendFormToBack"
 
 function Tchat({ onClose, ws, user, setNotification, notification, invitations, setInvitations}) {
     const [connectUsers, setConnectUsers] = useState([]);
@@ -21,7 +23,10 @@ function Tchat({ onClose, ws, user, setNotification, notification, invitations, 
     const [notSub, setNotSub] = useState("")
     const [creaGroup, setCreaGroup] = useState(false)
 
+    const [inviations2, setInvitations2]=useState([])
+
     const [groups, setGroups] = useState([])
+    const [allGroups, setAllGroups] = useState([])
     const [seeGroup, setSeeGroup] = useState({
         Name:"",
         exist:false,
@@ -58,7 +63,9 @@ function Tchat({ onClose, ws, user, setNotification, notification, invitations, 
                     if (receivedMessage.ObjectOfRequest == "see users connect"){
                         setChats(receivedMessage.Tchat.Messages)
                         setGroups(receivedMessage.Tchat.Group)
+                        setAllGroups(receivedMessage.Tchat.AllGroup)
                         setInvitations(receivedMessage.Tchat.Invitations)
+                        setInvitations2(receivedMessage.Tchat.RequestToJoin)
                     }
                     console.log(receivedMessage.Tchat.Clients.filter((userConnect)=> userConnect.Nickname !== user.Nickname ))
                 }else if (receivedMessage.Accept && (receivedMessage.ObjectOfRequest === "message save")){
@@ -175,6 +182,7 @@ function Tchat({ onClose, ws, user, setNotification, notification, invitations, 
 
         sendMessageToWebsocket(ws, request)
         setInvitations(invitations.filter((value)=> value !== group))
+        setGroups((prevGroups) => [...prevGroups, { Name: group }]);
     }
 
     const handleDecline=(group)=>{
@@ -190,8 +198,83 @@ function Tchat({ onClose, ws, user, setNotification, notification, invitations, 
         setInvitations(invitations.filter((value)=> value !== group))
     }
 
+    const handleAccept2 =(group)=>{
+        const partGroup = group.split(" ")
+        const request = {
+            User: cookieExist(),
+            Origin: "chat-home",
+            Nature: "chat",
+            ObjectOfRequest: "accept invitation2",
+            toUser: partGroup[0],
+            Message: partGroup[partGroup.length-1]
+        };
+
+        sendMessageToWebsocket(ws, request)
+        setInvitations2(inviations2.filter((value)=> value !== group))
+    }
+
+    const handleDecline2=(group)=>{
+        const partGroup = group.split(" ")
+        const request = {
+            User: cookieExist(),
+            Origin: "chat-home",
+            Nature: "chat",
+            ObjectOfRequest: "decline invitation2",
+            toUser: partGroup[0],
+            Message: partGroup[partGroup.length-1]
+        };
+
+        sendMessageToWebsocket(ws, request)
+        setInvitations2(inviations2.filter((value)=> value !== group))
+    }
+
     const setText=(value)=>{
         setMessage(value)
+    }
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [errorSearchGroup, seterrorSearchGroup] = useState("")
+    const [messageSucess, setMessageSuccess] = useState("")
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+
+        if (value.length > 0) {
+            const filteredSuggestions = allGroups.filter(group =>
+                group.toLowerCase().includes(value.toLowerCase())
+            );
+            setSuggestions(filteredSuggestions);
+        } else {
+            setSuggestions([]);
+        }
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+        setSearchTerm(suggestion);
+        setSuggestions([]);
+    };
+
+    const joinGroup = ()=>{
+        if (allGroups.includes(searchTerm)){
+            const formGroup = new FormData();
+            formGroup.append("group", searchTerm)
+            formGroup.append("token", user.UUID)
+            formGroup.append("nature", "join a group")
+
+            sendFormToBack("/api/home", formGroup)
+            setMessageSuccess("Request send")
+            setTimeout(()=>{
+                setMessageSuccess("")
+            },4000)
+
+        }else{
+            seterrorSearchGroup("ERROR: group name doesn't exist")
+            setTimeout(()=>{
+                seterrorSearchGroup("")
+            },4000)
+        }
     }
 
 
@@ -204,9 +287,39 @@ function Tchat({ onClose, ws, user, setNotification, notification, invitations, 
                     <button className={styles.closeButton} onClick={onClose}>X</button>
                     <button className={styles.createGroup} onClick={creaGroupSet}>Create a group</button>
                 </div>
+                {creaGroup && users && (<CreateGroup users={users} ws={ws} setGroups={setGroups} close={creaGroupSet} />)}
                 <div className={styles.center}>
-                    {creaGroup && users && (<CreateGroup users={users} ws={ws} setGroups={setGroups} close={creaGroupSet} />)}
                     <div className={styles.usersList}>
+                        <>
+                            {allGroups && !creaGroup && allGroups.length > 0 && (
+                                <div className={styles.searchGroupContainer}>
+                                    <div>Search a group:</div>
+                                    <input
+                                        type="text"
+                                        placeholder="Subscribe to a group"
+                                        className={styles.searchGroupInput}
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                    />
+                                    {suggestions.length > 0 && (
+                                        <div className={styles.suggestionsList}>
+                                            {suggestions.map((suggestion, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={styles.suggestionItem}
+                                                    onClick={() => handleSuggestionClick(suggestion)}
+                                                >
+                                                    {suggestion}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {errorSearchGroup && (<div className={styles.error}>{errorSearchGroup}</div>)}
+                                    {messageSucess && <div className={styles.messageSuccess}> {messageSucess} </div>}
+                                    <button className={styles.searchGroupButton} onClick={joinGroup}>Request</button>
+                                </div>
+                            )}
+                        </>
                         <>
                             {groups && !creaGroup && groups.length > 0 ? (
                                 <>
@@ -236,7 +349,7 @@ function Tchat({ onClose, ws, user, setNotification, notification, invitations, 
                         </>
 
   
-                        {invitations && !creaGroup && invitations.length > 0 ? (
+                        {!creaGroup && (invitations && invitations.length >0) ? (
                             <>
                             <div>-_--_-_--_---_-__--__-__-_--_--_-_--__--</div>
                             {invitations.map((group, index) => (
@@ -260,7 +373,37 @@ function Tchat({ onClose, ws, user, setNotification, notification, invitations, 
                                     </div>
                                 </div>
                                 </div>
-                            ))}</>
+                            ))}
+                            </>
+                        ): (
+                        null
+                        )}
+                        {!creaGroup && (inviations2 && inviations2.length >0) ? (
+
+                            <>
+                                {inviations2.map((group, index) => (
+                                    <div className={styles.containGroup}>
+                                    <div className={styles.invitationTitle}>Users want join a group:</div>
+                                    <div key={index} className={styles.invitationItem}>
+                                        <div className={styles.invitationGroupName}>{group}</div>
+                                        <div className={styles.invitationButtons}>
+                                            <button
+                                                className={`${styles.invitationButton} ${styles.acceptButton}`}
+                                                onClick={() => handleAccept2(group)}
+                                            >
+                                                Accept
+                                            </button>
+                                            <button
+                                                className={`${styles.invitationButton} ${styles.declineButton}`}
+                                                onClick={() => handleDecline2(group)}
+                                            >
+                                                Decline
+                                            </button>
+                                        </div>
+                                    </div>
+                                    </div>
+                                ))}
+                            </>
                         ): (
                         null
                         )}

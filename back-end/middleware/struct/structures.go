@@ -109,6 +109,8 @@ type Tchat struct {
 	AuthorNotSee   []string
 	Group          []Group
 	Invitations    []string
+	AllGroup       []string
+	RequestToJoin  []string
 }
 
 type Group struct {

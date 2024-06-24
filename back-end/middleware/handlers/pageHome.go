@@ -6,6 +6,7 @@ import (
 	structures "back-end/middleware/struct"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -30,6 +31,8 @@ func HandlerInfoPostsAndUser(w http.ResponseWriter, r *http.Request) {
 			} else if r.FormValue("nature") == "yes" || r.FormValue("nature") == "no" {
 				event(db, r, user, w)
 
+			} else if r.FormValue("nature") == "join a group" {
+				requestJoinGroup(db, user, r)
 			} else {
 
 				var data structures.Data
@@ -345,4 +348,18 @@ func selectUserPrivatesPost(db *sql.DB, privatesViewers []structures.PrivatesVie
 	}
 
 	return users
+}
+
+func requestJoinGroup(db *sql.DB, user structures.User, r *http.Request) {
+	group := r.FormValue("group")
+	groupID, _ := dbFunc.GetGroupID(db, group)
+
+	newInvitation2(db, groupID, user.ID)
+}
+
+func newInvitation2(db *sql.DB, userID, groupID int) {
+	_, err := db.Exec("INSERT INTO GroupInvitation2 (GroupID, UserID) VALUES (?, ?)", groupID, userID)
+	if err != nil {
+		log.Fatalf("Failed to insert group member: %v", err)
+	}
 }

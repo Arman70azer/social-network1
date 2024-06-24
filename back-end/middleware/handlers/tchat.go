@@ -23,6 +23,8 @@ func Tchat(clients *Clients, message structures.Request) {
 		object.Messages = dbFunc.SelectAllChats(db, userID)
 		message.Tchat = object
 		message.Tchat.Group = dbFunc.GetsGroups(db, userID)
+		message.Tchat.AllGroup = dbFunc.GestAllNameGroups(db)
+		message.Tchat.RequestToJoin = dbFunc.GetsJoinGroupRequest(db, message.Tchat.Group)
 
 		Broadcast(message)
 		for i := 0; i < len(object.ClientsConnect); i++ {
@@ -60,7 +62,16 @@ func Tchat(clients *Clients, message structures.Request) {
 		db := dbFunc.Open_db()
 		user := dbFunc.SelectUserByNickname_db(db, message.ToUser)
 		groupID, _ := dbFunc.GetGroupID(db, message.Message)
-		newInvitation(db, groupID, user.ID)
+		NewInvitation(db, groupID, user.ID)
+	} else if message.ObjectOfRequest == "accept invitation2" {
+		db := dbFunc.Open_db()
+		userAccept := dbFunc.SelectUserByNickname_db(db, message.ToUser)
+		acceptInvitation2(db, userAccept, message.Message)
+	} else if message.ObjectOfRequest == "decline invitation2" {
+		db := dbFunc.Open_db()
+		userAccept := dbFunc.SelectUserByNickname_db(db, message.ToUser)
+		groupID, _ := dbFunc.GetGroupID(db, message.Message)
+		deleteInvitation(db, userAccept.ID, groupID)
 	}
 }
 
@@ -407,17 +418,78 @@ func acceptInvitation(message structures.Request) {
 		fmt.Println("Error inserting into GroupMembers:", err)
 	}
 
+	events := dbFunc.SelectAllEvents_db(db)
+	messageGroup, _ := dbFunc.GetsChatsGroup(db, message.ToUser, user.ID)
+
+	for i := 0; i < len(events); i++ {
+		if events[i].Type == message.ToUser {
+			_, err = db.Exec("INSERT INTO PrivatesEvents (Event, Author, Date, Type, User) VALUES (?, ?, ?, ? ,?)", events[i].ID, events[i].Author.ID, events[i].Date, events[i].Type, user.ID)
+			if err != nil {
+				fmt.Println("Error inserting into GroupMembers:", err)
+			}
+		}
+
+	}
+
+	fmt.Println("ds:", messageGroup)
+
+	for i := 0; i < len(messageGroup); i++ {
+		_, err = db.Exec("INSERT INTO GroupChatSee (ChatID, UserID) VALUES (?, ?)", messageGroup[i].ID, user.ID)
+		if err != nil {
+			fmt.Println("Error inserting into GroupMembers:", err)
+		}
+	}
+
 	deleteInvitation(db, user.ID, groupID)
+}
+
+func acceptInvitation2(db *sql.DB, userAccept structures.User, groupName string) {
+
+	groupID, _ := dbFunc.GetGroupID(db, groupName)
+
+	// Insérer l'utilisateur dans le groupe
+	_, err := db.Exec("INSERT INTO GroupMembers (GroupID, Member) VALUES (?, ?)", groupID, userAccept.ID)
+	if err != nil {
+		fmt.Println("Error inserting into GroupMembers:", err)
+	}
+
+	events := dbFunc.SelectAllEvents_db(db)
+	messageGroup, _ := dbFunc.GetsChatsGroup(db, groupName, userAccept.ID)
+
+	for i := 0; i < len(events); i++ {
+		if events[i].Type == groupName {
+			_, err = db.Exec("INSERT INTO PrivatesEvents (Event, Author, Date, Type, User) VALUES (?, ?, ?, ? ,?)", events[i].ID, events[i].Author.ID, events[i].Date, events[i].Type, userAccept.ID)
+			if err != nil {
+				fmt.Println("Error inserting into GroupMembers:", err)
+			}
+		}
+
+	}
+
+	for i := 0; i < len(messageGroup); i++ {
+		_, err = db.Exec("INSERT INTO GroupChatSee (ChatID, UserID) VALUES (?, ?)", messageGroup[i].ID, userAccept.ID)
+		if err != nil {
+			fmt.Println("Error inserting into GroupMembers:", err)
+		}
+	}
+
+	deleteInvitation(db, userAccept.ID, groupID)
+
 }
 
 func deleteInvitation(db *sql.DB, userID, groupID int) {
 	_, err := db.Exec("DELETE FROM GroupInvitation WHERE GroupID = ? AND UserID = ?", groupID, userID)
 	if err != nil {
-		fmt.Println("Error in deleteInvitation:", err)
+		fmt.Println("Error in deleteInvitation1:", err)
+	}
+
+	_, err = db.Exec("DELETE FROM GroupInvitation2 WHERE GroupID = ? AND UserID = ?", groupID, userID)
+	if err != nil {
+		fmt.Println("Error in deleteInvitation2:", err)
 	}
 }
 
-func newInvitation(db *sql.DB, groupID, userID int) {
+func NewInvitation(db *sql.DB, groupID, userID int) {
 	// Insert the users into GroupMembers
 	_, err := db.Exec("INSERT INTO GroupInvitation (GroupID, UserID) VALUES (?, ?)", groupID, userID)
 	if err != nil {

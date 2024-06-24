@@ -131,7 +131,7 @@ func StockeImage(w http.ResponseWriter, r *http.Request, author structures.User)
 	// Récupérer le fichier image
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		fileName = "nothing"
+		fileName = "nothing.webp"
 		fmt.Println("gggg")
 	} else {
 		defer file.Close()

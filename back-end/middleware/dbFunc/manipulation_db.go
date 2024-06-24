@@ -1060,13 +1060,43 @@ func GetsGroups(db *sql.DB, userID int) []structures.Group {
 			var group structures.Group
 			group.Name = groups[i]
 			group.Members = GetGroupMembers(db, groups[i])
-			group.Conv, group.NoSeeMessages = getsChatsGroup(db, groups[i], userID)
+			group.Conv, group.NoSeeMessages = GetsChatsGroup(db, groups[i], userID)
 
 			allGroups = append(allGroups, group)
 		}
 	}
 
 	return allGroups
+}
+
+func GestAllNameGroups(db *sql.DB) []string {
+	var allNamesGroups []string
+
+	// Corrected SQL query
+	rows, err := db.Query(`
+        SELECT GroupName
+        FROM GroupChat`)
+	if err != nil {
+		fmt.Println("error GetsAllNames:", err)
+		return allNamesGroups
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var groupName string
+		if err := rows.Scan(&groupName); err != nil {
+			fmt.Println("error GetsAllNames1:", err)
+			return allNamesGroups
+		}
+		allNamesGroups = append(allNamesGroups, groupName)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Println("error GetsAllNames2:", err)
+		return allNamesGroups
+	}
+
+	return allNamesGroups
 }
 
 // GetsGroups retrieves the group names that a user belongs to
@@ -1103,7 +1133,7 @@ func getsGroupsNames(db *sql.DB, userID int) []string {
 }
 
 // Récupère les messages d'un groupe de chat et vérifie si chaque message a été vu par l'utilisateur
-func getsChatsGroup(db *sql.DB, groupName string, userID int) ([]structures.Message, int) {
+func GetsChatsGroup(db *sql.DB, groupName string, userID int) ([]structures.Message, int) {
 	var messages []structures.Message
 	count := 0
 
@@ -1123,13 +1153,12 @@ func getsChatsGroup(db *sql.DB, groupName string, userID int) ([]structures.Mess
 
 	for rows.Next() {
 		var message structures.Message
-		var chatID int
-		if err := rows.Scan(&chatID, &message.Author, &message.Content, &message.Date); err != nil {
+		if err := rows.Scan(&message.ID, &message.Author, &message.Content, &message.Date); err != nil {
 			fmt.Println("Row scan error:", err)
 			return messages, count
 		}
 
-		message.See = chatGroupHasBeenSeeByUser(db, chatID, userID)
+		message.See = chatGroupHasBeenSeeByUser(db, message.ID, userID)
 		if !message.See {
 			count++
 		}
@@ -1208,4 +1237,41 @@ func GetGroupID(db *sql.DB, groupName string) (int, error) {
 		return 0, fmt.Errorf("error querying group ID: %v", err)
 	}
 	return groupID, nil
+}
+
+func GetsJoinGroupRequest(db *sql.DB, groups []structures.Group) []string {
+	var groupsInvitations []string
+
+	query := `
+	SELECT gc.GroupName, u.Nickname
+	FROM GroupInvitation2 gi 
+	JOIN GroupChat gc ON gi.GroupID = gc.ID 
+	JOIN Users u ON gi.UserID = u.ID 
+	WHERE gc.GroupName = ?`
+
+	for i := 0; i < len(groups); i++ {
+		rows, err := db.Query(query, groups[i].Name)
+		if err != nil {
+			fmt.Println("Error fetching group invitations:", err)
+			return groupsInvitations
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var groupName string
+			var nickname string
+			if err := rows.Scan(&groupName, &nickname); err != nil {
+				fmt.Println("Error scanning group name:", err)
+				continue
+			}
+			sentence := nickname + " wants to join " + groupName
+			groupsInvitations = append(groupsInvitations, sentence)
+		}
+
+		if err := rows.Err(); err != nil {
+			fmt.Println("Error with rows:", err)
+		}
+	}
+
+	return groupsInvitations
 }
