@@ -173,18 +173,24 @@ export default function page(){
         }
       };
 
-    const setUsertoParam = (key, value)=>{
+      const setUsertoParam = (key, value) => {
         setUserInfo({
             ...userInfo,
-            [key]:value
-        })
-        if (key == "Nickname"){
-            console.log("ici problème: ${}", value )
-            setUser((previousUser) => {
-                return [...previousUser, { Nickname: value }];
-            });
+            [key]: value,
+        });
+    
+        if (key === "Nickname") {
+            // Utilisation des backticks pour la template string
+            console.log(`ici problème: ${value}`);
+    
+            // Mise à jour de l'objet avec la nouvelle valeur de Nickname
+            setUser((previousUser) => ({
+                ...previousUser, // Conserve les anciennes propriétés
+                Nickname: value, // Met à jour ou ajoute la clé Nickname
+            }));
         }
-    }
+    };
+    
 
     const acceptFollow = async (name)=>{
         const formFollow = new FormData();
