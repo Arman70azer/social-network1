@@ -179,6 +179,7 @@ export default function page(){
             [key]:value
         })
         if (key == "Nickname"){
+            console.log("ici problème: ${}", value )
             setUser((previousUser) => {
                 return [...previousUser, { Nickname: value }];
             });
