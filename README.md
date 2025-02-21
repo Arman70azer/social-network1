@@ -15,7 +15,7 @@ Vous pouvez vérifier vos versions installées avec les commandes suivantes :
 ```bash
 node -v
 npm -v
-
+```
 Puis lancez dans front/:
 
 npm run dev
