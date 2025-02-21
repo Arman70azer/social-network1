@@ -17,9 +17,11 @@ node -v
 npm -v
 ```
 Puis lancez dans front/:
-
+```
 npm run dev
+```
 
 Dans le back/:
-
+```
 go run server.go
+```
