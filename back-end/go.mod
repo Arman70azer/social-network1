@@ -1,6 +1,6 @@
 module back-end
 
-go 1.21.4
+go 1.24
 
 require (
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
